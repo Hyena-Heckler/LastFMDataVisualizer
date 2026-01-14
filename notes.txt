@@ -1,0 +1,37 @@
+Example of Track Data
+{
+    "artist": {
+      "mbid": "20244d07-534f-4eff-b4d4-930878889970",
+      "#text": "Taylor Swift"
+    },
+    "streamable": "0",
+    "image": [
+      {
+        "size": "small",
+        "#text": "https://lastfm.freetls.fastly.net/i/u/34s/88b646daa5e6626399ccd002ba67e50d.jpg"
+      },
+      {
+        "size": "medium",
+        "#text": "https://lastfm.freetls.fastly.net/i/u/64s/88b646daa5e6626399ccd002ba67e50d.jpg"
+      },
+      {
+        "size": "large",
+        "#text": "https://lastfm.freetls.fastly.net/i/u/174s/88b646daa5e6626399ccd002ba67e50d.jpg"
+      },
+      {
+        "size": "extralarge",
+        "#text": "https://lastfm.freetls.fastly.net/i/u/300x300/88b646daa5e6626399ccd002ba67e50d.jpg"
+      }
+    ],
+    "mbid": "00cb4e72-4f6f-4b6c-8d8d-6e9445efe757",
+    "album": {
+      "mbid": "8d085050-69ee-4b6a-a7f4-6dad97695f09",
+      "#text": "Speak Now (Deluxe Edition)"
+    },
+    "name": "Haunted",
+    "url": "https://www.last.fm/music/Taylor+Swift/_/Haunted",
+    "date": {
+      "uts": "1648237275",
+      "#text": "25 Mar 2022, 19:41"
+    }
+  },
