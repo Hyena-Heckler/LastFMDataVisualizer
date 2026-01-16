@@ -1,6 +1,26 @@
 import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
+
+const CACHE_FILE = path.join(process.cwd(), "cache.json");
+
+function saveCache(data) {
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2));
+}
+
+function loadCache() {
+  if (fs.existsSync(CACHE_FILE)) {
+    const raw = fs.readFileSync(CACHE_FILE, "utf-8");
+    return JSON.parse(raw);
+  }
+  return null;
+}
+
 
 export async function getAllTracksData(apiKey) { //gets all tracks data including when the first one was
+  const cached = loadCache();
+  if (cached) return cached;
+  
   const totalTracks = await getTotalTrackNumber();
 
   async function getTotalTrackNumber() { // gets the number of tracks
@@ -53,5 +73,7 @@ export async function getAllTracksData(apiKey) { //gets all tracks data includin
     return userPlaylistHistory;
   }
 
-  return getAllTracksBatch(totalTracks);
+  let data = await getAllTracksBatch(totalTracks);
+  saveCache(data);
+  return data;
 }
