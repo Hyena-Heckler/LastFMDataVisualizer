@@ -73,7 +73,6 @@ def song_position_data(playlist_history, include_none_dates, split_artist = Fals
         track for track in sheet
         if min(pos for pos in track['positions'] if pos is not None) <= max_position_range
     ]
-    logging.info("Finished creating sheet")
     final_sheet = [[None, None, None]] #final sheet returned
     if split_artist:
         final_sheet[0].append(None)
@@ -88,6 +87,6 @@ def song_position_data(playlist_history, include_none_dates, split_artist = Fals
         for position in track['positions']:
             column.append(position)
         final_sheet.append(column)
-
+    logging.info("Finished creating sheet")
     return final_sheet
 

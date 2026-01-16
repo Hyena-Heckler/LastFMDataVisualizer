@@ -46,8 +46,8 @@ def get_color(img_link=""):
 
         color_thief = ColorThief(img)
         dominant_color = color_thief.get_color(quality=1)
-
-        full_albums_to_colors.append(Album(img_link, dominant_color).__dict__)
+        normalize_dominant_color = [c / 255 for c in dominant_color]
+        full_albums_to_colors.append(Album(img_link, normalize_dominant_color).__dict__)
 
         with open('albums_to_colors.json', 'w') as f:
             json.dump(full_albums_to_colors, f, indent=2)

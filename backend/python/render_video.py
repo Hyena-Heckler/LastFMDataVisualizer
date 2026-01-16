@@ -2,9 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import FFMpegWriter
-from song_tracker import song_position_data
-from artist_tracker import artist_position_data
-from album_tracker import album_position_data
 from matplotlib import font_manager
 
 # Annotation Variable
@@ -15,17 +12,8 @@ ann_y_shift = 0.2
 # controllable
 speed_per_date = 15 # int(input("Enter a number for the smoothness of graph (15 fps): "))  # frame rate
 intro_outro_length = 3 # int(input("Enter a number for the length of intro/outro: "))  # how long it goes into and out of the charts for
-turn_to_video = "n" #input("Do you want to convert this to a video? (y/n): ")  # asks if this should be a video
-print("green - #1db954 | black - #191414")
-default = "y" # input("Do you want to use default Spotify Colors? (y/n): ")
-if default == "n":
-    background_color = input(
-        "(either generic name or a hex code with #) Background color: ")  # determines background color
-    graph_color = input(
-        "either generic name or a hex code with #) Graph color: ")  # determines the color of graph and text
-else:
-    background_color = "#1db954"  # defaults to green
-    graph_color = "#191414"  # defaults to black
+background_color = "#1db954" # defaults to green
+graph_color = "#191414"  # defaults to black
 kind_of_chart = "songs" #input("Do you want to view songs or artists chart? (songs/artists/albums): ")  # switches between artist and song chart
 num_positions_shown = 15 #input("How much positions do you want to be shown?: ")
 num_positions_shown = int(num_positions_shown)
@@ -39,144 +27,126 @@ plt.rcParams['font.fantasy'] = prop.get_name()
 plt.rcParams['axes.facecolor'] = background_color  # changes color to black
 plt.rcParams['figure.facecolor'] = background_color  # changes color to black
 
-# Information from the song_position_data
-if kind_of_chart == "songs":  # takes different sets of data if it is supposed to be a songs chart or an artists chart
-    data = song_position_data(True, num_positions_shown)  # all
-elif kind_of_chart == "artists":
-    data = artist_position_data(num_positions_shown)
-elif kind_of_chart == "albums":
-    data = album_position_data(num_positions_shown)
-else:
-    data = song_position_data(True, num_positions_shown)  # all
-days = data[0][4:]  # all dates
+def graph_data(data):
+    days = data[0][4:]  # all dates
 
-ranks_ticks = list(range(1, num_positions_shown + 1, 1))  # tick marks for positions
+    ranks_ticks = list(range(1, num_positions_shown + 1, 1))  # tick marks for positions
 
-# Basic Structure of the Figure
-fig = plt.figure(figsize=(10, 5))  # creates plot
-plot_frame = fig.add_axes((0.1, 0.1, .8, .8))  # actually frame data
-plot_data = fig.add_axes((0.1, 0.1, .4, .8))  # adds labels
+    # Basic Structure of the Figure
+    fig = plt.figure(figsize=(10, 5))  # creates plot
+    plot_frame = fig.add_axes((0.1, 0.1, .8, .8))  # actually frame data
+    plot_data = fig.add_axes((0.1, 0.1, .4, .8))  # adds labels
 
-# Plot for the data
-plot_data.set_ylim([.5, num_positions_shown + .5])  # range for the y values displayed
-plot_data.invert_yaxis()  # flips axis
-plot_data.axis("off")  # turns off the axis
+    # Plot for the data
+    plot_data.set_ylim([.5, num_positions_shown + .5])  # range for the y values displayed
+    plot_data.invert_yaxis()  # flips axis
+    plot_data.axis("off")  # turns off the axis
 
-# Plot for the frame
-plot_frame.set_ylim([.5, num_positions_shown + .5])  # range for the y values displayed
-plot_frame.set_yticks(ranks_ticks, minor=False)  # shows ticks for the range
-plot_frame.set_yticklabels(ranks_ticks, fontdict=None, minor=False, color='#1db954',
-                           fontsize=22)  # shows labels for the ticks
-plot_frame.plot(days, np.full_like(days, 0))  # plots data outside of range to have an x axis
-plot_frame.xaxis.tick_top()  # moves x ticks to the top
-plot_frame.spines["top"].set_color(graph_color)  # changes color to green
-plot_frame.spines["bottom"].set_color(graph_color)  # changes color to green
-plot_frame.spines["left"].set_color(graph_color)  # changes color to green
-plot_frame.spines["right"].set_color(graph_color)  # changes color to green
-plot_frame.yaxis.label.set_color(graph_color)  # changes color to green
-plot_frame.xaxis.label.set_color(graph_color)  # changes color to green
-plot_frame.tick_params(axis='x', colors=graph_color)  # changes color to green
-plot_frame.tick_params(axis='y', colors=graph_color)  # changes color to green
-plot_frame.set_xlabel('Dates', weight='bold')  # label for the x axis
-plot_frame.xaxis.set_label_position('top')  # moves the x axis label to the top
-plot_frame.invert_yaxis()  # flips y-axis
+    # Plot for the frame
+    plot_frame.set_ylim([.5, num_positions_shown + .5])  # range for the y values displayed
+    plot_frame.set_yticks(ranks_ticks, minor=False)  # shows ticks for the range
+    plot_frame.set_yticklabels(ranks_ticks, fontdict=None, minor=False, color='#1db954',
+                               fontsize=22)  # shows labels for the ticks
+    plot_frame.plot(days, np.full_like(days, 0))  # plots data outside of range to have an x axis
+    plot_frame.xaxis.tick_top()  # moves x ticks to the top
+    plot_frame.spines["top"].set_color(graph_color)  # changes color to green
+    plot_frame.spines["bottom"].set_color(graph_color)  # changes color to green
+    plot_frame.spines["left"].set_color(graph_color)  # changes color to green
+    plot_frame.spines["right"].set_color(graph_color)  # changes color to green
+    plot_frame.yaxis.label.set_color(graph_color)  # changes color to green
+    plot_frame.xaxis.label.set_color(graph_color)  # changes color to green
+    plot_frame.tick_params(axis='x', colors=graph_color)  # changes color to green
+    plot_frame.tick_params(axis='y', colors=graph_color)  # changes color to green
+    plot_frame.set_xlabel('Dates', weight='bold')  # label for the x axis
+    plot_frame.xaxis.set_label_position('top')  # moves the x axis label to the top
+    plot_frame.invert_yaxis()  # flips y-axis
 
-# Plot for data
-for i, day in enumerate(days):  # adds days as x values starting at 0
-    days[i] = i
-for x in range(0, 2 * intro_outro_length):  # adds intro and outro days
-    days.append(days[len(days) - 1] + 1)  # days extending the current set
+    # Plot for data
+    for i, day in enumerate(days):  # adds days as x values starting at 0
+        days[i] = i
+    for x in range(0, 2 * intro_outro_length):  # adds intro and outro days
+        days.append(days[len(days) - 1] + 1)  # days extending the current set
 
-for song in data[1:]:
-    # lines
-    print(song)
-    ranks = song[4:]  # ranking positions of all songs without extra information
-    rank_initial = ranks[0]  # first value of rank (could probably incorporate in
-    for x in range(0, intro_outro_length):
-        ranks.insert(0, rank_initial)
-        ranks.append(ranks[len(ranks) - 1])
-    print(days)
-    print(ranks)
-    plot_data.plot(days, ranks, lw=3, color = song[3])  # creates the lines in graph
+    for song in data[1:]:
+        # lines
+        ranks = song[4:]  # ranking positions of all songs without extra information
+        rank_initial = ranks[0]  # first value of rank (could probably incorporate in
+        for x in range(0, intro_outro_length):
+            ranks.insert(0, rank_initial)
+            ranks.append(ranks[len(ranks) - 1])
+        plot_data.plot(days, ranks, lw=3, color = song[3])  # creates the lines in graph
 
-    # points
-    point_days = []  # array for the dates that are points
-    point_ranks = []  # array for positions of those points
+        # points
+        point_days = []  # array for the dates that are points
+        point_ranks = []  # array for positions of those points
 
-    for i, position in enumerate(song[4:len(song) - 2]):  # goes through the positions in the middle
-        if song[i + 3] is None and song[i + 4] is not None and song[
-            i + 5] is None:  # checks to see if the days before and after are None
-            point_days.append(intro_outro_length + i + 1)  # adds the day and the position to the graph
-            point_ranks.append(song[i + 4])
+        for i, position in enumerate(song[4:len(song) - 2]):  # goes through the positions in the middle
+            if song[i + 3] is None and song[i + 4] is not None and song[
+                i + 5] is None:  # checks to see if the days before and after are None
+                point_days.append(intro_outro_length + i + 1)  # adds the day and the position to the graph
+                point_ranks.append(song[i + 4])
 
-    plot_data.plot(point_days, point_ranks, 'o')  # creates the points with 'o' making it not  a line graph
+        plot_data.plot(point_days, point_ranks, 'o')  # creates the points with 'o' making it not  a line graph
 
-def animate(frame):
-    print(frame)
-    xdist_per_date = frame / speed_per_date  # adjusts speed to take X frames to reach the next day
-    print(xdist_per_date)
-    plot_data.set_xlim([xdist_per_date - 3.5, xdist_per_date])  # actually data points
-    plot_frame.set_xlim([xdist_per_date - 3.5 - intro_outro_length,
-                         xdist_per_date + 3.5 - intro_outro_length])  # frame that changes the labels
+    def animate(frame):
+        xdist_per_date = frame / speed_per_date  # adjusts speed to take X frames to reach the next day
+        plot_data.set_xlim([xdist_per_date - 3.5, xdist_per_date])  # actually data points
+        plot_frame.set_xlim([xdist_per_date - 3.5 - intro_outro_length,
+                             xdist_per_date + 3.5 - intro_outro_length])  # frame that changes the labels
 
-    graph_date_value = int(np.floor(xdist_per_date))  # last actual playlist date
+        graph_date_value = int(np.floor(xdist_per_date))  # last actual playlist date
 
-    for j, a in enumerate(ann_list):
-        a.remove()  # deletes all the annotated point labels
-    ann_list[:] = []  # list of all the annotated point labels is a blank array (MAYBE DELETE THE FOR LOOP THEN)
+        for j, a in enumerate(ann_list):
+            a.remove()  # deletes all the annotated point labels
+        ann_list[:] = []  # list of all the annotated point labels is a blank array (MAYBE DELETE THE FOR LOOP THEN)
 
-    previous_value = graph_date_value - intro_outro_length
-    for track in data[1:]:  # goes through every track in data
-        #print(track)
-        #print(str(previous_value) + "|" + str(len(track)) + "|" + str(graph_date_value) + "|" + str(intro_outro_length))
-        #print(str(track[previous_value + 3]))
-        #print(str(track[previous_value + 4]))
-        if previous_value >= len(
-                track) - 4:  # checks to see if the current data (previous_value) is in the final date or over
-            if track[len(track) - 1] is not None:  # if the final track's position is on the charts, plot  it
-                ann = plot_data.annotate(track[0], (xdist_per_date, track[len(track) - 1] + ann_y_shift),
-                                         color=graph_color)
-                ann_list.append(ann)
-        # checks to see if the two dates around the data point exist
-        elif previous_value <= -1:  # checks to see if it has not started yet
-            if track[4] is not None:  # if the intro track's position is on the charts, plot  it
-                ann = plot_data.annotate(track[0], (xdist_per_date, track[4] + ann_y_shift), color=graph_color)
-                ann_list.append(ann)
-        elif track[previous_value + 4] is not None and track[previous_value + 5] is not None and (
-                track[previous_value + 4] <= 15 or track[previous_value + 5] <= 15):
-            # math using slope and the distance from the closest point to the left to determine where it should be
-            ydist_per_date = track[previous_value + 4] + (track[previous_value + 5] - track[previous_value + 4]) * (
-                    xdist_per_date - graph_date_value)
-            """print(track[0] + "|" + str(ydist_per_date))"""
-            ann = plot_data.annotate(track[0], (xdist_per_date, ydist_per_date + ann_y_shift),
-                                     color=graph_color)  # plots the annotated point labels
-            ann_list.append(ann)  # adds it to a list
-        else:  # checks to see if it is a point before plotting
-            for j, rank in enumerate(reversed(track[4:previous_value + 4])):  # traverses track positions backwards
-                # if position exists, higher than 15, and the next position doesn't exist, this occurs
-                if rank is not None and rank <= 15 and track[previous_value + 5 - j] is None:
-                    ann = plot_data.annotate(track[0],
-                                             (
-                                                 previous_value + intro_outro_length - j + ann_x_shift,
-                                                 rank + ann_y_shift),
-                                             color=graph_color)  # plots the annotated point labels
-                    ann_list.append(ann)  # adds it to a list
-                    break  # avoids duplicates
+        previous_value = graph_date_value - intro_outro_length
+        for track in data[1:]:  # goes through every track in data
+            if previous_value >= len(
+                    track) - 4:  # checks to see if the current data (previous_value) is in the final date or over
+                if track[len(track) - 1] is not None:  # if the final track's position is on the charts, plot  it
+                    ann = plot_data.annotate(track[0], (xdist_per_date, track[len(track) - 1] + ann_y_shift),
+                                             color=graph_color)
+                    ann_list.append(ann)
+            # checks to see if the two dates around the data point exist
+            elif previous_value <= -1:  # checks to see if it has not started yet
+                if track[4] is not None:  # if the intro track's position is on the charts, plot  it
+                    ann = plot_data.annotate(track[0], (xdist_per_date, track[4] + ann_y_shift), color=graph_color)
+                    ann_list.append(ann)
+            elif track[previous_value + 4] is not None and track[previous_value + 5] is not None and (
+                    track[previous_value + 4] <= 15 or track[previous_value + 5] <= 15):
+                # math using slope and the distance from the closest point to the left to determine where it should be
+                ydist_per_date = track[previous_value + 4] + (track[previous_value + 5] - track[previous_value + 4]) * (
+                        xdist_per_date - graph_date_value)
+                ann = plot_data.annotate(track[0], (xdist_per_date, ydist_per_date + ann_y_shift),
+                                         color=graph_color)  # plots the annotated point labels
+                ann_list.append(ann)  # adds it to a list
+            else:  # checks to see if it is a point before plotting
+                for j, rank in enumerate(reversed(track[4:previous_value + 4])):  # traverses track positions backwards
+                    # if position exists, higher than 15, and the next position doesn't exist, this occurs
+                    if rank is not None and rank <= 15 and track[previous_value + 5 - j] is None:
+                        ann = plot_data.annotate(track[0],
+                                                 (
+                                                     previous_value + intro_outro_length - j + ann_x_shift,
+                                                     rank + ann_y_shift),
+                                                 color=graph_color)  # plots the annotated point labels
+                        ann_list.append(ann)  # adds it to a list
+                        break  # avoids duplicates
 
 
-ani = animation.FuncAnimation(fig, animate, frames=speed_per_date * (
-    len(days)) - intro_outro_length + 1)  # how long it lasts in relation to the framerate and number of days
+    ani = animation.FuncAnimation(fig, animate, frames=speed_per_date * (
+        len(days)) - intro_outro_length + 1)  # how long it lasts in relation to the framerate and number of days
 
-# TURNS IT INTO A VIDEO
-metadata = dict(Title='Color Chart', artist='harshshetty')  # data for the file
-writer = FFMpegWriter(fps=speed_per_date / 2, metadata=metadata)  # creates the file
-if turn_to_video == "y":
-    if kind_of_chart == "songs":
-        ani.save("songs_chart.mp4", writer=writer)  # creates a video for song chart
-    elif kind_of_chart == "artists":
-        ani.save("artist_chart.mp4", writer=writer)  # creates a video for artist chart
-    elif kind_of_chart == "albums":
-        ani.save("albums_chart.mp4", writer=writer)  # creates a video for album chart
+    # TURNS IT INTO A VIDEO
+    metadata = dict(Title='Color Chart', artist='harshshetty')  # data for the file
+    writer = FFMpegWriter(fps=speed_per_date / 2, metadata=metadata)  # creates the file
+    # if turn_to_video == "y":
+    #     if kind_of_chart == "songs":
+    #         ani.save("songs_chart.mp4", writer=writer)  # creates a video for song chart
+    #     elif kind_of_chart == "artists":
+    #         ani.save("artist_chart.mp4", writer=writer)  # creates a video for artist chart
+    #     elif kind_of_chart == "albums":
+    #         ani.save("albums_chart.mp4", writer=writer)  # creates a video for album chart
 
-# Packing all the plots and displaying them
-plt.show()
+    # Packing all the plots and displaying them
+    plt.show()
