@@ -50,7 +50,7 @@ def access_display_sheet(playlist_history):
 
 
 # positions of all songs for all dates
-def song_position_data(playlist_history, include_none_dates, split_artist = False, max_position_range=30):  # include_none_dates determines if None dates are included in position
+def song_position_data(playlist_history, include_none_dates, max_position_range=30):  # include_none_dates determines if None dates are included in position
     sheet = []  # stores the data
     logging.info("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):  # goes through every playlist in on repeat, with an index
@@ -73,19 +73,18 @@ def song_position_data(playlist_history, include_none_dates, split_artist = Fals
         track for track in sheet
         if min(pos for pos in track['positions'] if pos is not None) <= max_position_range
     ]
-    final_sheet = [[None, None, None]] #final sheet returned
-    if split_artist:
-        final_sheet[0].append(None)
+    final_sheet = [[None]] #final sheet returned
     for playlist in playlist_history: #adds the playlist date as a row in data
         final_sheet[0].append(format_date(playlist['date']))
     for track in sheet: # formats the name of the title in the chart and adds the track image for future purposes
         track_color = get_color(track['image'])
-        if split_artist:
-            column = [track['name'], track['artists'], track['image'], track_color]
-        else:
-            column = [full_title(track), track['image'], track_color]
-        for position in track['positions']:
-            column.append(position)
+        column = [{
+            "name": track['name'],
+            "artists": track['artists'],
+            "image": track['image'],
+            "color": track_color
+        }]
+        column.extend(track['positions'])
         final_sheet.append(column)
     logging.info("Finished creating sheet")
     return final_sheet

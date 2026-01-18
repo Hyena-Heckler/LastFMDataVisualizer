@@ -24,11 +24,11 @@ def points_each_week(data):
     previous_week = {}
     for week in data:
         current_week = {
-            name: {**track, "points": track["points"] / 2.0}
+            name: {**track, "points": track["points"] * .841}
             for name, track in previous_week.items()
         }
         for song in week["tracks"]:
-            song_name = song["name"]
+            song_name = song["name"] + song["artist"]
             if song_name in current_week:
                 current_week[song_name]["points"] += song["count"]
             else:
@@ -57,7 +57,8 @@ def format_node_to_python(data):
                         track["artist"]
                     ],
                     "image": track["image"],
-                    "album": track["album"]
+                    "album": track["album"],
+                    "points": track["points"]
                 }
                 for track in obj["tracks"]
             ]
@@ -80,12 +81,13 @@ def main():
         logging.info("Started Formatting Data Analysis")
         formatted_history = format_node_to_python(filtered_history)
         logging.info("Started Python Data Analysis")
-        result = song_position_data(formatted_history, True, split_artist = True)
+        result = song_position_data(formatted_history, True)
 
         print(json.dumps({
-            "status": "success",
-            "data": result
+            "status": "success"
         }))
+        with open('song_points.json', 'w') as f:
+            json.dump(filtered_history, f, indent=2)
 
         with open('song_positions.json', 'w') as f:
             json.dump(result, f, indent=2)
