@@ -68,10 +68,8 @@ def format_node_to_python(data):
     return transformed
 
 
-def main():
+def main(history,):
     try:
-
-        history = json.loads(sys.stdin.read())
         logging.info("Started Ordering Data Analysis")
         ordered_history = sort_week(history)
         logging.info("Started Ranking Data Analysis")
@@ -99,4 +97,6 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    history = json.loads(sys.stdin.read())
+    #history = history[0:length_filter]
+    main(history)

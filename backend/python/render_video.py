@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.style.use('fast')
 import matplotlib.animation as animation
 from matplotlib.animation import FFMpegWriter
 from matplotlib import font_manager
@@ -69,7 +69,7 @@ def create_smooth_lines(song, intro_outro_length):
     ranks = song[1:]  # ranking positions of all songs without extra information
     ranks = (
         [ranks[0]] * intro_outro_length
-        + ranks
+        + [np.nan if pos is None else pos for pos in ranks]
         + [ranks[-1]] * intro_outro_length
     )
     return np.array(ranks, dtype=float)
@@ -99,7 +99,7 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
 
 def graph_data(data):
     # Annotation Variable
-    ann_x_shift = 0.05
+    ann_x_shift = 0
     ann_y_shift = 0
 
     # controllable
@@ -144,12 +144,8 @@ def graph_data(data):
         next_graph_date_value = int(np.ceil(xdist_per_date))  # next actual playlist date
 
         # progress meter
-        progress = (frame*100) // total_frames
-        progress = int(np.floor(progress))
-        previous_progress = ((frame-1)*100) // total_frames
-        previous_progress = int(np.floor(previous_progress))
-        if progress % 1 == 0 and previous_progress != progress:
-            print(f"{progress}%")
+        if frame % speed_per_date == 0:
+            print(f"{(frame * 100) // total_frames}%")
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
@@ -190,10 +186,11 @@ def graph_data(data):
     writer = FFMpegWriter(
         fps=speed_per_date / 2,
         metadata=metadata,
-        extra_args=['-preset', 'ultrafast', '-pix_fmt', 'yuv420p']
+        extra_args=['-preset', 'ultrafast']
     )  # creates the file
 
-    ani.save("songs_chart.mp4", writer=writer)  # creates a video for song chart
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    ani.save(f"{timestamp}.mp4", writer=writer)  # creates a video for song chart
     t3 = time.perf_counter()
     print(f"Video render time: {t3 - t2:.2f}s")
     # Packing all the plots and displaying them
@@ -215,5 +212,5 @@ def graph_data(data):
 
 
 
-    plt.show()
+    #plt.show()
 
