@@ -1,3 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/harshshetty/Desktop/Code/Javascript/LastFMAPI/backend/python/media/videos/sliding_chart/480p15/partial_movie_files/CenterRevealChart/1584795214_337223031_901883506.mp4'
-file 'file:/Users/harshshetty/Desktop/Code/Javascript/LastFMAPI/backend/python/media/videos/sliding_chart/480p15/partial_movie_files/CenterRevealChart/4072820271_667144672_4127945769.mp4'

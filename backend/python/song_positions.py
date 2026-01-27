@@ -12,11 +12,12 @@ logging.basicConfig(
 )
 
 class SongPositions:  # class for creating the playlist information
-    def __init__(self, name, artists, image, positions):
+    def __init__(self, name, artists, image, positions, points):
         self.name = name
         self.artists = artists
         self.image = image
         self.positions = positions
+        self.points = points
 
 def get_index(li, target):
     for index, x in enumerate(li):
@@ -50,28 +51,38 @@ def access_display_sheet(playlist_history):
 
 
 # positions of all songs for all dates
-def song_position_data(playlist_history, include_none_dates, max_position_range=30):  # include_none_dates determines if None dates are included in position
+def get_song_position_data(playlist_history, include_none_dates, max_position_range=30, is_position=True):  # include_none_dates determines if None dates are included in position
+    attribute = 'points'
+    if is_position:
+        attribute = 'positions'
     sheet = []  # stores the data
     logging.info("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):  # goes through every playlist in on repeat, with an index
         for song in playlist['songs']:  # goes through every song in each playlist
+
             if get_index(sheet, song['name']) == -1:  # checks to see if song is not in the sheet, only runs if false
                 sheet.append(SongPositions(song['name'], song['artists'], song['image'],
-                                           []).__dict__)  # adds to sheet the song name, artist, and an array for positions
+                                           [], []).__dict__)  # adds to sheet the song name, artist, and an array for positions
                 if include_none_dates:  # checks to see if given argument is true
                     for i in range(
                             index - 1):  # adds a None value for position for every date prior to the playlist date
-                        sheet[get_index(sheet, song['name'])]['positions'].append(None)
-            sheet[get_index(sheet, song['name'])]['positions'].append(
-                playlist['songs'].index(song) + 1)  # adds the position of playlist to the position key
+                        sheet[get_index(sheet, song['name'])][attribute].append(None)
+
+            if is_position:
+                sheet[get_index(sheet, song['name'])][attribute].append(
+                    playlist['songs'].index(song) + 1)  # adds the position of playlist to the position key
+            else:
+                sheet[get_index(sheet, song['name'])][attribute].append(
+                    song['points'])
         if include_none_dates:  # checks to see if given argument is true
             for track in sheet:  # looks at every track in the sheet so far
                 if len(track[
-                           'positions']) != index:  # if the length does not match index (has one less position), then it adds a None value to position
-                    track['positions'].append(None)
+                           attribute]) != index:  # if the length does not match index (has one less position), then it adds a None value to position
+                    track[attribute].append(None)
+
     sheet = [
         track for track in sheet
-        if min(pos for pos in track['positions'] if pos is not None) <= max_position_range
+        if min(pos for pos in track[attribute] if pos is not None) <= max_position_range
     ]
     final_sheet = [[None]] #final sheet returned
     for playlist in playlist_history: #adds the playlist date as a row in data
@@ -84,7 +95,7 @@ def song_position_data(playlist_history, include_none_dates, max_position_range=
             "image": track['image'],
             "color": track_color
         }]
-        column.extend(track['positions'])
+        column.extend(track[attribute])
         final_sheet.append(column)
     logging.info("Finished creating sheet")
     return final_sheet

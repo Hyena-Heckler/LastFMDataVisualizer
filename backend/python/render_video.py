@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-plt.style.use('fast')
 import matplotlib.animation as animation
 from matplotlib.animation import FFMpegWriter
 from matplotlib import font_manager
@@ -144,8 +143,10 @@ def graph_data(data):
         next_graph_date_value = int(np.ceil(xdist_per_date))  # next actual playlist date
 
         # progress meter
-        if frame % speed_per_date == 0:
-            print(f"{(frame * 100) // total_frames}%")
+        current_percentage = (frame * 100) // total_frames
+        previous_percentage = ((frame - 1) * 100) // total_frames
+        if current_percentage != previous_percentage:
+            print(f"{current_percentage}%")
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
@@ -177,8 +178,10 @@ def graph_data(data):
             elif xdist_per_date - intro_outro_length == next_value < len(song) - 1 and song[next_value + 1] is not None and song[next_value + 1] <= 15:
                 song_label.set_position((xdist_per_date + ann_x_shift, song[next_value + 1] + ann_y_shift))
                 song_label.set_visible(True)
+            elif song_label.get_position()[0] < xdist_per_date - 3.5:
+                song_label.set_visible(False)
 
-    ani = animation.FuncAnimation(fig, animate, frames=total_frames,  blit=False)  # how long it lasts in relation to the framerate and number of days
+    ani = animation.FuncAnimation(fig, animate, frames=total_frames,  blit=False, interval=1)  # how long it lasts in relation to the framerate and number of days
 
     # TURNS IT INTO A VIDEO
     t2 = time.perf_counter()
@@ -190,7 +193,7 @@ def graph_data(data):
     )  # creates the file
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    ani.save(f"{timestamp}.mp4", writer=writer)  # creates a video for song chart
+    ani.save(f"videos/{timestamp}.mp4", writer=writer)  # creates a video for song chart
     t3 = time.perf_counter()
     print(f"Video render time: {t3 - t2:.2f}s")
     # Packing all the plots and displaying them
@@ -208,9 +211,6 @@ def graph_data(data):
 
     with open("render_efficiency.json", "w") as f:
         json.dump(data, f, indent=2)
-
-
-
 
     #plt.show()
 

@@ -1,95 +1,50 @@
-body {
-  font-family: sans-serif;
-  padding: 20px;
+
+.card-example {
+  display: grid;
+  width: auto;
+  height: 100px;
+  max-width: 750px;
+  grid-template-columns: 75px auto min(1fr, 275px);
+  grid-template-rows: 2fr 1fr 1fr;
+  background-color: dodgerblue;
+  gap: 25px;
+  padding: 5px;
+  align-items: center;
+  height:250px;
 }
 
-h1 {
-  font-size: 40px;
-  margin-top: 0;
-  margin-bottom: 15px;
-}
-
-h2 {
-  font-size: 30px;
-}
-
-.established {
-  font-style: italic;
-}
-
-h1, h2, p {
-  text-align: center;
-}
-
-.menu {
-  width: 80%;
-  background-color: burlywood;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 20px;
-  max-width: 500px;
+.right-side {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  background-color: #f1f1f1;
 }
 
 img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: -25px;
 }
 
-hr {
-  height: 2px;
-  background-color: brown;
-  border-color: brown;
+.image {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  background-color: #f1f1f1;
+  height: auto;
+  max-height: 100%;
+  min-width: 25px;
+  aspect-ratio: 1 / 1;
+  justify-self: start;
 }
 
-.bottom-line {
-  margin-top: 25px;
-}
-
-h1, h2 {
-  font-family: Impact, serif;
-}
-
-.item p {
-  display: inline-block;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  font-size: 18px;
-}
-
-.flavor, .dessert {
-  text-align: left;
-  width: 75%;
-}
-
-.price {
-  text-align: right;
-  width: 25%;
-}
-
-/* FOOTER */
-
-footer {
-  font-size: 14px;
-}
-
-.address {
-  margin-bottom: 5px;
-}
-
-a {
-  color: black;
-}
-
-a:visited {
-  color: black;
-}
-
-a:hover {
-  color: brown;
-}
-
-a:active {
-  color: brown;
+.main-identifier, .top-row, .bottom-row {
+  display: flex;
+  justify-content: space-evenly;
+  grid-row: 1 2 3;
+  grid-column: 3;
+  display: flex;
+  flex-direction: row;
+  background-color: #f1f1f1;
+  gap: 10px;
 }

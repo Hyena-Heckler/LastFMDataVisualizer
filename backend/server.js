@@ -74,7 +74,39 @@ async function renderWorkflow(userData) {
   }
 }
 
-app.get("/api/tracks", async (req, res) => {
+app.get("/update", async (req, res) => {
+  try {
+    const data = await getAllTracksData(process.env.LASTFM_API_KEY);
+    const organizedData = transformTracks(data);
+    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
+    console.log("Work on Rendering Tracks");
+    const response = await renderWorkflow(organizedDataJson)
+
+    res.json(organizedDataJson);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch tracks" });
+  }
+});
+
+
+app.get("/download", async (req, res) => {
+  try {
+    const data = await getAllTracksData(process.env.LASTFM_API_KEY);
+    const organizedData = transformTracks(data);
+    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
+    console.log("Work on Rendering Tracks");
+    const response = await renderWorkflow(organizedDataJson)
+
+    res.json(organizedDataJson);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch tracks" });
+  }
+});
+
+
+app.get("/top-of-the-week", async (req, res) => {
   try {
     const data = await getAllTracksData(process.env.LASTFM_API_KEY);
     const organizedData = transformTracks(data);
@@ -89,6 +121,12 @@ app.get("/api/tracks", async (req, res) => {
   }
 });
 
+
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
+
+app.listen(PORT, () => {
+  console.log(`Backend running on http://localhost:${PORT}`);
+});
+

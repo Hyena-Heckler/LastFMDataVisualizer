@@ -1,3 +1,5 @@
+// for all buttons
+
 
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);
@@ -12,7 +14,13 @@ function downloadJSON(data, filename) { // downloads a JSON file using a data
 }
 
 document.getElementById("download").addEventListener("click", async () => {
-  const res = await fetch("http://localhost:3000/api/tracks");
+  const res = await fetch("http://localhost:3000/download");
+  const data = await res.json();
+  downloadJSON(data, "Data");
+})
+
+document.getElementById("update").addEventListener("click", async () => {
+  const res = await fetch("http://localhost:3000/update");
   const data = await res.json();
   downloadJSON(data, "Data");
 })
