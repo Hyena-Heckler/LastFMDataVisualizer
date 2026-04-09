@@ -98,7 +98,7 @@ def main(history):
             json.dump(song_points_by_position_data, f, indent=2)
 
         add_extra_info(song_points_by_position_data, song_position_data)
-        # graph_data(song_position_data)
+        graph_data(song_position_data)
 
     except Exception as e:
         print(str(e), file=sys.stderr)

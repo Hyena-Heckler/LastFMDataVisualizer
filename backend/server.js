@@ -76,11 +76,11 @@ async function renderWorkflow(userData) {
 
 app.get("/update", async (req, res) => {
   try {
-    const data = await getAllTracksData(process.env.LASTFM_API_KEY);
+    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     console.log("Work on Rendering Tracks");
-    const response = await renderWorkflow(organizedDataJson)
+    //const response = await renderWorkflow(organizedDataJson)
 
     res.json(organizedDataJson);
   } catch (err) {
@@ -92,7 +92,7 @@ app.get("/update", async (req, res) => {
 
 app.get("/download", async (req, res) => {
   try {
-    const data = await getAllTracksData(process.env.LASTFM_API_KEY);
+    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     console.log("Work on Rendering Tracks");
@@ -108,7 +108,7 @@ app.get("/download", async (req, res) => {
 
 app.get("/top-of-the-week", async (req, res) => {
   try {
-    const data = await getAllTracksData(process.env.LASTFM_API_KEY);
+    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     console.log("Work on Rendering Tracks");
@@ -121,12 +121,19 @@ app.get("/top-of-the-week", async (req, res) => {
   }
 });
 
+app.get("/submit-username", async (req, res) => {
+  try {
+    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
+    console.log(data)
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch tracks" });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-});
 

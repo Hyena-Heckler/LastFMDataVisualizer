@@ -18,15 +18,21 @@ def add_extra_info(data, song_position_data):
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["total_points"]}')
 
+    print("\n")
+    
     songs_info.sort(key=lambda n: n["total_weeks"], reverse=True)
     print("Total Weeks")
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["total_weeks"]}')
 
+    print("\n")
+
     songs_info.sort(key=lambda n: n["points_per_week"], reverse=True)
     print("Points Per Week")
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["points_per_week"]}')
+
+    print("\n")
 
     songs_info = []
     for song in song_position_data[1:]:
@@ -50,21 +56,28 @@ def add_extra_info(data, song_position_data):
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_number_one"]}')
 
+    print("\n")
+
     songs_info.sort(key=lambda n: n["weeks_top_three"], reverse=True)
     print("Total Weeks Top Three")
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_three"]}')
+
+    print("\n")
 
     songs_info.sort(key=lambda n: n["weeks_top_five"], reverse=True)
     print("Total Weeks Top Five")
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_five"]}')
 
+    print("\n")
+
     songs_info.sort(key=lambda n: n["weeks_top_ten"], reverse=True)
     print("Total Weeks Top Ten")
     for index, song in enumerate(songs_info[:15]):
         print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_ten"]}')
 
+    print("\n")
 
     songs_info.sort(key=lambda n: n["weeks_number_two"], reverse=True)
     print("Total Weeks Stuck at Number Two")
@@ -73,6 +86,8 @@ def add_extra_info(data, song_position_data):
         if song["weeks_number_one"] == 0:
             print(f'{i}. {song["song"]["name"]}: {song["weeks_number_two"]}')
             i += 1
+
+    print("\n")
 
     print("Number One Debut")
     for song in song_position_data[1:]:

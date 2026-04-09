@@ -51,4 +51,4 @@ def get_color(img_link=""):
 
         with open('albums_to_colors.json', 'w') as f:
             json.dump(full_albums_to_colors, f, indent=2)
-        return dominant_color[0], dominant_color[1], dominant_color[2]
+        return normalize_dominant_color[0], normalize_dominant_color[1], normalize_dominant_color[2]
