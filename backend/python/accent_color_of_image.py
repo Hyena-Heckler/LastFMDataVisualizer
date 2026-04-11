@@ -33,6 +33,7 @@ def get_color(img_link=""):
         full_albums_to_colors = []
 
     if get_index(full_albums_to_colors, img_link) > -1:
+
         return full_albums_to_colors[get_index(full_albums_to_colors, img_link)]['common_color']
     else:
         try:
@@ -48,7 +49,6 @@ def get_color(img_link=""):
         dominant_color = color_thief.get_color(quality=1)
         normalize_dominant_color = [c / 255 for c in dominant_color]
         full_albums_to_colors.append(Album(img_link, normalize_dominant_color).__dict__)
-
         with open('albums_to_colors.json', 'w') as f:
             json.dump(full_albums_to_colors, f, indent=2)
         return normalize_dominant_color[0], normalize_dominant_color[1], normalize_dominant_color[2]

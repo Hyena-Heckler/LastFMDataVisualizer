@@ -7,8 +7,11 @@ dotenv.config();
 export const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: process.env.DATABASE_PASSWORD,
+  password: "",
   database: "user_info",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 async function saveUserData(lastfmUsername, data) {
@@ -34,8 +37,7 @@ async function loadUserData(lastfmUsername) {
 
 export async function getAllTracksData(username, apiKey) { //gets all tracks data including when the first one was
   const userData = await loadUserData(username);
-  console.log(userData)
-  if (userData) return userData;
+  if (userData) return JSON.parse(userData);
   let totalTracks = 0;
   try {
     totalTracks = await getTotalTrackNumber();
@@ -78,7 +80,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
     if (!data.recenttracks || !data.recenttracks.track) {
       console.error("Unexpected response for page", page);
       console.error(data);
-      error_pages.append(page)
+      error_pages.push(page)
       return [];
     }
     return data.recenttracks.track;
@@ -110,6 +112,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
   }
 
   let data = await getAllTracksBatch(totalTracks);
+  console.log("Saving tracks:", data.length);
   await saveUserData(username, data);
   return data;
 }

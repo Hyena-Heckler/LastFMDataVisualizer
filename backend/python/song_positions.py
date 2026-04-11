@@ -88,6 +88,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
     for playlist in playlist_history: #adds the playlist date as a row in data
         final_sheet[0].append(format_date(playlist['date']))
     for track in sheet: # formats the name of the title in the chart and adds the track image for future purposes
+        # logging.info(track['name'])
         track_color = get_color(track['image'])
         column = [{
             "name": track['name'],

@@ -237,5 +237,11 @@
     "time": "709.68s",
     "rendered_frames": 2865,
     "timestamp": "2026-03-06T00:40:38.439622"
+  },
+  {
+    "fps": "13.63",
+    "time": "218.94s",
+    "rendered_frames": 2985,
+    "timestamp": "2026-04-09T17:39:10.228627"
   }
 ]

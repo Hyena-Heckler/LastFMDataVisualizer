@@ -12,6 +12,10 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
+print("PYTHON STARTED", file=sys.stderr)
+print("PYTHON STARTED", flush=True)
+sys.stderr.flush()
+
 def unix_to_date(unix_time): # turns Unix time to a standard date
     datetime_obj = datetime.datetime.fromtimestamp(unix_time)
     formatted_data = datetime_obj.strftime("(%m/%d/%y)")

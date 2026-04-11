@@ -7,10 +7,21 @@ from matplotlib import font_manager
 from datetime import datetime
 import time
 import json
+import sys
+import os
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stderr,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 def setup_font(background_color):
     # changes the font
-    font_path = '/Users/harshshetty/Desktop/Python/Spot/tutorial-env/NotoSansJP-Bold.ttf'  # Your font path goes here
+    BASE_DIR = os.path.dirname(__file__)
+    font_path = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Bold.ttf")
     font_manager.fontManager.addfont(font_path)
     prop = font_manager.FontProperties(fname=font_path)
     plt.rcParams['font.family'] = 'fantasy'  # or sans-serif or monospace
@@ -146,7 +157,7 @@ def graph_data(data):
         current_percentage = (frame * 100) // total_frames
         previous_percentage = ((frame - 1) * 100) // total_frames
         if current_percentage != previous_percentage:
-            print(f"{current_percentage}%")
+            logging.info(f"{current_percentage}%")
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
@@ -188,17 +199,16 @@ def graph_data(data):
     metadata = dict(Title='Color Chart', artist='harshshetty')  # data for the file
     writer = FFMpegWriter(
         fps=speed_per_date / 2,
-        metadata=metadata,
-        extra_args=['-preset', 'ultrafast']
+        metadata=metadata
     )  # creates the file
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    ani.save(f"videos/{timestamp}.mp4", writer=writer)  # creates a video for song chart
+    ani.save(f"python/videos/{timestamp}.mp4", writer=writer)  # creates a video for song chart
     t3 = time.perf_counter()
-    print(f"Video render time: {t3 - t2:.2f}s")
+    # print(f"Video render time: {t3 - t2:.2f}s")
     # Packing all the plots and displaying them
 
-    with open("render_efficiency.json", "r") as f:
+    with open("python/render_efficiency.json", "r") as f:
         data = json.load(f)
 
     data.append({
@@ -209,7 +219,7 @@ def graph_data(data):
 
     })
 
-    with open("render_efficiency.json", "w") as f:
+    with open("python/render_efficiency.json", "w") as f:
         json.dump(data, f, indent=2)
 
     #plt.show()

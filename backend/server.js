@@ -40,6 +40,10 @@ function runPython(scriptPath, inputData) {
       reject(new Error(`stdin error: ${err.message}`));
     });
 
+    py.on("error", (err) => {
+      console.error("FAILED TO SPAWN PYTHON:", err);
+    });
+
     py.on("close", code => {
       if (code !== 0) {
         return reject(new Error(`Python exited ${code}:\n${stderr}`));
@@ -93,10 +97,12 @@ app.get("/update", async (req, res) => {
 app.get("/download", async (req, res) => {
   try {
     const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
+    console.log("tracks type:", typeof data);
+
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     console.log("Work on Rendering Tracks");
-    const response = await renderWorkflow(organizedDataJson)
+    // const response = await renderWorkflow(organizedDataJson)
 
     res.json(organizedDataJson);
   } catch (err) {
