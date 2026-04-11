@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { getAllTracksData } from "./tracks.service.js";
+import { getAllTracksData, getStoredData} from "./tracks.service.js";
 import { transformTracks } from "./tracks.transform.js";
 import { spawn } from "child_process";
 
@@ -81,12 +81,7 @@ async function renderWorkflow(userData) {
 app.get("/update", async (req, res) => {
   try {
     const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
-    const organizedData = transformTracks(data);
-    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    console.log("Work on Rendering Tracks");
-    //const response = await renderWorkflow(organizedDataJson)
-
-    res.json(organizedDataJson);
+    console.log("Finished updating tracks");
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch tracks" });
@@ -96,18 +91,16 @@ app.get("/update", async (req, res) => {
 
 app.get("/download", async (req, res) => {
   try {
-    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
-    console.log("tracks type:", typeof data);
-
+    const data = await getStoredData("hyenaheckler", process.env.LASTFM_API_KEY);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    console.log("Work on Rendering Tracks");
+    console.log("Finished preparing file for download");
     // const response = await renderWorkflow(organizedDataJson)
 
     res.json(organizedDataJson);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch tracks" });
+    res.status(500).json({ error: "Failed to download tracks" });
   }
 });
 

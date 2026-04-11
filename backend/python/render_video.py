@@ -5,6 +5,7 @@ import matplotlib.animation as animation
 from matplotlib.animation import FFMpegWriter
 from matplotlib import font_manager
 from datetime import datetime
+from pathlib import Path
 import time
 import json
 import sys
@@ -203,12 +204,15 @@ def graph_data(data):
     )  # creates the file
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    ani.save(f"python/videos/{timestamp}.mp4", writer=writer)  # creates a video for song chart
+    BASE_DIR = Path(__file__).resolve().parent
+    video_output_path = BASE_DIR / "videos" / f"{timestamp}.mp4"
+    ani.save(video_output_path, writer=writer)  # creates a video for song chart
     t3 = time.perf_counter()
     # print(f"Video render time: {t3 - t2:.2f}s")
     # Packing all the plots and displaying them
 
-    with open("python/render_efficiency.json", "r") as f:
+    efficiency_output_path = BASE_DIR / "render_efficiency.json"
+    with open(efficiency_output_path, "r") as f:
         data = json.load(f)
 
     data.append({
@@ -219,7 +223,7 @@ def graph_data(data):
 
     })
 
-    with open("python/render_efficiency.json", "w") as f:
+    with open(efficiency_output_path, "w") as f:
         json.dump(data, f, indent=2)
 
     #plt.show()

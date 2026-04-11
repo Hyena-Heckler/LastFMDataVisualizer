@@ -36,15 +36,13 @@ async function loadUserData(lastfmUsername) {
 
 
 export async function getAllTracksData(username, apiKey) { //gets all tracks data including when the first one was
-  const userData = await loadUserData(username);
-  if (userData) return JSON.parse(userData);
+
   let totalTracks = 0;
   try {
     totalTracks = await getTotalTrackNumber();
-
   } catch (err) {
     console.log(err)
-    return null
+    return null;
   }
 
   async function getTotalTrackNumber() { // gets the number of tracks
@@ -61,12 +59,21 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
       throw new Error(data.message);
     }
 
-    return Number(data.user.playcount);
+    return Number(data.user.playcount)
   }
+
+  const userData = await loadUserData(username);
+  let loggedTracks = 0;
+  let userJSON = [];
+  if (userData) {
+    loggedTracks = JSON.parse(userData).length;
+    userJSON = JSON.parse(userData);
+  }
+
 
   const error_pages = [];
 
-  async function getMaxTracksFromPage(page, limit = 1000) { // gets all tracks from a page
+  async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { // gets all tracks from a page
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
     console.log(`page ${page}`);
     const response = await fetch(url, {
@@ -83,7 +90,11 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
       error_pages.push(page)
       return [];
     }
-    return data.recenttracks.track;
+    if (filterCurrentlyPlaying === true) {
+      return data.recenttracks.track.filter(singleTrack => !singleTrack['@attr'] || !singleTrack['@attr'].nowplaying === true);
+    } else {
+      return data.recenttracks.track
+    }
   }
 
   async function getAllTracksBatch(totalTrackNumber, batchSize = 3) { // gets multiple pages of data in a batch
@@ -111,8 +122,24 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
     return userPlaylistHistory;
   }
 
-  let data = await getAllTracksBatch(totalTracks);
+  if(getMaxTracksFromPage(1, 1, false).length === 2) totalTracks--;
+  console.log("Total Tracks: ", totalTracks);
+  console.log("Logged Tracks: ", loggedTracks);
+
+  let newData = await getAllTracksBatch(totalTracks - loggedTracks);
+  console.log("New Data Type: ", typeof newData);
+  console.log("Logged Data Type: ", typeof userJSON);
+  let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
   await saveUserData(username, data);
   return data;
+}
+
+export async function getStoredData(username) {
+  const userData = await loadUserData(username);
+  if (userData) {
+    return JSON.parse(userData);
+  } else {
+    return null;
+  }
 }
