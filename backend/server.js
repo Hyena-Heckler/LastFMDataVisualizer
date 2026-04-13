@@ -4,11 +4,13 @@ import cors from "cors";
 import { getAllTracksData, getStoredData} from "./tracks.service.js";
 import { transformTracks } from "./tracks.transform.js";
 import { spawn } from "child_process";
+import path from "path";
 
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use("/videos", express.static(path.join(process.cwd(), "python/videos")));
 app.use(cors({
   origin: "http://127.0.0.1:8080"
 }));
@@ -31,6 +33,8 @@ function runPython(scriptPath, inputData, commandPrompt) {
     py.stdout.on("data", data => {
       stdout += data;
     });
+
+    py.stdin.setDefaultEncoding("utf8");
 
     py.stderr.on("data", data => {
       stderr += data;
@@ -62,7 +66,7 @@ function runPython(scriptPath, inputData, commandPrompt) {
     try {
       py.stdin.write(JSON.stringify({
         command: commandPrompt,
-        information: inputData
+        payload: inputData
       }));
       py.stdin.end();
     } catch (e) {
@@ -108,6 +112,31 @@ app.post("/download", async (req, res) => {
     // const response = await renderWorkflow(organizedDataJson)
 
     res.json(organizedDataJson);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to download tracks" });
+  }
+});
+
+app.post("/download-video", async (req, res) => {
+  try {
+    const user = req.body.user;
+    const data = await getStoredData(user);
+    const organizedData = transformTracks(data);
+    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
+    console.log("Finished preparing file for rendering");
+    const workingData = await renderWorkflow(organizedDataJson, "prepare_cached_data");
+    const result = await renderWorkflow(workingData, "get_video");
+    const videoPath = path.resolve(result.output_path);
+
+    console.log("Completed rendering");
+
+    res.download(videoPath, "your-video.mp4", (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("Error downloading file");
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to download tracks" });

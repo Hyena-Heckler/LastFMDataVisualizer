@@ -50,4 +50,27 @@ export function setupButtons() {
     const data = await res.json();
     console.log("Successful update for:", store.user);
   });
+
+  document.getElementById("download-video").addEventListener("click", async () => {
+    if (!store.user) {
+      alert("Please log in first");
+      return;
+    }
+
+    const res = await fetch("http://localhost:3000/download-video", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({user: store.user})
+    })
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "video.mp4";
+    a.click();
+    console.log("Successful download video for:", store.user);
+  });
 }

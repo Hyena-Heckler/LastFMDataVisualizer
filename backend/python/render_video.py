@@ -199,7 +199,7 @@ def graph_data(data):
     t2 = time.perf_counter()
     metadata = dict(Title='Color Chart', artist='harshshetty')  # data for the file
     writer = FFMpegWriter(
-        fps=speed_per_date / 2,
+        fps=speed_per_date/2,
         metadata=metadata
     )  # creates the file
 
@@ -207,6 +207,8 @@ def graph_data(data):
     BASE_DIR = Path(__file__).resolve().parent
     video_output_path = BASE_DIR / "videos" / f"{timestamp}.mp4"
     ani.save(video_output_path, writer=writer)  # creates a video for song chart
+    return str(video_output_path)
+
     t3 = time.perf_counter()
     # print(f"Video render time: {t3 - t2:.2f}s")
     # Packing all the plots and displaying them

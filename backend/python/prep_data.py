@@ -5,6 +5,10 @@ from data_points import add_extra_info
 from render_video import graph_data
 import datetime
 import logging
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
 
 logging.basicConfig(
     level=logging.INFO,
@@ -12,8 +16,8 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
-print("PYTHON STARTED", file=sys.stderr)
-print("PYTHON STARTED", flush=True)
+logging.info("PYTHON STARTED")
+logging.info("PYTHON STARTED")
 sys.stderr.flush()
 
 def unix_to_date(unix_time): # turns Unix time to a standard date
@@ -102,7 +106,8 @@ def main(history):
         graph_data(song_position_data)
 
     except Exception as e:
-        print(str(e), file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
 def prepare_cached_data(history):
@@ -118,7 +123,7 @@ def prepare_cached_data(history):
         logging.info("Started Python Data Analysis")
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
-        
+
         def combine_poi_and_pos(in1, in2):
             return [
                 in1[0],
@@ -134,9 +139,39 @@ def prepare_cached_data(history):
             cached_song_data
         ))
 
+    except Exception as e:
+        import traceback
+        traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
+    
+
+def get_video(cached_song_data):
+    try:
+        song_position_data = [
+            cached_song_data[0],
+            *[
+                [song_data[0], *list(map(lambda x:x['position'], song_data[1:]))]
+                for song_data in cached_song_data[1:]
+            ]
+        ]
+        song_points_by_position_data = [
+            cached_song_data[0],
+            *[
+                [song_data[0], *list(map(lambda x:x['points'], song_data[1:]))]
+                for song_data in cached_song_data[1:]
+            ]
+        ]
+
+        add_extra_info(song_points_by_position_data, song_position_data)
+        video_path = graph_data(song_position_data)
+        print(json.dumps({
+            "output_path": video_path
+        }))
+        sys.stdout.flush()
 
     except Exception as e:
-        print(str(e), file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
@@ -146,3 +181,8 @@ if __name__ == "__main__":
     
     if command == "prepare_cached_data":
         prepare_cached_data(payload)
+
+    if command == "get_video":
+        get_video(payload)
+
+    
