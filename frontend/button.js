@@ -1,5 +1,7 @@
 import {store} from "./store.js";
 
+let backend_server = "http://localhost:3000"
+
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: "application/json" });
@@ -20,7 +22,7 @@ export function setupButtons() {
       return;
     }
     
-    const res = await fetch("http://localhost:3000/download", {
+    const res = await fetch(`${backend_server}/download`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -39,7 +41,7 @@ export function setupButtons() {
       return;
     }
 
-    const res = await fetch("http://localhost:3000/update", {
+    const res = await fetch(`${backend_server}/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -57,20 +59,45 @@ export function setupButtons() {
       return;
     }
 
-    const res = await fetch("http://localhost:3000/download-video", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({user: store.user})
-    })
+    try{
+      const startRes = await fetch(`${backend_server}/start-video`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({user: store.user})
+      })
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "video.mp4";
-    a.click();
-    console.log("Successful download video for:", store.user);
+      const { jobId } = await startRes.json();
+      console.log("Job started:", jobId);
+
+      let ready = false;
+
+      while (!ready) {
+        const statusRes = await fetch(`http://localhost:3000/status/${jobId}`);
+        const statusData = await statusRes.json();
+
+        ready = statusData.ready;
+
+        console.log("Checking status...", ready);
+
+        if (!ready) {
+          await new Promise(r => setTimeout(r, 5000)); // wait 2s
+        }
+      }
+
+      console.log("Video ready!");
+      const downloadRes = await fetch(`http://localhost:3000/download-video/${jobId}`);
+      const blob = await downloadRes.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "video.mp4";
+      a.click();
+      console.log("Successful download video for:", store.user);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Something went wrong");
+    }
   });
 }

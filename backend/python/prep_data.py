@@ -150,7 +150,7 @@ def prepare_cached_data(history):
         sys.exit(1)
     
 
-def get_video(cached_song_data):
+def get_video(cached_song_data, path):
     try:
         song_position_data = [
             cached_song_data[0],
@@ -168,11 +168,7 @@ def get_video(cached_song_data):
         ]
 
         add_extra_info(song_points_by_position_data, song_position_data)
-        video_path = graph_data(song_position_data)
-        print(json.dumps({
-            "output_path": video_path
-        }))
-        sys.stdout.flush()
+        graph_data(song_position_data, path)
 
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
@@ -180,6 +176,7 @@ def get_video(cached_song_data):
 
 if __name__ == "__main__":
     request = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+    job_id = request.get("jobId")
     command = request.get("command")
     payload = request.get("payload")
     
@@ -187,6 +184,11 @@ if __name__ == "__main__":
         prepare_cached_data(payload)
 
     if command == "get_video":
-        get_video(payload)
+        output_path = os.path.join("python", "videos", f"{job_id}.mp4")
+        get_video(payload, output_path)
+        done_flag = f"python/videos/{job_id}.done"
+        with open(done_flag, "w") as f:
+            f.write("done")
+        print(f"Saved to {output_path}", file=sys.stderr)
 
     

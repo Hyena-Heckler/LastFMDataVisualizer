@@ -5,6 +5,7 @@ import { getAllTracksData, getStoredData} from "./tracks.service.js";
 import { transformTracks } from "./tracks.transform.js";
 import { spawn } from "child_process";
 import path from "path";
+import fs from "fs";
 
 
 dotenv.config();
@@ -81,6 +82,32 @@ function runPython(scriptPath, inputData, commandPrompt) {
   });
 }
 
+function runPythonJob(scriptPath, inputData, commandPrompt, jobId) {
+  const py = spawn("python3", ["-u", scriptPath], {
+    stdio: ["pipe", "pipe", "pipe"]
+  });
+
+  py.stdout.on("data", (data) => {
+    console.log("PY:", data.toString());
+  });
+
+  py.stderr.on("data", (data) => {
+    console.error("PY ERR:", data.toString());
+  });
+
+  py.on("close", (code) => {
+    console.log(`Job ${jobId} finished with code ${code}`);
+  });
+
+  py.stdin.write(JSON.stringify({
+    command: commandPrompt,
+    payload: inputData,
+    jobId
+  }));
+
+  py.stdin.end();
+}
+
 async function renderWorkflow(userData, promptData) {
   try {
     const prepData = await runPython("python/prep_data.py", userData, promptData);
@@ -124,29 +151,53 @@ app.post("/download", async (req, res) => {
   }
 });
 
-app.post("/download-video", async (req, res) => {
+app.post("/start-video", async (req, res) => {
   try {
+    const jobId = Date.now().toString();
+
     const user = req.body.user;
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const workingData = await renderWorkflow(organizedDataJson, "prepare_cached_data");
-    const result = await renderWorkflow(workingData, "get_video");
-    const videoPath = path.resolve(result.output_path);
-
-    console.log("Completed rendering");
-
-    res.download(videoPath, "your-video.mp4", (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send("Error downloading file");
-      }
-    });
+    runPythonJob("python/prep_data.py", workingData, "get_video", jobId);
+    console.log("Start rendering");
+    res.json({jobId})
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to download tracks" });
+    res.status(500).json({ error: "Failed to start video tracks" });
   }
 });
+
+app.get("/status/:jobId", (req, res) => {
+  const videoPath = path.join(
+    process.cwd(),
+    "python",
+    "videos",
+    `${req.params.jobId}.done`
+  );
+
+  res.json({
+    ready: fs.existsSync(videoPath)
+  });
+});
+
+app.get("/download-video/:jobId", (req, res) => {
+  const videoPath = path.join(
+    process.cwd(),
+    "python",
+    "videos",
+    `${req.params.jobId}.mp4`
+  );
+
+  if (!fs.existsSync(videoPath)) {
+    return res.status(404).json({ error: "Video not ready" });
+  }
+
+  res.download(videoPath);
+});
+
+
 
 
 app.post("/top-of-the-week", async (req, res) => {

@@ -114,7 +114,7 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
     text.set_visible(False)
     text_labels[song_id] = text
 
-def graph_data(data):
+def graph_data(data, video_output_path):
     # Annotation Variable
     ann_x_shift = 0
     ann_y_shift = 0
@@ -210,8 +210,6 @@ def graph_data(data):
     )  # creates the file
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    BASE_DIR = Path(__file__).resolve().parent
-    video_output_path = BASE_DIR / "videos" / f"{timestamp}.mp4"
     ani.save(video_output_path, writer=writer)  # creates a video for song chart
     return str(video_output_path)
 
