@@ -1,18 +1,15 @@
-const loginForm = document.getElementById("login-form")
+import {store} from "./store.js";
 
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+export function setupLogin() {
+  const loginForm = document.getElementById("login-form")
 
-  const username = document.getElementById("username-login").value;
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  const res = await fetch("/submit-username", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application-login/json"
-    },
-    body: JSON.stringify({ username })
+    const username = document.getElementById("username-login").value;
+
+    store.user = username;
+
+    console.log("Logged in:", store.user);
   });
-
-  const data = await res.json();
-  console.log(data);
-});
+}

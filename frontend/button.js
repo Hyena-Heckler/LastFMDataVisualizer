@@ -1,5 +1,4 @@
-// for all buttons
-
+import {store} from "./store.js";
 
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);
@@ -13,14 +12,42 @@ function downloadJSON(data, filename) { // downloads a JSON file using a data
   URL.revokeObjectURL(url);
 }
 
-document.getElementById("download").addEventListener("click", async () => {
-  const res = await fetch("http://localhost:3000/download");
-  const data = await res.json();
-  downloadJSON(data, "Data");
-})
+export function setupButtons() {
+  document.getElementById("download").addEventListener("click", async () => {
+    
+    if (!store.user) {
+      alert("Please log in first");
+      return;
+    }
+    
+    const res = await fetch("http://localhost:3000/download", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({user: store.user})
+    });
+    const data = await res.json();
+    downloadJSON(data, "Data");
 
-document.getElementById("update").addEventListener("click", async () => {
-  const res = await fetch("http://localhost:3000/update");
-  const data = await res.json();
-  downloadJSON(data, "Data");
-})
+    console.log("Successful download for:", store.user);
+  });
+
+  document.getElementById("update").addEventListener("click", async () => {
+    if (!store.user) {
+      alert("Please log in first");
+      return;
+    }
+
+    const res = await fetch("http://localhost:3000/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({user: store.user})
+    });
+
+    const data = await res.json();
+    console.log("Successful update for:", store.user);
+  });
+}

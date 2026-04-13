@@ -16,7 +16,7 @@ const PORT = 3000;
 
 
 
-function runPython(scriptPath, inputData) {
+function runPython(scriptPath, inputData, commandPrompt) {
   return new Promise((resolve, reject) => {
     const py = spawn("python3", ["-u", scriptPath], {
       stdio: ["pipe", "pipe", "pipe"]
@@ -51,6 +51,7 @@ function runPython(scriptPath, inputData) {
 
       try {
         resolve(JSON.parse(stdout));
+
       } catch (e) {
         reject(new Error(
           `Invalid JSON from Python\nSTDOUT:\n${stdout}\nSTDERR:\n${stderr}`
@@ -59,7 +60,10 @@ function runPython(scriptPath, inputData) {
     });
 
     try {
-      py.stdin.write(JSON.stringify(inputData));
+      py.stdin.write(JSON.stringify({
+        command: commandPrompt,
+        information: inputData
+      }));
       py.stdin.end();
     } catch (e) {
       reject(e);
@@ -67,10 +71,9 @@ function runPython(scriptPath, inputData) {
   });
 }
 
-async function renderWorkflow(userData) {
+async function renderWorkflow(userData, promptData) {
   try {
-    const prepData = await runPython("python/prep_data.py", userData);
-    // const videoData = await runPython("python/render_video.py", prepData);
+    const prepData = await runPython("python/prep_data.py", userData, promptData);
     return prepData;
   } catch (err) {
     console.error("Workflow error:", err);
@@ -78,10 +81,16 @@ async function renderWorkflow(userData) {
   }
 }
 
-app.get("/update", async (req, res) => {
+app.post("/update", async (req, res) => {
   try {
-    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
+    const user = req.body.user;
+    const data = await getAllTracksData(user, process.env.LASTFM_API_KEY);
     console.log("Finished updating tracks");
+
+    res.json({
+      success: true,
+      message: "Updated"
+    })
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch tracks" });
@@ -89,9 +98,10 @@ app.get("/update", async (req, res) => {
 });
 
 
-app.get("/download", async (req, res) => {
+app.post("/download", async (req, res) => {
   try {
-    const data = await getStoredData("hyenaheckler", process.env.LASTFM_API_KEY);
+    const user = req.body.user;
+    const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     console.log("Finished preparing file for download");
@@ -105,25 +115,15 @@ app.get("/download", async (req, res) => {
 });
 
 
-app.get("/top-of-the-week", async (req, res) => {
+app.post("/top-of-the-week", async (req, res) => {
   try {
-    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
+    const data = await getStoredData("hyenaheckler");
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    console.log("Work on Rendering Tracks");
-    const response = await renderWorkflow(organizedDataJson)
+    console.log("Work on Organizing Tracks");
+    const response = await renderWorkflow(organizedDataJson, "prepare_cached_data")
 
     res.json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch tracks" });
-  }
-});
-
-app.get("/submit-username", async (req, res) => {
-  try {
-    const data = await getAllTracksData("hyenaheckler", process.env.LASTFM_API_KEY);
-    console.log(data)
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch tracks" });

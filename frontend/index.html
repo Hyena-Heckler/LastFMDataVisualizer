@@ -9,10 +9,16 @@
   <body>
     <nav>
     <ul>
-        <li><a href="login.html">Login</a></li>
-        <li><a href="home.html">Home</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
     </ul>
     </nav>
+    <form id="login-form" action="/submit-username" method="POST">
+      <label for="username-login">Username:</label>
+      <input type="text" id="username-login" name="username" placeholder="Enter username here">
+      <button type="submit">Submit</button>
+    </form>
     <button id="update">Updated Information</button>
     <button id="download">Download JSON</button>
     <label id="communication">INFO</label>
@@ -43,6 +49,6 @@
           </div>
         </div>
     </div>
-    <script src="button.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>

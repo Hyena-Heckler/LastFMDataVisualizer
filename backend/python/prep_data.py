@@ -89,9 +89,6 @@ def main(history):
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
 
-        print(json.dumps({
-            "status": "success"
-        }))
         with open('song_points.json', 'w') as f:
             json.dump(formatted_history, f, indent=2)
 
@@ -108,6 +105,44 @@ def main(history):
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
+def prepare_cached_data(history):
+    try:
+        logging.info("Started Ordering Data Analysis")
+        ordered_history = sort_week(history.copy())
+        logging.info("Started Ranking Data Analysis")
+        ranked_history = points_each_week(ordered_history)
+        logging.info("Started Filtering Data Analysis")
+        filtered_history = filter_songs_in_week(ranked_history, filter_size = 30)
+        logging.info("Started Formatting Data Analysis")
+        formatted_history = format_node_to_python(filtered_history)
+        logging.info("Started Python Data Analysis")
+        song_position_data = get_song_position_data(formatted_history, True)
+        song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
+        
+        def combine_poi_and_pos(in1, in2):
+            return [
+                in1[0],
+                *[
+                    {"position": pos, "points": pts}
+                    for pos, pts in zip(in1[1:], in2[1:])
+                ]
+            ]
+        cached_song_data = [song_position_data[0]] + [combine_poi_and_pos(pos_data, poi_data) for pos_data, poi_data in zip(song_position_data[1:], song_points_by_position_data[1:]) ]
+
+
+        print(json.dumps(
+            cached_song_data
+        ))
+
+
+    except Exception as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(1)
+
 if __name__ == "__main__":
-    json_history = json.loads(sys.stdin.read())
-    main(json_history)
+    request = json.loads(sys.stdin.read());
+    command = request.get("command");
+    payload = request.get("payload");
+    
+    if command == "prepare_cached_data":
+        prepare_cached_data(payload)
