@@ -5,7 +5,14 @@ from data_points import add_extra_info
 from render_video import graph_data
 import datetime
 import logging
-import sys
+import traceback
+import os
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
+
+sys.stderr.reconfigure(line_buffering=True, write_through=True)
+sys.stdout.reconfigure(line_buffering=True, write_through=True)
 
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
@@ -13,11 +20,11 @@ sys.stderr.reconfigure(encoding='utf-8')
 logging.basicConfig(
     level=logging.INFO,
     stream=sys.stderr,
-    format="%(asctime)s [%(levelname)s] %(message)s"
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    force=True
 )
 
-logging.info("PYTHON STARTED")
-logging.info("PYTHON STARTED")
+logging.info("PYTHON STARTED 2")
 sys.stderr.flush()
 
 def unix_to_date(unix_time): # turns Unix time to a standard date
@@ -106,7 +113,6 @@ def main(history):
         graph_data(song_position_data)
 
     except Exception as e:
-        import traceback
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
@@ -140,7 +146,6 @@ def prepare_cached_data(history):
         ))
 
     except Exception as e:
-        import traceback
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
     
@@ -170,14 +175,13 @@ def get_video(cached_song_data):
         sys.stdout.flush()
 
     except Exception as e:
-        import traceback
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
-    request = json.loads(sys.stdin.read());
-    command = request.get("command");
-    payload = request.get("payload");
+    request = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+    command = request.get("command")
+    payload = request.get("payload")
     
     if command == "prepare_cached_data":
         prepare_cached_data(payload)

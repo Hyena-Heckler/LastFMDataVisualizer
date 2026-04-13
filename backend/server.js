@@ -27,11 +27,17 @@ function runPython(scriptPath, inputData, commandPrompt) {
     let stdout = "";
     let stderr = "";
 
-    py.stdout.setEncoding("utf8");
-    py.stderr.setEncoding("utf8");
 
     py.stdout.on("data", data => {
       stdout += data;
+    });
+
+    py.stdout.on("data", (data) => {
+      console.log("PY:", data.toString());
+    });
+
+    py.stderr.on("data", (data) => {
+      console.error("PY ERR:", data.toString());
     });
 
     py.stdin.setDefaultEncoding("utf8");
@@ -124,7 +130,6 @@ app.post("/download-video", async (req, res) => {
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    console.log("Finished preparing file for rendering");
     const workingData = await renderWorkflow(organizedDataJson, "prepare_cached_data");
     const result = await renderWorkflow(workingData, "get_video");
     const videoPath = path.resolve(result.output_path);

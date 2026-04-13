@@ -1,5 +1,6 @@
 import numpy as np
 import json
+import sys
 # just to see some info for now
 def add_extra_info(data, song_position_data):
     # songs info
@@ -14,25 +15,25 @@ def add_extra_info(data, song_position_data):
         })
 
     songs_info.sort(key=lambda n: n["total_points"], reverse=True)
-    print("Total Points")
+    print("Total Points", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["total_points"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["total_points"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
     
     songs_info.sort(key=lambda n: n["total_weeks"], reverse=True)
-    print("Total Weeks")
+    print("Total Weeks", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["total_weeks"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["total_weeks"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
     songs_info.sort(key=lambda n: n["points_per_week"], reverse=True)
-    print("Points Per Week")
+    print("Points Per Week", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["points_per_week"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["points_per_week"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
     songs_info = []
     for song in song_position_data[1:]:
@@ -52,49 +53,49 @@ def add_extra_info(data, song_position_data):
         })
 
     songs_info.sort(key=lambda n: n["weeks_number_one"], reverse=True)
-    print("Total Weeks at Number One")
+    print("Total Weeks at Number One", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_number_one"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_number_one"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
     songs_info.sort(key=lambda n: n["weeks_top_three"], reverse=True)
-    print("Total Weeks Top Three")
+    print("Total Weeks Top Three", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_three"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_three"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
     songs_info.sort(key=lambda n: n["weeks_top_five"], reverse=True)
-    print("Total Weeks Top Five")
+    print("Total Weeks Top Five", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_five"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_five"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
     songs_info.sort(key=lambda n: n["weeks_top_ten"], reverse=True)
-    print("Total Weeks Top Ten")
+    print("Total Weeks Top Ten", file=sys.stderr)
     for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_ten"]}')
+        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_ten"]}', file=sys.stderr)
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
     songs_info.sort(key=lambda n: n["weeks_number_two"], reverse=True)
-    print("Total Weeks Stuck at Number Two")
+    print("Total Weeks Stuck at Number Two", file=sys.stderr)
     i = 1
     for song in songs_info[:15]:
         if song["weeks_number_one"] == 0:
-            print(f'{i}. {song["song"]["name"]}: {song["weeks_number_two"]}')
+            print(f'{i}. {song["song"]["name"]}: {song["weeks_number_two"]}', file=sys.stderr)
             i += 1
 
-    print("\n")
+    print("\n", file=sys.stderr)
 
-    print("Number One Debut")
+    print("Number One Debut", file=sys.stderr)
     for song in song_position_data[1:]:
         for index, pos in enumerate(song[1:]):
             if pos is not None:
                 if pos == 1:
-                    print(f'Week of {song_position_data[0][index + 1]}: {song[0]["name"]}')
+                    print(f'Week of {song_position_data[0][index + 1]}: {song[0]["name"]}', file=sys.stderr)
                 break
 
 

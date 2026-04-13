@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.animation import FFMpegWriter
@@ -10,14 +9,21 @@ import time
 import json
 import sys
 import os
-
+import unicodedata
 import logging
 
+os.environ["PYTHONUNBUFFERED"] = "1"
 logging.basicConfig(
     level=logging.INFO,
     stream=sys.stderr,
-    format="%(asctime)s [%(levelname)s] %(message)s"
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    force=True
 )
+
+def clean_text(s):
+    if not isinstance(s, str):
+        return s
+    return unicodedata.normalize("NFKC", s)
 
 def setup_font(background_color):
     # changes the font
@@ -99,7 +105,7 @@ def create_points(song, intro_outro_length):
 def create_text(text_labels, plot_data, graph_color, song, song_id):
     text = plot_data.text(
         0, 0,
-        song[0]["name"],
+        clean_text(song[0]["name"]),
         color=graph_color,
         ha="left",
         va="center",
@@ -158,7 +164,7 @@ def graph_data(data):
         current_percentage = (frame * 100) // total_frames
         previous_percentage = ((frame - 1) * 100) // total_frames
         if current_percentage != previous_percentage:
-            logging.info(f"{current_percentage}%")
+            print(f"{current_percentage}%", file=sys.stderr, flush=True)
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
