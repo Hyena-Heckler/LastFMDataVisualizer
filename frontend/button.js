@@ -74,7 +74,7 @@ export function setupButtons() {
       let ready = false;
 
       while (!ready) {
-        const statusRes = await fetch(`http://localhost:3000/status/${jobId}`);
+        const statusRes = await fetch(`${backend_server}/status/${jobId}`);
         const statusData = await statusRes.json();
 
         ready = statusData.ready;
@@ -87,7 +87,7 @@ export function setupButtons() {
       }
 
       console.log("Video ready!");
-      const downloadRes = await fetch(`http://localhost:3000/download-video/${jobId}`);
+      const downloadRes = await fetch(`${backend_server}/download-video/${jobId}`);
       const blob = await downloadRes.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
