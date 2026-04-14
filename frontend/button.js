@@ -15,14 +15,14 @@ function downloadJSON(data, filename) { // downloads a JSON file using a data
 }
 
 export function setupButtons() {
-  document.getElementById("download").addEventListener("click", async () => {
+  document.getElementById("download-json").addEventListener("click", async () => {
     
     if (!store.user) {
       alert("Please log in first");
       return;
     }
     
-    const res = await fetch(`${backend_server}/download`, {
+    const res = await fetch(`${backend_server}/download-json`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -49,7 +49,7 @@ export function setupButtons() {
       body: JSON.stringify({user: store.user})
     });
 
-    const data = await res.json();
+    const data = await res.json(); // will follow the same logic in download-video
     console.log("Successful update for:", store.user);
   });
 
@@ -60,6 +60,7 @@ export function setupButtons() {
     }
 
     try{
+      // Step 1: Creates a job ID to track the progress of video rendering
       const startRes = await fetch(`${backend_server}/start-video`, {
         method: "POST",
         headers: {
@@ -68,9 +69,10 @@ export function setupButtons() {
         body: JSON.stringify({user: store.user})
       })
 
-      const { jobId } = await startRes.json();
+      const { jobId } = await startRes.json(); // Download video takes a long time, so there is an issue of it timing out. This allows it to run in the background.
       console.log("Job started:", jobId);
-
+      
+      // Step 2: Does not let the code proceed until a signal file is found indictating completion/
       let ready = false;
 
       while (!ready) {
@@ -85,7 +87,8 @@ export function setupButtons() {
           await new Promise(r => setTimeout(r, 5000)); // wait 2s
         }
       }
-
+      
+      // Step 3: Downloads the video as a mp4 file
       console.log("Video ready!");
       const downloadRes = await fetch(`${backend_server}/download-video/${jobId}`);
       const blob = await downloadRes.blob();

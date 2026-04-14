@@ -135,7 +135,7 @@ app.post("/update", async (req, res) => {
 });
 
 
-app.post("/download", async (req, res) => {
+app.post("/download-json", async (req, res) => {
   try {
     const user = req.body.user;
     const data = await getStoredData(user);

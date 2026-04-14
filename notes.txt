@@ -35,14 +35,17 @@
       "#text": "25 Mar 2022, 19:41"
     }
   },
-
--------------------------Work On----------------------------------------------------------------------------
-* Updating can timeout if there's too many tracks, add a progress bar and make it similar to downloading video
-* Sometimes says album_to_colors.json cannot be worked on
-* albums_to_colors should go into a database
-* Handle empty image links
-* Handle remixes of tracks
+-------------------------Severe Bugs----------------------------------------------------------------------------
 * Last track is not displayed in song_points_by_position (All Town in one dataset is good example)
 -> resolved: there was a filter that removed any songs whose minimum position was higher htan 30. This accidentally applied to points.
+* Updating can timeout if there's too many tracks, add a progress bar and make it similar to downloading video
+* Sometimes says album_to_colors.json cannot be worked on
+-------------------------Light Bugs----------------------------------------------------------------------------
+* Handle empty image links
+* Handle remixes of tracks
+* UNIX time seems to be interpretted using UTC in some sections and local in others.
+-------------------------Work On----------------------------------------------------------------------------
+
+* albums_to_colors should go into a database
 * Add progress bar to rendering video
 * Album and artist chart

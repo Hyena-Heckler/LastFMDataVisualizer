@@ -45,7 +45,8 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
     return null;
   }
 
-  async function getTotalTrackNumber() { // gets the number of tracks
+  async function getTotalTrackNumber() { 
+    // gets the number of tracks
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getinfo`;
     const response = await fetch(url, {
       headers: {
@@ -71,9 +72,10 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
   }
 
 
-  const error_pages = [];
+  const error_pages = []; // when a page of plays throws an error, this allows it to return back to it
 
-  async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { // gets all tracks from a page
+  async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
+    // gets all tracks from a page
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
     console.log(`page ${page}`);
     const response = await fetch(url, {
@@ -102,7 +104,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
 
     let userPlaylistHistory = [];
     for(let i = 1; i <= totalPages; i += batchSize) {
-      const batch = [];
+      const batch = []; // allows pages to be done in batches so it is processed faster
 
       for(let j = i; j < i + batchSize && j <= totalPages; j++) {
         const limit = j < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
@@ -110,6 +112,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
       }
       
       error_pages.forEach((page) => {
+        // 
         const limit = page < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
         batch.push(getMaxTracksFromPage(page, limit));
       })
