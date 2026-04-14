@@ -130,6 +130,15 @@ def prepare_cached_data(history):
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
 
+        with open('song_points.json', 'w') as f:
+            json.dump(formatted_history, f, indent=2)
+
+        with open('song_positions.json', 'w') as f:
+            json.dump(song_position_data, f, indent=2)
+
+        with open('song_points_by_positions.json', 'w') as f:
+            json.dump(song_points_by_position_data, f, indent=2)
+            
         def combine_poi_and_pos(in1, in2):
             return [
                 in1[0],
