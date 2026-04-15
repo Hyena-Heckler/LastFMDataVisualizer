@@ -72,7 +72,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
   }
 
 
-  const error_pages = []; // when a page of plays throws an error, this allows it to return back to it
+  // const error_pages = []; // when a page of plays throws an error, this allows it to return back to it
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
     // gets all tracks from a page
@@ -86,11 +86,11 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
 
     const data = await response.json();
 
-    if (!data.recenttracks || !data.recenttracks.track) {
+    if (!data.recenttracks || !data.recenttracks.track || Math.random() < .2) {
       console.error("Unexpected response for page", page);
-      console.error(data);
-      error_pages.push(page)
-      return [];
+      //console.error(data);
+      //error_pages.push(page)
+      return getMaxTracksFromPage(page, limit, filterCurrentlyPlaying);
     }
     if (filterCurrentlyPlaying === true) {
       return data.recenttracks.track.filter(singleTrack => !singleTrack['@attr'] || !singleTrack['@attr'].nowplaying === true);
@@ -99,33 +99,37 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
     }
   }
 
-  async function getAllTracksBatch(totalTrackNumber, batchSize = 3) { // gets multiple pages of data in a batch
+  async function getAllTracksBatch(totalTrackNumber, batchSize = 10) { // gets multiple pages of data in a batch
     const totalPages = Math.ceil(totalTrackNumber / 1000);
 
     let userPlaylistHistory = [];
     for(let i = 1; i <= totalPages; i += batchSize) {
       const batch = []; // allows pages to be done in batches so it is processed faster
-
+      console.error("New Batch");
       for(let j = i; j < i + batchSize && j <= totalPages; j++) {
         const limit = j < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
         batch.push(getMaxTracksFromPage(j, limit));
       }
+      // console.error(error_pages);
+      // error_pages.forEach((page) => {
+      //   // 
+      //   const limit = page < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
+      //   batch.push(getMaxTracksFromPage(page, limit));
+      // })
       
-      error_pages.forEach((page) => {
-        // 
-        const limit = page < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
-        batch.push(getMaxTracksFromPage(page, limit));
-      })
+      // error_pages.splice(0, error_pages.length);
 
       const results = await Promise.all(batch);
       userPlaylistHistory = userPlaylistHistory.concat(results.flat());
 
       await new Promise(r => setTimeout(r, 400));
     }
+    
     return userPlaylistHistory;
   }
-
-  if(getMaxTracksFromPage(1, 1, false).length === 2) totalTracks--;
+  
+  const firstSinglePage = await getMaxTracksFromPage(1, 1, false);
+  if(firstSinglePage.length === 2) totalTracks--;
   console.log("Total Tracks: ", totalTracks);
   console.log("Logged Tracks: ", loggedTracks);
 

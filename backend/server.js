@@ -30,34 +30,28 @@ function runPython(scriptPath, inputData, commandPrompt) {
 
 
     py.stdout.on("data", data => {
-      stdout += data;
-    });
-
-    py.stdout.on("data", (data) => {
       console.log("PY:", data.toString());
+      stdout += data;
     });
 
     py.stderr.on("data", (data) => {
       console.error("PY ERR:", data.toString());
+      stderr += data;
     });
 
     py.stdin.setDefaultEncoding("utf8");
-
-    py.stderr.on("data", data => {
-      stderr += data;
-    });
 
     py.stdin.on("error", err => {
       reject(new Error(`stdin error: ${err.message}`));
     });
 
     py.on("error", (err) => {
-      console.error("FAILED TO SPAWN PYTHON:", err);
+       reject(new Error(`Failed to spawn python: ${err.message}`));
     });
 
     py.on("close", code => {
       if (code !== 0) {
-        return reject(new Error(`Python exited ${code}:\n${stderr}`));
+        reject(new Error(`Python exited ${code}:\n${stderr}`));
       }
 
       try {
@@ -82,7 +76,7 @@ function runPython(scriptPath, inputData, commandPrompt) {
   });
 }
 
-function runPythonJob(scriptPath, inputData, commandPrompt, jobId) {
+function runPythonJob(scriptPath, inputData, commandPrompt, jobId) { // runs python in background and gives jobID number to keep track of
   const py = spawn("python3", ["-u", scriptPath], {
     stdio: ["pipe", "pipe", "pipe"]
   });
@@ -108,7 +102,7 @@ function runPythonJob(scriptPath, inputData, commandPrompt, jobId) {
   py.stdin.end();
 }
 
-async function renderWorkflow(userData, promptData) {
+async function renderWorkflow(userData, promptData) { // could be removed and go direction to run python
   try {
     const prepData = await runPython("python/prep_data.py", userData, promptData);
     return prepData;
@@ -142,7 +136,6 @@ app.post("/download-json", async (req, res) => {
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     console.log("Finished preparing file for download");
-    // const response = await renderWorkflow(organizedDataJson)
 
     res.json(organizedDataJson);
   } catch (err) {
@@ -174,7 +167,7 @@ app.get("/status/:jobId", (req, res) => {
     process.cwd(),
     "python",
     "videos",
-    `${req.params.jobId}.done`
+    `${req.params.jobId}.done` // marker file to notify when it is done
   );
 
   res.json({
