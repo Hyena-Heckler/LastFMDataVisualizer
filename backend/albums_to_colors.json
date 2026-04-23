@@ -10670,5 +10670,61 @@
       0.9254901960784314,
       0.9686274509803922
     ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/daabecfffbd4ee405100c735c4b3cd2d.jpg",
+    "common_color": [
+      0.7215686274509804,
+      0.45098039215686275,
+      0.5803921568627451
+    ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/ae1706f7cf9c1a1bfe78ec4959f6ba85.jpg",
+    "common_color": [
+      0.7843137254901961,
+      0.796078431372549,
+      0.1803921568627451
+    ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/eab67ecf0719692ac253f7e203ae5de4.jpg",
+    "common_color": [
+      0.6549019607843137,
+      0.615686274509804,
+      0.6078431372549019
+    ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/ae6dec39a40ca58b550c2d5a763cba22.jpg",
+    "common_color": [
+      0.788235294117647,
+      0.7058823529411765,
+      0.8274509803921568
+    ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/bc76cb8c0823880a890f8d45b18b9e81.jpg",
+    "common_color": [
+      0.5411764705882353,
+      0.4666666666666667,
+      0.4392156862745098
+    ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/eb32a72112c54968c4bd3a57e6785325.gif",
+    "common_color": [
+      0.6901960784313725,
+      0.7803921568627451,
+      0.8431372549019608
+    ]
+  },
+  {
+    "image": "https://lastfm.freetls.fastly.net/i/u/34s/4ec53139a0dcd7d29c75a8300e2bae36.jpg",
+    "common_color": [
+      0.054901960784313725,
+      0.054901960784313725,
+      0.08627450980392157
+    ]
   }
 ]

@@ -35,7 +35,7 @@ async function loadUserData(lastfmUsername) {
 }
 
 
-export async function getAllTracksData(username, apiKey) { //gets all tracks data including when the first one was
+export async function getAllTracksData(username, apiKey) {
 
   let totalTracks = 0;
   try {
@@ -71,11 +71,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
     userJSON = JSON.parse(userData);
   }
 
-
-  // const error_pages = []; // when a page of plays throws an error, this allows it to return back to it
-
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
-    // gets all tracks from a page
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
     console.log(`page ${page}`);
     const response = await fetch(url, {
@@ -88,9 +84,8 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
 
     if (!data.recenttracks || !data.recenttracks.track || Math.random() < .2) {
       console.error("Unexpected response for page", page);
-      //console.error(data);
-      //error_pages.push(page)
-      return getMaxTracksFromPage(page, limit, filterCurrentlyPlaying);
+      console.error(data);
+      return getMaxTracksFromPage(page, limit, filterCurrentlyPlaying); // redoes the damaged page *ASSUMES error was due to too many requests
     }
     if (filterCurrentlyPlaying === true) {
       return data.recenttracks.track.filter(singleTrack => !singleTrack['@attr'] || !singleTrack['@attr'].nowplaying === true);
@@ -99,25 +94,17 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
     }
   }
 
-  async function getAllTracksBatch(totalTrackNumber, batchSize = 10) { // gets multiple pages of data in a batch
+  async function getAllTracksBatch(totalTrackNumber, batchSize = 5) { // gets multiple pages of data in a batch
     const totalPages = Math.ceil(totalTrackNumber / 1000);
 
     let userPlaylistHistory = [];
     for(let i = 1; i <= totalPages; i += batchSize) {
-      const batch = []; // allows pages to be done in batches so it is processed faster
+      const batch = []; // allows pages to be done in batches so it is processed faster, but not overwhelm lastfm api
       console.error("New Batch");
       for(let j = i; j < i + batchSize && j <= totalPages; j++) {
         const limit = j < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
         batch.push(getMaxTracksFromPage(j, limit));
       }
-      // console.error(error_pages);
-      // error_pages.forEach((page) => {
-      //   // 
-      //   const limit = page < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
-      //   batch.push(getMaxTracksFromPage(page, limit));
-      // })
-      
-      // error_pages.splice(0, error_pages.length);
 
       const results = await Promise.all(batch);
       userPlaylistHistory = userPlaylistHistory.concat(results.flat());
@@ -129,7 +116,7 @@ export async function getAllTracksData(username, apiKey) { //gets all tracks dat
   }
   
   const firstSinglePage = await getMaxTracksFromPage(1, 1, false);
-  if(firstSinglePage.length === 2) totalTracks--;
+  if(firstSinglePage.length === 2) totalTracks--; // if a song is currently playing, the array will be one greater than the actual size, this takes that in consideration
   console.log("Total Tracks: ", totalTracks);
   console.log("Logged Tracks: ", loggedTracks);
 

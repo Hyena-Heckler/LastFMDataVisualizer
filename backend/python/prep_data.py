@@ -36,9 +36,9 @@ def sort_week(data): #sorts the week based on the time that the week starts (ear
     data.sort(key=lambda n: n["weekStart"])
     return data
 
-def points_each_week(data): # gets the number of points for each song in each week
-    previous_week = {} # keeps track of the previous week
-    for week in data: # goes through every track in the data
+def points_each_week(data):
+    previous_week = {}
+    for week in data:
         # takes previous week's points and multiplies by a time factor
         time_factor = (1/2) ** (1/4) # in one month, a track loses half its points
         current_week = {

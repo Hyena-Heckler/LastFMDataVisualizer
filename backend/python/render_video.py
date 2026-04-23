@@ -213,24 +213,24 @@ def graph_data(data, video_output_path):
     ani.save(video_output_path, writer=writer)  # creates a video for song chart
     return str(video_output_path)
 
-    t3 = time.perf_counter()
+    # t3 = time.perf_counter()
     # print(f"Video render time: {t3 - t2:.2f}s")
     # Packing all the plots and displaying them
 
-    efficiency_output_path = BASE_DIR / "render_efficiency.json"
-    with open(efficiency_output_path, "r") as f:
-        data = json.load(f)
+    # efficiency_output_path = BASE_DIR / "render_efficiency.json"
+    # with open(efficiency_output_path, "r") as f:
+    #     data = json.load(f)
 
-    data.append({
-        "fps": f"{total_frames / (t3 - t2):.2f}",
-        "time": f"{t3 - t2:.2f}s",
-        "rendered_frames": total_frames,
-        "timestamp": datetime.now().isoformat()
+    # data.append({
+    #     "fps": f"{total_frames / (t3 - t2):.2f}",
+    #     "time": f"{t3 - t2:.2f}s",
+    #     "rendered_frames": total_frames,
+    #     "timestamp": datetime.now().isoformat()
 
-    })
+    # })
 
-    with open(efficiency_output_path, "w") as f:
-        json.dump(data, f, indent=2)
+    # with open(efficiency_output_path, "w") as f:
+    #     json.dump(data, f, indent=2)
 
     #plt.show()
 
