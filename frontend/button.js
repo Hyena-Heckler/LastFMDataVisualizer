@@ -1,6 +1,6 @@
 import {store} from "./store.js";
 
-let backend_server = "http://localhost:3000"
+let backend_server = "https://acquisition-timely-bufing-liquid.trycloudflare.com"
 
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);

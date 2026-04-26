@@ -7,49 +7,107 @@
     <link href="styles.css" rel="stylesheet"/>
   </head>
   <body>
-    <nav>
-    <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-    </ul>
-    </nav>
-    <form id="login-form" action="/submit-username" method="POST">
-      <label for="username-login">Username:</label>
-      <input type="text" id="username-login" name="username" placeholder="Enter username here">
-      <button type="submit">Submit</button>
-    </form>
-    <button id="update">Updated Information</button>
-    <button id="download-json">Download JSON</button>
-    <button id="download-video">Download Video</button>
-    <label id="communication">INFO</label>
-    <div id="song-card-profile">
-        <div class="card-example">
-          <div class="right-side">
+    <header class="introduction">
+      <h1 class="introduction__title">YourTop30</h1>
+      <p class="introduction__description">
+        Input your <a href="https://www.last.fm/home" target="_blank"><span class="introduction__highlight">lastfm</span></a> username and see your own personal charts and additional metrics. 
+        Want to visually see it? Your history can be graphed!
+      </p>
+    </header>
+
+    <div class="panel">
+      <form id="panel__form" action="/submit-username" method="POST">
+        <label class="panel__form-label" for="username-login">Username:</label>
+        <input class="panel__input" type="text" id="username-login" name="username" placeholder="Enter username here">
+        <button class="panel__button" id="submit-login" type="submit">Submit</button>
+      </form>
+      <button class="panel__button" id="update">Update Information</button>
+      <button class="panel__button" id="download-json">Download JSON</button>
+      <button class="panel__button" id="download-video">Download Video</button>
+      <select class="panel__dropdown" id="date__">
+        <option value="(April 10, 2026)">(April 10, 2026)</option>
+      </select>
+    </div>
+
+    <div class="chart">
+        <div class="chart__song">
+          <div class="chart__position">
             <h5>Streak</h5>
             <h2>POS</h2>
             <h5>LW+Symbol</h5>
           </div>
-          <div class="image">
-            <img src="https://lastfm.freetls.fastly.net/i/u/300x300/88b646daa5e6626399ccd002ba67e50d.jpg"/>
+          <div class="chart__icon">
+            <img src="https://lastfm.freetls.fastly.net/i/u/900x900/88b646daa5e6626399ccd002ba67e50d.jpg"/>
           </div>
-          <div class="main-identifier">
+          <div class="chart__identifier">
             <h3>Title</h3>
-            <h3>Artists</h3>
+            <div class="chart__identifier-extra">
+              <h4>Album</h4>
+              <h4>-</h4>
+              <h4>Artists</h4>
+            </div>
           </div>
-          <div class="top-row">
-            <h5>Album</h5>
+          <div class="chart__main">
             <h5>Points</h5>
             <h5>Week</h5>
             <h5>Peak</h5>
           </div>
-          <div class="bottom-row">
+          <div class="chart__extra">
             <h5>Year-End</h5>
             <h5>YE Points</h5>
             <h5>First Appearance</h5>
           </div>
         </div>
+
+        <div class="chart__song">
+          <div class="chart__position">
+            <h5>Streak: x1</h5>
+            <h2>#2</h2>
+            <h5>LW: #4 (⬆️2)</h5>
+          </div>
+          <div class="chart__icon">
+            <img src="https://lastfm.freetls.fastly.net/i/u/300x300/88b646daa5e6626399ccd002ba67e50d.jpg"/>
+          </div>
+          <div class="chart__identifier">
+            <h3>Enchanted</h3>
+            <div class="chart__identifier-extra">
+              <h4>Speak Now</h4>
+              <h4>-</h4>
+              <h4>Taylor Swift</h4>
+            </div>
+          </div>
+          <div class="chart__main">
+            <h5>23 Points</h5>
+            <h5>(3 Weeks)</h5>
+            <h5>Peak: #2</h5>
+          </div>
+          <div class="chart__extra">
+            <h5>YE: #59</h5>
+            <h5>YE Points: (51 Pts)</h5>
+            <h5>April 10th, 2026</h5>
+          </div>
+        </div>
     </div>
+
+    <section class="about">
+      <h3 class="about__title">A Little Bit More About This Site</h3>
+      <p class="about__description"> 
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+        Integer non nulla venenatis, volutpat dui in, congue metus. 
+        Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. 
+        Donec eleifend lobortis metus, vel hendrerit sem dictum sed. 
+        Fusce scelerisque augue sit amet vehicula posuere. 
+        Integer malesuada et arcu sed varius. 
+        Vivamus quis tincidunt enim. 
+        Quisque semper accumsan enim eu tincidunt. 
+        Maecenas feugiat vulputate magna convallis commodo. 
+        Fusce non nunc augue. 
+        In neque dui, volutpat quis hendrerit ac, fermentum in mauris. 
+        Donec at tortor rutrum magna scelerisque tincidunt. 
+        Integer ut ipsum semper, tempus est non, efficitur diam. 
+        Integer egestas dolor eu hendrerit porttitor.
+        Check out the <a href="https://github.com/Hyena-Heckler/LastFMDataVisualizer" target="_blank"><span>Github</span></a> and see the code for yourself!</p>
+    </section>
     <script type="module" src="main.js"></script>
   </body>
 </html>
