@@ -1,7 +1,7 @@
 import {store} from "./store.js";
 
 export function setupLogin() {
-  const loginForm = document.getElementById("login-form")
+  const loginForm = document.getElementById("panel__form")
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
