@@ -2,3 +2,8 @@
 *.mp4
 *.done
 *.DS_Store
+*.png
+song_points_by_position.json
+song_points.json
+song_positions.json
+Data.json

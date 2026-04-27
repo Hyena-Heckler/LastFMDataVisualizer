@@ -52,51 +52,58 @@ def access_display_sheet(playlist_history):
 
 # positions of all songs for all dates
 def get_song_position_data(playlist_history, include_none_dates, max_position_range=30, is_position=True):  # include_none_dates determines if None dates are included in position
-    attribute = 'points'
-    if is_position:
-        attribute = 'positions'
-    sheet = []  # stores the data
+    attribute = 'positions' if is_position else 'points'
+
+    sheet = {}  # stores the data
     logging.info("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):
-        for song in playlist['songs']:
-            song_key = song["name"] + "|" + ",".join(song["artists"]) + "|" + ",".join(song["album"])
-            if get_index(sheet, song_key) == -1:  # intializes song's history
-                sheet.append({
-                    "key": song_key,
+        logging.info(index/len(playlist_history))
+        for song_index, song in enumerate(playlist['songs']):
+            song_key = (song["name"], tuple(song["artists"]), tuple(song["album"]))
+            if song_key not in sheet:  # intializes song's history
+                sheet[song_key] = {
                     "name": song['name'],
                     "artists": song['artists'],
                     "image": song['image'],
                     "positions": [],
                     "points": []
-                })
-                if include_none_dates:
-                    for i in range(
-                            index - 1):  # adds a None value for position for every date prior to the playlist date that didn't exist
-                        sheet[get_index(sheet, song_key)][attribute].append(None)
+                }
 
-            song_index = get_index(sheet, song_key)
             if is_position:
-                sheet[song_index][attribute].append(
-                    playlist['songs'].index(song) + 1)  # adds the position of playlist to the position key, shifted by 1 as 0th place is 1st
+                sheet[song_key][attribute].append(
+                    (index - 1, song_index + 1))  # adds the position of playlist to the position key, shifted by 1 as 0th place is 1st
             else:
-                sheet[song_index][attribute].append(
-                    song['points'])
-        if include_none_dates: 
-            for track in sheet: 
-                if len(track[
-                           attribute]) != index:  # if the length does not match index (has one less position), then it adds a None value to position
-                    track[attribute].append(None)
+                sheet[song_key][attribute].append(
+                    (index - 1, song['points']))
+    
+    logging.info("Midway Process 1")
 
     if is_position:
-        sheet = [
-            track for track in sheet
-            if min(pos for pos in track[attribute] if pos is not None) <= max_position_range # helps decrease amount of data stored
-        ]
+        sheet = {
+            key: track for key, track in sheet.items()
+            if any(value <= max_position_range for _, value in track[attribute])
+        }
+
+    total_playlists = len(playlist_history)
+
+    for track in sheet.values():
+        arr = [None] * total_playlists
+
+        for playlist_idx, value in track[attribute]:
+            arr[playlist_idx] = value
+
+        track[attribute] = arr
+    
+    logging.info("Midway Process 2")
+
+    sheet = list(sheet.values())
+
     final_sheet = [[None]] #final sheet returned
     for playlist in playlist_history: #adds the playlist date as a row in data
         final_sheet[0].append(format_date(playlist['date']))
-    for track in sheet: # formats the name of the title in the chart and adds the track image for future purposes
+    for index, track in enumerate(sheet): # formats the name of the title in the chart and adds the track image for future purposes
         # logging.info(track['name'])
+        logging.info(index/len(sheet))
         track_color = get_color(track['image'])
         column = [{
             "name": track['name'],

@@ -7,10 +7,12 @@ from datetime import datetime
 from pathlib import Path
 import time
 import json
+import numpy as np
 import sys
 import os
 import unicodedata
 import logging
+from matplotlib.collections import LineCollection
 
 os.environ["PYTHONUNBUFFERED"] = "1"
 logging.basicConfig(
@@ -135,11 +137,15 @@ def graph_data(data, video_output_path):
     days = build_days(days, intro_outro_length)
 
     text_labels = {}
-
+    segments = []
+    colors = []
     for song_id, song in enumerate(data[1:]):
         # lines
         ranks = create_smooth_lines(song, intro_outro_length)
-        plot_data.plot(days, ranks, lw=3, color = song[0]["color"])  # creates the lines in graph
+        points = np.column_stack([days, ranks])  # (x, y)
+        segments.append(points)
+        
+        colors.append(song[0]["color"])
 
         # points
         point_days, point_ranks  = create_points(song, intro_outro_length)
@@ -147,8 +153,27 @@ def graph_data(data, video_output_path):
 
         # annotations
         create_text(text_labels, plot_data, graph_color, song, song_id)
+    lc = LineCollection(
+        segments,
+        colors=colors,
+        linewidths=3
+    )
 
+    plot_data.add_collection(lc)
+    
+    active_songs = [[] for _ in range(len(data[0][1:]))]
+    for song_id, song in enumerate(data[1:]):
+        first = None
+        last = None
 
+        for i, v in enumerate(song[1:]):
+            if v is not None:
+                if first is None:
+                    first = i
+                last = i
+
+        for valid in range(first, last+1):
+            active_songs[valid].append(song_id)
 
     total_frames = speed_per_date * (len(days) - 1) - intro_outro_length + 1
     def animate(frame):
@@ -168,8 +193,10 @@ def graph_data(data, video_output_path):
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
-        for song_id, song in enumerate(data[1:]):  # goes through every song in data for labels
+        for song_id in active_songs[min(last_graph_date_value, len(data[0][1:]) - 1)]:  # goes through every song in data for labels
             song_label = text_labels[song_id]
+            song = data[song_id+1]
+
             # checks to see if the current date (previous_value) is in the initial date or before
             if next_value <= 0:  # checks to see if it has not started yet
                 if song[1] is not None and song[1] <= 15:  # if the intro song's position is on the charts, plot  it
@@ -205,32 +232,36 @@ def graph_data(data, video_output_path):
     t2 = time.perf_counter()
     metadata = dict(Title='Color Chart', artist='harshshetty')  # data for the file
     writer = FFMpegWriter(
-        fps=speed_per_date/2,
-        metadata=metadata
-    )  # creates the file
+        fps=int(speed_per_date / 2),
+        metadata=metadata,
+        extra_args=[
+            "-vcodec", "libx264",
+            "-preset", "ultrafast",
+            "-crf", "28",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart"
+        ]
+    )
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     ani.save(video_output_path, writer=writer)  # creates a video for song chart
+    
+
+    t3 = time.perf_counter()
+    BASE_DIR = Path(__file__).resolve().parent
+    efficiency_output_path = BASE_DIR / "render_efficiency.json"
+    with open(efficiency_output_path, "r") as f:
+        data = json.load(f)
+
+    data.append({
+        "fps": f"{total_frames / (t3 - t2):.2f}",
+        "time": f"{t3 - t2:.2f}s",
+        "rendered_frames": total_frames,
+        "timestamp": datetime.now().isoformat()
+
+    })
+
+    with open(efficiency_output_path, "w") as f:
+        json.dump(data, f, indent=2)
     return str(video_output_path)
-
-    # t3 = time.perf_counter()
-    # print(f"Video render time: {t3 - t2:.2f}s")
-    # Packing all the plots and displaying them
-
-    # efficiency_output_path = BASE_DIR / "render_efficiency.json"
-    # with open(efficiency_output_path, "r") as f:
-    #     data = json.load(f)
-
-    # data.append({
-    #     "fps": f"{total_frames / (t3 - t2):.2f}",
-    #     "time": f"{t3 - t2:.2f}s",
-    #     "rendered_frames": total_frames,
-    #     "timestamp": datetime.now().isoformat()
-
-    # })
-
-    # with open(efficiency_output_path, "w") as f:
-    #     json.dump(data, f, indent=2)
-
     #plt.show()
 
