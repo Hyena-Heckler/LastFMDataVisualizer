@@ -249,5 +249,41 @@
     "time": "209.42s",
     "rendered_frames": 2985,
     "timestamp": "2026-04-11T18:56:22.195995"
+  },
+  {
+    "fps": "11.66",
+    "time": "270.18s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-26T21:31:30.640572"
+  },
+  {
+    "fps": "12.90",
+    "time": "244.25s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-26T21:40:16.158108"
+  },
+  {
+    "fps": "13.42",
+    "time": "234.74s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-26T21:49:12.240967"
+  },
+  {
+    "fps": "13.32",
+    "time": "236.50s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-26T21:54:52.021119"
+  },
+  {
+    "fps": "18.32",
+    "time": "171.90s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-26T22:15:58.884500"
+  },
+  {
+    "fps": "25.37",
+    "time": "124.14s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-26T22:22:22.471727"
   }
 ]

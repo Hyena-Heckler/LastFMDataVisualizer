@@ -14,24 +14,117 @@ export const db = mysql.createPool({
   queueLimit: 0
 });
 
-async function saveUserData(lastfmUsername, data) {
-  await db.execute(
-    `
-    INSERT INTO users (lastfm_username, data)
-    VALUES (?, ?)
-    ON DUPLICATE KEY UPDATE data = VALUES(data)
-    `,
-    [lastfmUsername, JSON.stringify(data)]
-  );
+async function getUser(lastfmUsername) {
+  const [result] = await db.execute(`
+    INSERT INTO users (username)
+    VALUES (?)
+    ON DUPLICATE KEY UPDATE user_id = LAST_INSERT_ID(user_id)
+  `, [lastfmUsername]);
+  return result.insertId;
 }
 
-async function loadUserData(lastfmUsername) {
+async function saveUserData(lastfmUsername, data) {
+  try {
+    const user_id = await getUser(lastfmUsername);
+    for (let scrobble_index = 0; scrobble_index < data.length;  scrobble_index++) {
+      const scrobble = data[scrobble_index];
+      const [artist] = await db.execute(`
+        INSERT INTO artists (name, mbid)
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE artist_id = LAST_INSERT_ID(artist_id)
+      `, [scrobble.artist['#text'], scrobble.artist['mbid'] || null]);
+
+      const [album] = await db.execute(`
+        INSERT INTO albums (name, mbid, artist_id, image_url)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE album_id = LAST_INSERT_ID(album_id)
+      `, [scrobble.album['#text'], scrobble.album['mbid'] || null, artist.insertId, scrobble?.image[0]?.['#text'] || null]);
+
+      const [song] = await db.execute(`
+        INSERT INTO songs (name, mbid, url, artist_id, album_id)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE song_id = LAST_INSERT_ID(song_id)
+      `, [scrobble.name, scrobble.mbid || null, scrobble.url, artist.insertId, album.insertId]);
+      
+      await db.execute(`
+        INSERT INTO scrobbles (user_id, song_id, played_at)
+        VALUES (?, ?, ?)
+      `, [user_id, song.insertId, new Date(scrobble.date['uts'] * 1000)]);
+    }
+  } catch (err) {
+    console.error("saveUserData crashed:", err);
+  }
+}
+
+async function loadUser(lastfmUsername) {
   const [rows] = await db.execute(
-    `SELECT data FROM users WHERE lastfm_username = ?`,
+    `SELECT user_id FROM users WHERE username = ?`,
     [lastfmUsername]
   );
 
-  return rows[0]?.data || null;
+  return rows[0]?.user_id || null;
+}
+
+async function formatScrobbleData(scrobbleData) {
+  return scrobbleData.map(row => ({
+    artist: {
+      mbid: row.artist_mbid,
+      '#text': row.artist_name
+    },
+
+    image: [
+      { '#text': row.image_url, size: 'small' },
+      { '#text': row.image_url, size: 'medium' },
+      { '#text': row.image_url, size: 'large' }
+    ],
+
+    mbid: row.song_mbid,
+
+    album: {
+      mbid: row.album_mbid,
+      '#text': row.album_name
+    },
+
+    name: row.song_name,
+    url: row.song_url,
+
+    date: {
+      uts: Math.floor(new Date(row.played_at).getTime() / 1000).toString(),
+      '#text': new Date(row.played_at).toLocaleString()
+    }
+  }));
+}
+
+async function loadUserData(lastfmUsername) {
+  try {
+    const user_id = await loadUser(lastfmUsername);
+    if(!user_id) {
+      return null
+    }
+    console.log(user_id)
+    const [rows] = await db.execute(`
+      SELECT 
+        s.played_at,
+        so.name AS song_name,
+        so.mbid AS song_mbid,
+        so.url AS song_url,
+        ar.name AS artist_name,
+        ar.mbid AS artist_mbid,
+        al.name AS album_name,
+        al.mbid AS album_mbid,
+        al.image_url
+      FROM scrobbles s
+      JOIN songs so ON s.song_id = so.song_id
+      JOIN artists ar ON so.artist_id = ar.artist_id
+      JOIN albums al ON so.album_id = al.album_id
+      WHERE s.user_id = ?
+      ORDER BY s.played_at DESC
+    `, [user_id]);
+    console.log("formatting left")
+    return formatScrobbleData(rows);
+  } catch (err) {
+    console.error("loadUserData crashed:", err);
+  }
 }
 
 
@@ -67,8 +160,8 @@ export async function getAllTracksData(username, apiKey) {
   let loggedTracks = 0;
   let userJSON = [];
   if (userData) {
-    loggedTracks = JSON.parse(userData).length;
-    userJSON = JSON.parse(userData);
+    loggedTracks = userData.length;
+    userJSON = userData;
   }
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
@@ -82,7 +175,7 @@ export async function getAllTracksData(username, apiKey) {
 
     const data = await response.json();
 
-    if (!data.recenttracks || !data.recenttracks.track || Math.random() < .2) {
+    if (!data.recenttracks || !data.recenttracks.track) {
       console.error("Unexpected response for page", page);
       console.error(data);
       return getMaxTracksFromPage(page, limit, filterCurrentlyPlaying); // redoes the damaged page *ASSUMES error was due to too many requests
@@ -125,14 +218,14 @@ export async function getAllTracksData(username, apiKey) {
   console.log("Logged Data Type: ", typeof userJSON);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
-  await saveUserData(username, data);
+  await saveUserData(username, newData);
   return data;
 }
 
 export async function getStoredData(username) {
   const userData = await loadUserData(username);
   if (userData) {
-    return JSON.parse(userData);
+    return userData;
   } else {
     return null;
   }

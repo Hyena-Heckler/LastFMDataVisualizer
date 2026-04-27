@@ -188,6 +188,13 @@ app.get("/download-video/:jobId", (req, res) => {
   }
 
   res.download(videoPath);
+
+  res.on("close", () => {
+    fs.unlink(videoPath, (err) => {
+      if (err) console.error("Delete error:", err);
+      else console.log("File deleted:", videoPath);
+    });
+  });
 });
 
 
