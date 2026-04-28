@@ -1,8 +1,8 @@
 import json
 import sys
-from song_positions import get_song_position_data
-from data_points import add_extra_info
-from render_video import graph_data
+from services.song_positions import get_song_position_data
+from services.data_points import add_extra_info
+from services.render_video import graph_data
 import datetime
 import logging
 import traceback
@@ -100,13 +100,13 @@ def main(history):
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
 
-        with open('song_points.json', 'w') as f:
+        with open('cache/song_points.json', 'w') as f:
             json.dump(formatted_history, f, indent=2)
 
-        with open('song_positions.json', 'w') as f:
+        with open('cache/song_positions.json', 'w') as f:
             json.dump(song_position_data, f, indent=2)
 
-        with open('song_points_by_positions.json', 'w') as f:
+        with open('cache/song_points_by_positions.json', 'w') as f:
             json.dump(song_points_by_position_data, f, indent=2)
 
         add_extra_info(song_points_by_position_data, song_position_data)
@@ -130,13 +130,13 @@ def prepare_cached_data(history):
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
 
-        with open('song_points.json', 'w') as f:
+        with open('backend-python/app/cache/song_points.json', 'w') as f:
             json.dump(formatted_history, f, indent=2)
 
-        with open('song_positions.json', 'w') as f:
+        with open('backend-python/app/cache/song_positions.json', 'w') as f:
             json.dump(song_position_data, f, indent=2)
 
-        with open('song_points_by_positions.json', 'w') as f:
+        with open('backend-python/app/cache/song_points_by_positions.json', 'w') as f:
             json.dump(song_points_by_position_data, f, indent=2)
             
         def combine_poi_and_pos(in1, in2):
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     if command == "get_video":
         output_path = os.path.join("python", "videos", f"{job_id}.mp4")
         get_video(payload, output_path)
-        done_flag = f"python/videos/{job_id}.done"
+        done_flag = f"backend-python/app/assets/videos/{job_id}.done"
         with open(done_flag, "w") as f:
             f.write("done")
         print(f"Saved to {output_path}", file=sys.stderr)

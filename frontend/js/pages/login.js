@@ -1,4 +1,4 @@
-import {store} from "./store.js";
+import {store} from "../store.js";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")

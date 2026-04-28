@@ -15,3 +15,83 @@ npm start
 To run frontend
 cd./frontend
 npx live-server
+
+
+
+
+Structure:
+backend-python/
+│
+├── api/
+│
+├── services/
+│   ├── accent_color_of_image.py
+│   ├── data_points.py
+│   ├── render_video.py
+│   ├── song_positions.py
+│
+├── scripts/
+│   ├── prep_data.py
+│
+├── data/
+│   ├── cache/
+│       ├── Data.json
+│       ├── render_efficiency.json
+│       ├── song_points.json
+│       ├── song_points_by_positions.json
+│       ├── song_positions.json
+│
+├── assets/
+│   ├── fonts/
+│   ├── frames/
+│   ├── videos/
+│
+├── main.py
+
+backend-nodejs/
+│
+├── node_modules/
+├── .env
+├── package.json
+├── package-lock.json
+│
+├── server.js              → ALL API routes live here (for now)
+│
+├── services/             → business logic
+│   ├── tracks.service.js
+│   ├── tracks.transform.js
+│   ├── week.js
+│
+├── db/                   → MySQL layer (important)
+│
+├── cache/                → JSON runtime data
+│
+├── data/                 → static JSON (like mappings)
+│
+├── integrations/
+│   └── python/          → Node ↔ Python bridge
+
+frontend/
+│
+├── index.html
+├── styles/
+│   ├── main.css
+│
+├── js/
+│   ├── main.js              → entry point
+│   ├── store.js             → global state
+│
+│   ├── components/
+│   │   ├── button.js
+│   │   ├── card-adder.js
+│
+│   ├── pages/
+│   │   ├── login.js
+│   │   ├── dashboard.js     (optional but useful)
+│
+│   ├── services/
+│   │   ├── api.js           → calls backend-node
+│
+│   ├── utils/
+│       ├── dom.js
+│       ├── format.js

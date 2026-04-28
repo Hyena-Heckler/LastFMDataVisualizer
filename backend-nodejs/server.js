@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { getAllTracksData, getStoredData} from "./tracks.service.js";
-import { transformTracks } from "./tracks.transform.js";
+import { getAllTracksData, getStoredData} from "./services/tracks.service.js";
+import { transformTracks } from "./services/racks.transform.js";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -104,7 +104,7 @@ function runPythonJob(scriptPath, inputData, commandPrompt, jobId) { // runs pyt
 
 async function renderWorkflow(userData, promptData) { // could be removed and go direction to run python
   try {
-    const prepData = await runPython("python/prep_data.py", userData, promptData);
+    const prepData = await runPython("../backend-python/scripts/prep_data.py", userData, promptData);
     return prepData;
   } catch (err) {
     console.error("Workflow error:", err);
@@ -153,7 +153,7 @@ app.post("/start-video", async (req, res) => {
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const workingData = await renderWorkflow(organizedDataJson, "prepare_cached_data");
-    runPythonJob("python/prep_data.py", workingData, "get_video", jobId);
+    runPythonJob("../backend-python/scripts/prep_data.py", workingData, "get_video", jobId);
     console.log("Start rendering");
     res.json({jobId})
   } catch (err) {
@@ -188,13 +188,6 @@ app.get("/download-video/:jobId", (req, res) => {
   }
 
   res.download(videoPath);
-
-  res.on("close", () => {
-    fs.unlink(videoPath, (err) => {
-      if (err) console.error("Delete error:", err);
-      else console.log("File deleted:", videoPath);
-    });
-  });
 });
 
 
