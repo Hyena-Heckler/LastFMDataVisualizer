@@ -2,7 +2,7 @@ import json
 import datetime
 import re
 import sys
-from accent_color_of_image import *
+from app.services.accent_color_of_image import *
 import logging
 
 logging.basicConfig(

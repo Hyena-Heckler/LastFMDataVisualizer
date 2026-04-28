@@ -1,8 +1,8 @@
 import json
 import sys
-from services.song_positions import get_song_position_data
-from services.data_points import add_extra_info
-from services.render_video import graph_data
+from app.services.song_positions import get_song_position_data
+from app.services.data_points import add_extra_info
+from app.services.render_video import graph_data
 import datetime
 import logging
 import traceback
@@ -85,37 +85,6 @@ def format_node_to_python(data):
     ]
     return transformed
 
-
-def main(history):
-    try:
-        logging.info("Started Ordering Data Analysis")
-        ordered_history = sort_week(history)
-        logging.info("Started Ranking Data Analysis")
-        ranked_history = points_each_week(ordered_history)
-        logging.info("Started Filtering Data Analysis")
-        filtered_history = filter_songs_in_week(ranked_history, filter_size = 30)
-        logging.info("Started Formatting Data Analysis")
-        formatted_history = format_node_to_python(filtered_history)
-        logging.info("Started Python Data Analysis")
-        song_position_data = get_song_position_data(formatted_history, True)
-        song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
-
-        with open('cache/song_points.json', 'w') as f:
-            json.dump(formatted_history, f, indent=2)
-
-        with open('cache/song_positions.json', 'w') as f:
-            json.dump(song_position_data, f, indent=2)
-
-        with open('cache/song_points_by_positions.json', 'w') as f:
-            json.dump(song_points_by_position_data, f, indent=2)
-
-        add_extra_info(song_points_by_position_data, song_position_data)
-        graph_data(song_position_data)
-
-    except Exception as e:
-        traceback.print_exc(file=sys.stderr)
-        sys.exit(1)
-
 def prepare_cached_data(history):
     try:
         logging.info("Started Ordering Data Analysis")
@@ -130,13 +99,13 @@ def prepare_cached_data(history):
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
 
-        with open('backend-python/app/cache/song_points.json', 'w') as f:
+        with open('app/data/cache/song_points.json', 'w') as f:
             json.dump(formatted_history, f, indent=2)
 
-        with open('backend-python/app/cache/song_positions.json', 'w') as f:
+        with open('app/data/cache/song_positions.json', 'w') as f:
             json.dump(song_position_data, f, indent=2)
 
-        with open('backend-python/app/cache/song_points_by_positions.json', 'w') as f:
+        with open('app/data/cache/song_points_by_positions.json', 'w') as f:
             json.dump(song_points_by_position_data, f, indent=2)
             
         def combine_poi_and_pos(in1, in2):
@@ -149,10 +118,7 @@ def prepare_cached_data(history):
             ]
         cached_song_data = [song_position_data[0]] + [combine_poi_and_pos(pos_data, poi_data) for pos_data, poi_data in zip(song_position_data[1:], song_points_by_position_data[1:]) ]
 
-
-        print(json.dumps(
-            cached_song_data
-        ))
+        return cached_song_data
 
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
@@ -183,19 +149,14 @@ def get_video(cached_song_data, path):
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
-if __name__ == "__main__":
-    request = json.loads(sys.stdin.buffer.read().decode("utf-8"))
-    job_id = request.get("jobId")
-    command = request.get("command")
-    payload = request.get("payload")
-    
+def prep_data(command, payload, job_id = None):
     if command == "prepare_cached_data":
         prepare_cached_data(payload)
 
     if command == "get_video":
-        output_path = os.path.join("python", "videos", f"{job_id}.mp4")
-        get_video(payload, output_path)
-        done_flag = f"backend-python/app/assets/videos/{job_id}.done"
+        output_path = os.path.join("app", "assets", "videos", f"{job_id}.mp4")
+        get_video(prepare_cached_data(payload), output_path)
+        done_flag = f"app/assets/videos/{job_id}.done"
         with open(done_flag, "w") as f:
             f.write("done")
         print(f"Saved to {output_path}", file=sys.stderr)

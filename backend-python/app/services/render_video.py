@@ -29,8 +29,8 @@ def clean_text(s):
 
 def setup_font(background_color):
     # changes the font
-    BASE_DIR = os.path.dirname(__file__)
-    font_path = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Bold.ttf")
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    font_path = os.path.join(BASE_DIR, "assets", "fonts", "NotoSansJP-Bold.ttf")
     font_manager.fontManager.addfont(font_path)
     prop = font_manager.FontProperties(fname=font_path)
     plt.rcParams['font.family'] = 'fantasy'  # or sans-serif or monospace
@@ -247,8 +247,8 @@ def graph_data(data, video_output_path):
     
 
     t3 = time.perf_counter()
-    BASE_DIR = Path(__file__).resolve().parent
-    efficiency_output_path = BASE_DIR / "render_efficiency.json"
+    BASE_DIR = Path(__file__).resolve().parents[1]
+    efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
     with open(efficiency_output_path, "r") as f:
         data = json.load(f)
 

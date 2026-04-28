@@ -78,13 +78,13 @@ export function setupButtons() {
       while (!ready) {
         const statusRes = await fetch(`${backend_server}/status/${jobId}`);
         const statusData = await statusRes.json();
-
+        console.log(statusData)
         ready = statusData.ready;
 
         console.log("Checking status...", ready);
 
         if (!ready) {
-          await new Promise(r => setTimeout(r, 5000)); // wait 2s
+          await new Promise(r => setTimeout(r, 5000)); // wait 5s
         }
       }
       

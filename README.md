@@ -7,10 +7,11 @@ Run cloudflared tunnel --url http://localhost:3000 --protocol http2
 Replace backend_server with the given tunnel link
 
 
-To run backend
-cd ./backend
-npm start
+To run python backend
+python -m uvicorn main:app --reload --port 8000
 
+To run javascript backend
+npm start
 
 To run frontend
 cd./frontend
