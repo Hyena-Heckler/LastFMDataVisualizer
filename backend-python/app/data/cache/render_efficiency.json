@@ -345,5 +345,29 @@
     "time": "178.67s",
     "rendered_frames": 3150,
     "timestamp": "2026-04-28T10:15:33.118666"
+  },
+  {
+    "fps": "16.96",
+    "time": "185.71s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-28T17:56:39.607366"
+  },
+  {
+    "fps": "18.22",
+    "time": "172.91s",
+    "rendered_frames": 3150,
+    "timestamp": "2026-04-28T18:10:58.547499"
+  },
+  {
+    "fps": "35.02",
+    "time": "20.99s",
+    "rendered_frames": 735,
+    "timestamp": "2026-04-28T18:17:32.597370"
+  },
+  {
+    "fps": "35.07",
+    "time": "20.96s",
+    "rendered_frames": 735,
+    "timestamp": "2026-04-28T18:18:23.241626"
   }
 ]

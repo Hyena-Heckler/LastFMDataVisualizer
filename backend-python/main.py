@@ -5,7 +5,7 @@ from app.scripts.prep_data import prep_data
 from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parents[1]
-VIDEO_DIR = BASE_DIR / "backend-python" / "app" / "assets" / "videos"
+VIDEO_DIR = BASE_DIR / "backend-python" / "temp" / "videos"
 
 app = FastAPI()
 

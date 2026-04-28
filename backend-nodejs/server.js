@@ -94,18 +94,46 @@ app.get("/download-video/:jobId", async (req, res) => {
     process.cwd(),
     "..",
     "backend-python",
-    "app",
-    "assets",
+    "temp",
     "videos",
     `${req.params.jobId}.mp4`
   );
-  console.log(videoPath)
+  const videoDonePath = path.join(
+    process.cwd(),
+    "..",
+    "backend-python",
+    "temp",
+    "videos",
+    `${req.params.jobId}.done`
+  );
 
   if (!fs.existsSync(videoPath)) {
     return res.status(404).json({ error: "Video not ready" });
   }
 
-  res.download(videoPath);
+
+  res.download(videoPath, (err) => {
+    if (err) {
+      console.error("Download error:", err);
+      return;
+    }
+
+    // ✅ Delete AFTER successful send
+    fs.unlink(videoPath, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error("Error deleting file:", unlinkErr);
+      } else {
+        console.log("File deleted:", videoPath);
+      }
+    });
+    fs.unlink(videoDonePath, (unlinkErr) => {
+      if (unlinkErr) {
+        console.error("Error deleting file:", unlinkErr);
+      } else {
+        console.log("File deleted:", videoDonePath);
+      }
+    });
+  });
 });
 
 
