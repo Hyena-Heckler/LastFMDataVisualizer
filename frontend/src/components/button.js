@@ -1,6 +1,7 @@
 import {store} from "../store.js";
 
-let backend_server = "http://localhost:3000"
+
+let backend_server =  import.meta.env.VITE_API_URL
 
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);
@@ -40,7 +41,6 @@ export function setupButtons() {
       alert("Please log in first");
       return;
     }
-
     const res = await fetch(`${backend_server}/update`, {
       method: "POST",
       headers: {
@@ -78,7 +78,6 @@ export function setupButtons() {
       while (!ready) {
         const statusRes = await fetch(`${backend_server}/status/${jobId}`);
         const statusData = await statusRes.json();
-        console.log(statusData)
         ready = statusData.ready;
 
         console.log("Checking status...", ready);

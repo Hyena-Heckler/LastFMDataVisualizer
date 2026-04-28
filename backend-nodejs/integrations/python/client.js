@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const PYTHON_URL = "http://localhost:8000"
+const PYTHON_URL = process.env.PYTHON_API_URL
 
 // Prep Data
 export const prepareCached = async (payload) => {

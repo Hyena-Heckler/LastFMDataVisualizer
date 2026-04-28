@@ -10,12 +10,21 @@ import fs from "fs";
 
 dotenv.config();
 const app = express();
+app.use(cors({
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+// handle preflight requests
+app.use(cors());
+app.options(/.*/, cors());
+
+
 app.use(express.json());
 app.use("/videos", express.static(path.join(process.cwd(), "../backend-python/assets/videos")));
-app.use(cors({
-  origin: "http://127.0.0.1:8080"
-}));
-const PORT = 3000;
+
+const PORT = process.env.PORT;
 
 
 app.post("/update", async (req, res) => {

@@ -8,14 +8,14 @@ Replace backend_server with the given tunnel link
 
 
 To run python backend
-python -m uvicorn main:app --reload --port 8000
+$env:PORT=8000
+python -m uvicorn main:app --reload --port $env:PORT
 
 To run javascript backend
 npm start
 
 To run frontend
-cd./frontend
-npx live-server
+npm run dev
 
 
 
