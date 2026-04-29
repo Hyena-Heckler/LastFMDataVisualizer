@@ -41,6 +41,9 @@ export function setupButtons() {
       alert("Please log in first");
       return;
     }
+
+    // Step 1: Start the updating process
+    document.getElementById("update").disabled = true;
     const res = await fetch(`${backend_server}/update`, {
       method: "POST",
       headers: {
@@ -49,7 +52,25 @@ export function setupButtons() {
       body: JSON.stringify({user: store.user})
     });
 
-    const data = await res.json(); // will follow the same logic in download-video
+    const { jobId } = await res.json(); // Updating takes a long time sometimes, so there is an issue of it timing out. This allows it to run in the background.
+    console.log("Job started:", jobId);
+
+    // Step 2: Check to see if updating process is done
+    let ready = false;
+
+    while (!ready) {
+      const statusRes = await fetch(`${backend_server}/update-status/${jobId}`);
+      const statusData = await statusRes.json();
+      ready = statusData.ready;
+      let progress = statusData.progress;
+
+      console.log("Checking status...", ready, " and it's at", progress, "% done");
+
+      if (!ready) {
+        await new Promise(r => setTimeout(r, 5000)); // wait 5s
+      }
+    }
+    document.getElementById("update").disabled = false;
     console.log("Successful update for:", store.user);
   });
 
@@ -60,6 +81,7 @@ export function setupButtons() {
     }
 
     try{
+      document.getElementById("download-video").disabled = true;
       // Step 1: Creates a job ID to track the progress of video rendering
       const startRes = await fetch(`${backend_server}/start-video`, {
         method: "POST",
@@ -76,7 +98,7 @@ export function setupButtons() {
       let ready = false;
 
       while (!ready) {
-        const statusRes = await fetch(`${backend_server}/status/${jobId}`);
+        const statusRes = await fetch(`${backend_server}/video-status/${jobId}`);
         const statusData = await statusRes.json();
         ready = statusData.ready;
 
@@ -96,6 +118,7 @@ export function setupButtons() {
       a.href = url;
       a.download = "video.mp4";
       a.click();
+      document.getElementById("download-video").disabled = false;
       console.log("Successful download video for:", store.user);
     } catch (err) {
       console.error("Download failed:", err);

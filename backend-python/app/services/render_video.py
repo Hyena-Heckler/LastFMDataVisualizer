@@ -13,8 +13,12 @@ import os
 import unicodedata
 import logging
 from matplotlib.collections import LineCollection
+from dotenv import load_dotenv
 
+load_dotenv()  # this reads your .env file
 os.environ["PYTHONUNBUFFERED"] = "1"
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+
 logging.basicConfig(
     level=logging.INFO,
     stream=sys.stderr,
@@ -247,21 +251,23 @@ def graph_data(data, video_output_path):
     
 
     t3 = time.perf_counter()
-    BASE_DIR = Path(__file__).resolve().parents[1]
-    efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
-    with open(efficiency_output_path, "r") as f:
-        data = json.load(f)
 
-    data.append({
-        "fps": f"{total_frames / (t3 - t2):.2f}",
-        "time": f"{t3 - t2:.2f}s",
-        "rendered_frames": total_frames,
-        "timestamp": datetime.now().isoformat()
+    if ENVIRONMENT == "development":
+        BASE_DIR = Path(__file__).resolve().parents[1]
+        efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
+        with open(efficiency_output_path, "r") as f:
+            efficency_data = json.load(f)
 
-    })
+        efficency_data.append({
+            "fps": f"{total_frames / (t3 - t2):.2f}",
+            "time": f"{t3 - t2:.2f}s",
+            "rendered_frames": total_frames,
+            "timestamp": datetime.now().isoformat()
 
-    with open(efficiency_output_path, "w") as f:
-        json.dump(data, f, indent=2)
+        })
+
+        with open(efficiency_output_path, "w") as f:
+            json.dump(efficency_data, f, indent=2)
     return str(video_output_path)
-    #plt.show()
+        #plt.show()
 

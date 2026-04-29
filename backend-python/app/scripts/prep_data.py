@@ -3,10 +3,14 @@ import sys
 from app.services.song_positions import get_song_position_data
 from app.services.data_points import add_extra_info
 from app.services.render_video import graph_data
+from app.services.accent_color_of_image import *
 import datetime
 import logging
 import traceback
 import os
+import asyncio
+
+semaphore = asyncio.Semaphore(30)
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -65,6 +69,7 @@ def filter_songs_in_week(data, filter_size = 30):
     return data
 
 def format_node_to_python(data):
+    print(data[0]["tracks"][0])
     transformed = [
         {
             "date": unix_to_date(obj["weekStart"]),
@@ -76,7 +81,8 @@ def format_node_to_python(data):
                     ],
                     "image": track["image"],
                     "album": track["album"],
-                    "points": track["points"]
+                    "points": track["points"],
+                    "color": [track["color_r"], track["color_g"], track["color_b"]]
                 }
                 for track in obj["tracks"]
             ]
@@ -87,6 +93,7 @@ def format_node_to_python(data):
 
 def prepare_cached_data(history):
     try:
+        print(history[0]['tracks'][0])
         logging.info("Started Ordering Data Analysis")
         ordered_history = sort_week(history.copy())
         logging.info("Started Ranking Data Analysis")
@@ -161,4 +168,16 @@ def prep_data(command, payload, job_id = None):
             f.write("done")
         print(f"Saved to {output_path}", file=sys.stderr)
 
-    
+async def return_color_from_urls(payload):
+    print(f"[color] start batch size={len(payload)}")
+    async def handle(row):
+        async with semaphore:
+            color = await get_color(row["image_url"])
+            return {
+                "album_id": row["album_id"],
+                "color": color
+            }
+
+    tasks = [handle(r) for r in payload]
+    print("[color] batch complete")
+    return await asyncio.gather(*tasks)

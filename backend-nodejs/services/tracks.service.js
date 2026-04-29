@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import mysql from "mysql2/promise";
+import { getAlbumColor } from "../integrations/python/client.js"
 
 dotenv.config();
 
@@ -23,36 +24,164 @@ async function getUser(lastfmUsername) {
   return result.insertId;
 }
 
-async function saveUserData(lastfmUsername, data) {
+export async function updateJob(jobId, update) {
+  await db.execute(
+    `INSERT INTO jobs (job_id, status, step, progress)
+     VALUES (?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+     status = VALUES(status),
+     step = VALUES(step),
+     progress = VALUES(progress)`,
+    [
+      jobId,
+      update.status,
+      update.step,
+      update.progress
+    ]
+  );
+}
+
+
+async function updateColorOfAlbums(){
+  const [rows] = await db.execute(
+    `SELECT album_id, image_url
+    FROM albums
+    WHERE color_r IS NULL
+      OR color_g IS NULL
+      OR color_b IS NULL`
+  );
+
+  console.log("Row Length:", rows.length)
+
+
+  async function updateColors(initial, limit = 500) { 
+    console.log(initial, " | ", initial + limit);
+    const results = await getAlbumColor(rows.slice(initial, initial + limit));
+    const albums = results.data
+    const ids = albums.map(r => r.album_id);
+
+    const rCase = albums.map(r => `WHEN ${r.album_id} THEN ${r.color[0]}`).join(" ");
+    const gCase = albums.map(r => `WHEN ${r.album_id} THEN ${r.color[1]}`).join(" ");
+    const bCase = albums.map(r => `WHEN ${r.album_id} THEN ${r.color[2]}`).join(" ");
+
+    await db.execute(`
+      UPDATE albums
+      SET
+        color_r = CASE album_id ${rCase} END,
+        color_g = CASE album_id ${gCase} END,
+        color_b = CASE album_id ${bCase} END
+      WHERE album_id IN (${ids.join(",")})
+    `);
+  }
+
+
+
+
+
+
+  async function updateColorBatches(totalAlbums, batchSize = 5) { // gets multiple pages of data in a batch
+    const totalBatches = Math.ceil(totalAlbums / 500);
+
+    for(let i = 0; i < totalBatches; i += batchSize) {
+      const batch = []; // allows pages to be done in batches so it is processed faster, but not overwhelm lastfm api
+      console.error("New Batch");
+      for(let j = i; j < i + batchSize && j <= totalBatches; j++) {
+        const limit = j < totalBatches ? 500 : totalAlbums % 500 || 500;
+        batch.push(updateColors(j * 500, limit));
+      }
+
+      await Promise.all(batch);
+
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+
+  await updateColorBatches(rows.length)
+}
+
+async function saveUserData(lastfmUsername, data, onProgress) {
+  const conn = await db.getConnection();
+
   try {
-    const user_id = await getUser(lastfmUsername);
-    for (let scrobble_index = 0; scrobble_index < data.length;  scrobble_index++) {
-      const scrobble = data[scrobble_index];
-      const [artist] = await db.execute(`
+    await conn.beginTransaction(); // need to do a transaction so it all happens at once
+
+    const [userResult] = await conn.execute(`
+      INSERT INTO users (username)
+      VALUES (?)
+      ON DUPLICATE KEY UPDATE user_id = LAST_INSERT_ID(user_id)
+    `, [lastfmUsername]);
+
+    const user_id = userResult.insertId;
+
+    for (let i = 0; i < data.length; i++) {
+      const scrobble = data[i];
+
+      const [artist] = await conn.execute(`
         INSERT INTO artists (name, mbid)
         VALUES (?, ?)
         ON DUPLICATE KEY UPDATE artist_id = LAST_INSERT_ID(artist_id)
       `, [scrobble.artist['#text'], scrobble.artist['mbid'] || null]);
 
-      const [album] = await db.execute(`
+      const [album] = await conn.execute(`
         INSERT INTO albums (name, mbid, artist_id, image_url)
         VALUES (?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE album_id = LAST_INSERT_ID(album_id)
-      `, [scrobble.album['#text'], scrobble.album['mbid'] || null, artist.insertId, scrobble?.image[0]?.['#text'] || null]);
+      `, [
+        scrobble.album['#text'],
+        scrobble.album['mbid'] || null,
+        artist.insertId,
+        scrobble?.image?.[0]?.['#text'] || null
+      ]);
 
-      const [song] = await db.execute(`
+      const [song] = await conn.execute(`
         INSERT INTO songs (name, mbid, url, artist_id, album_id)
         VALUES (?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE song_id = LAST_INSERT_ID(song_id)
-      `, [scrobble.name, scrobble.mbid || null, scrobble.url, artist.insertId, album.insertId]);
-      
-      await db.execute(`
+      `, [
+        scrobble.name,
+        scrobble.mbid || null,
+        scrobble.url,
+        artist.insertId,
+        album.insertId
+      ]);
+
+      await conn.execute(`
         INSERT INTO scrobbles (user_id, song_id, played_at)
         VALUES (?, ?, ?)
-      `, [user_id, song.insertId, new Date(scrobble.date['uts'] * 1000)]);
+      `, [
+        user_id,
+        song.insertId,
+        new Date(scrobble.date['uts'] * 1000)
+      ]);
+
+      if (onProgress) {
+        onProgress({
+          stage: "db_write",
+          current: i + 1,
+          total: data.length,
+          percent: Math.floor(((i + 1) / data.length) * 100)
+        });
+      }
     }
+
+    await conn.commit();
+
+    // final 100% signal
+    if (onProgress) {
+      onProgress({
+        stage: "db_write",
+        current: data.length,
+        total: data.length,
+        percent: 100
+      });
+    }
+
   } catch (err) {
+    await conn.rollback();
     console.error("saveUserData crashed:", err);
+    throw err; // IMPORTANT: do NOT hide failure
+  } finally {
+    conn.release();
   }
 }
 
@@ -87,6 +216,9 @@ async function formatScrobbleData(scrobbleData) {
 
     name: row.song_name,
     url: row.song_url,
+    color_r: row.album_color_r,
+    color_g: row.album_color_g,
+    color_b: row.album_color_b,
 
     date: {
       uts: Math.floor(new Date(row.played_at).getTime() / 1000).toString(),
@@ -112,7 +244,10 @@ async function loadUserData(lastfmUsername) {
         ar.mbid AS artist_mbid,
         al.name AS album_name,
         al.mbid AS album_mbid,
-        al.image_url
+        al.image_url,
+        al.color_r as album_color_r,
+        al.color_g as album_color_g,
+        al.color_b as album_color_b
       FROM scrobbles s
       JOIN songs so ON s.song_id = so.song_id
       JOIN artists ar ON so.artist_id = ar.artist_id
@@ -128,7 +263,13 @@ async function loadUserData(lastfmUsername) {
 }
 
 
-export async function getAllTracksData(username, apiKey) {
+
+export async function getAllTracksData(username, apiKey, jobId) {
+  await updateJob(jobId, {
+    status: "processing",
+    step: "fetching",
+    progress: 5
+  });
 
   let totalTracks = 0;
   try {
@@ -163,6 +304,12 @@ export async function getAllTracksData(username, apiKey) {
     loggedTracks = userData.length;
     userJSON = userData;
   }
+
+  await updateJob(jobId, {
+    status: "processing",
+    step: "db_write",
+    progress: 10
+  });
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
@@ -212,18 +359,54 @@ export async function getAllTracksData(username, apiKey) {
   if(firstSinglePage.length === 2) totalTracks--; // if a song is currently playing, the array will be one greater than the actual size, this takes that in consideration
   console.log("Total Tracks: ", totalTracks);
   console.log("Logged Tracks: ", loggedTracks);
-
+  
   let newData = await getAllTracksBatch(totalTracks - loggedTracks);
   console.log("New Data Type: ", typeof newData);
   console.log("Logged Data Type: ", typeof userJSON);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
-  await saveUserData(username, newData);
+  await saveUserData(username, newData, (progress) => {
+    updateJob(jobId, {
+      status: "processing",
+      step: progress.stage,
+      progress: progress.percent
+    });
+  });
+  
+  console.log("Colors In");
+  await updateColorOfAlbums();
+  console.log("Colors Out");
+
+  await updateJob(jobId, {
+    status: "completed",
+    step: "done",
+    progress: 100
+  });
   return data;
+}
+
+export async function getUpdateStatus(jobId) {
+  const [row] = await db.execute(`
+    SELECT 
+      j.status AS status,
+      j.step AS step,
+      j.progress AS progress
+    FROM jobs j
+    WHERE j.job_id = ?
+  `, [jobId]);
+
+  console.log(row);
+
+  if (row[0].status === "completed" || row[0].step === "done" || row[0].progress === 100) {
+    return {ready: true, progress: 100}
+  } else {
+    return {ready: false, progress: row[0].progress}
+  }
 }
 
 export async function getStoredData(username) {
   const userData = await loadUserData(username);
+  
   if (userData) {
     return userData;
   } else {

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
-from app.scripts.prep_data import prep_data
+from app.scripts.prep_data import prep_data, return_color_from_urls
 from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -15,6 +15,9 @@ class Track(BaseModel):
     image: str
     album: str
     count: int
+    color_r: float
+    color_g: float
+    color_b: float
 
 class Week(BaseModel):
     weekStart: int
@@ -27,6 +30,9 @@ class ProcessRequest(BaseModel):
 class CombinedData(BaseModel):
     position: int
     points: float
+
+class AlbumColorRequest(BaseModel):
+    payload: List[Dict[str, Any]]
 
 @app.post("/prepare-cached")
 def process(request: ProcessRequest):
@@ -44,7 +50,6 @@ def render_video(request: ProcessRequest):
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
     done_file = VIDEO_DIR / f"{job_id}.done"
-    print(done_file)
 
     if done_file.exists():
         return {
@@ -58,3 +63,8 @@ def get_status(job_id: str):
         "jobId": job_id,
         "ready": False
     }
+
+@app.post("/get-album-color")
+async def get_colors(request: AlbumColorRequest):
+    result = await return_color_from_urls(request.payload)
+    return {"status": "ok", "data": result}

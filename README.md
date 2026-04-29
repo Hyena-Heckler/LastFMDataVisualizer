@@ -9,7 +9,7 @@ Replace backend_server with the given tunnel link
 
 To run python backend
 $env:PORT=8000
-python -m uvicorn main:app --reload --port $env:PORT
+python -m uvicorn main:app --port $env:PORT --log-level warning
 
 To run javascript backend
 npm start

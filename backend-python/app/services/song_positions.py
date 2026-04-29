@@ -57,7 +57,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
     sheet = {}  # stores the data
     logging.info("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):
-        logging.info(index/len(playlist_history))
+        logging.info("First Half", index/len(playlist_history))
         for song_index, song in enumerate(playlist['songs']):
             song_key = (song["name"], tuple(song["artists"]), tuple(song["album"]))
             if song_key not in sheet:  # intializes song's history
@@ -65,6 +65,8 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
                     "name": song['name'],
                     "artists": song['artists'],
                     "image": song['image'],
+                    "album": song['album'],
+                    "color": song['color'],
                     "positions": [],
                     "points": []
                 }
@@ -103,13 +105,13 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
         final_sheet[0].append(format_date(playlist['date']))
     for index, track in enumerate(sheet): # formats the name of the title in the chart and adds the track image for future purposes
         # logging.info(track['name'])
-        logging.info(index/len(sheet))
-        track_color = get_color(track['image'])
+        logging.info("Second Half:", index/len(sheet))
         column = [{
             "name": track['name'],
             "artists": track['artists'],
+            "album": track['album'],
             "image": track['image'],
-            "color": track_color
+            "color": track['color']
         }]
         column.extend(track[attribute])
         final_sheet.append(column)
