@@ -1,58 +1,60 @@
 import dotenv from "dotenv";
 import fetch from "node-fetch";
-import mysql from "mysql2/promise";
+import { Pool } from "pg";
 import { getAlbumColor } from "../integrations/python/client.js"
 
 dotenv.config();
 
-export const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "user_info",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+export const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 async function getUser(lastfmUsername) {
-  const [result] = await db.execute(`
+  const result = await db.query(`
     INSERT INTO users (username)
-    VALUES (?)
-    ON DUPLICATE KEY UPDATE user_id = LAST_INSERT_ID(user_id)
+    VALUES ($1)
+    ON CONFLICT (username)
+    DO UPDATE SET username = EXCLUDED.username
+    RETURNING user_id;
   `, [lastfmUsername]);
-  return result.insertId;
+
+  return result.rows[0]?.user_id;
 }
 
 export async function updateJob(jobId, update) {
-  await db.execute(
-    `INSERT INTO jobs (job_id, status, step, progress)
-     VALUES (?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-     status = VALUES(status),
-     step = VALUES(step),
-     progress = VALUES(progress)`,
-    [
-      jobId,
-      update.status,
-      update.step,
-      update.progress
-    ]
-  );
+  await db.query(`
+    INSERT INTO jobs (job_id, status, step, progress)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (job_id)
+    DO UPDATE SET
+      status = EXCLUDED.status,
+      step = EXCLUDED.step,
+      progress = EXCLUDED.progress
+  `, [
+    jobId,
+    update.status,
+    update.step,
+    update.progress
+  ]);
 }
 
 
+
 async function updateColorOfAlbums(){
-  const [rows] = await db.execute(
-    `SELECT album_id, image_url
+  const result = await db.query(`
+    SELECT album_id, image_url
     FROM albums
     WHERE color_r IS NULL
       OR color_g IS NULL
-      OR color_b IS NULL`
-  );
+      OR color_b IS NULL
+  `);
+
+  const rows = result.rows
 
   console.log("Row Length:", rows.length)
-
 
   async function updateColors(initial, limit = 500) { 
     console.log(initial, " | ", initial + limit);
@@ -60,30 +62,28 @@ async function updateColorOfAlbums(){
     const albums = results.data
     const ids = albums.map(r => r.album_id);
 
+    if (!ids.length) return;
+
     const rCase = albums.map(r => `WHEN ${r.album_id} THEN ${r.color[0]}`).join(" ");
     const gCase = albums.map(r => `WHEN ${r.album_id} THEN ${r.color[1]}`).join(" ");
     const bCase = albums.map(r => `WHEN ${r.album_id} THEN ${r.color[2]}`).join(" ");
 
-    await db.execute(`
+    await db.query(`
       UPDATE albums
       SET
         color_r = CASE album_id ${rCase} END,
         color_g = CASE album_id ${gCase} END,
         color_b = CASE album_id ${bCase} END
-      WHERE album_id IN (${ids.join(",")})
-    `);
+      WHERE album_id = ANY($1::int[])
+    `, [ids]);
   }
 
 
-
-
-
-
-  async function updateColorBatches(totalAlbums, batchSize = 5) { // gets multiple pages of data in a batch
+  async function updateColorBatches(totalAlbums, batchSize = 5) {
     const totalBatches = Math.ceil(totalAlbums / 500);
 
     for(let i = 0; i < totalBatches; i += batchSize) {
-      const batch = []; // allows pages to be done in batches so it is processed faster, but not overwhelm lastfm api
+      const batch = [];
       console.error("New Batch");
       for(let j = i; j < i + batchSize && j <= totalBatches; j++) {
         const limit = j < totalBatches ? 500 : totalAlbums % 500 || 500;
@@ -100,57 +100,82 @@ async function updateColorOfAlbums(){
 }
 
 async function saveUserData(lastfmUsername, data, onProgress) {
-  const conn = await db.getConnection();
+  const conn = await db.connect();
 
+  console.log("Begin");
+  await conn.query("BEGIN");
   try {
-    await conn.beginTransaction(); // need to do a transaction so it all happens at once
 
-    const [userResult] = await conn.execute(`
+    const userResult = await conn.query(`
       INSERT INTO users (username)
-      VALUES (?)
-      ON DUPLICATE KEY UPDATE user_id = LAST_INSERT_ID(user_id)
+      VALUES ($1)
+      ON CONFLICT (username)
+      DO UPDATE SET username = EXCLUDED.username
+      RETURNING user_id
     `, [lastfmUsername]);
 
-    const user_id = userResult.insertId;
+    const user_id = userResult.rows[0].user_id;
 
     for (let i = 0; i < data.length; i++) {
+      if (i % 100 === 0) {
+        console.log("Inserted:", i);
+      }
       const scrobble = data[i];
 
-      const [artist] = await conn.execute(`
-        INSERT INTO artists (name, mbid)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE artist_id = LAST_INSERT_ID(artist_id)
-      `, [scrobble.artist['#text'], scrobble.artist['mbid'] || null]);
+      let artistResult;
+      try {
+        artistResult = await conn.query(`
+          INSERT INTO artists (name, mbid)
+          VALUES ($1, $2)
+          ON CONFLICT (unique_key)
+          DO UPDATE SET name = EXCLUDED.name
+          RETURNING artist_id
+        `, [scrobble.artist['#text'], scrobble.artist['mbid'] || null]);
+      } catch (e) {
+        console.error("SCROBBLE FAILED:", e);
+        throw e;
+      }
+      console.log("ARTIST RESULT:", artistResult);
 
-      const [album] = await conn.execute(`
+      const artist_id = artistResult.rows[0].artist_id;
+
+      const albumResult = await conn.query(`
         INSERT INTO albums (name, mbid, artist_id, image_url)
-        VALUES (?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE album_id = LAST_INSERT_ID(album_id)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (artist_id, name)
+        DO UPDATE SET album_id = albums.album_id
+        RETURNING album_id
       `, [
         scrobble.album['#text'],
         scrobble.album['mbid'] || null,
-        artist.insertId,
+        artist_id,
         scrobble?.image?.[0]?.['#text'] || null
       ]);
 
-      const [song] = await conn.execute(`
+      const album_id = albumResult.rows[0].album_id;
+
+      const songResult = await conn.query(`
         INSERT INTO songs (name, mbid, url, artist_id, album_id)
-        VALUES (?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE song_id = LAST_INSERT_ID(song_id)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (artist_id, album_id, name)
+        DO UPDATE SET song_id = songs.song_id
+        RETURNING song_id
       `, [
         scrobble.name,
         scrobble.mbid || null,
         scrobble.url,
-        artist.insertId,
-        album.insertId
+        artist_id,
+        album_id
       ]);
 
-      await conn.execute(`
+      const song_id = songResult.rows[0].song_id;
+
+      await conn.query(`
         INSERT INTO scrobbles (user_id, song_id, played_at)
-        VALUES (?, ?, ?)
+        VALUES ($1, $2, $3)
       `, [
         user_id,
-        song.insertId,
+        song_id,
         new Date(scrobble.date['uts'] * 1000)
       ]);
 
@@ -162,11 +187,14 @@ async function saveUserData(lastfmUsername, data, onProgress) {
           percent: Math.floor(((i + 1) / data.length) * 100)
         });
       }
+
+      if ((i + 1) % 500 === 0) {
+        await conn.query("COMMIT");
+        await conn.query("BEGIN");
+      }
     }
+    await conn.query("COMMIT");
 
-    await conn.commit();
-
-    // final 100% signal
     if (onProgress) {
       onProgress({
         stage: "db_write",
@@ -177,21 +205,21 @@ async function saveUserData(lastfmUsername, data, onProgress) {
     }
 
   } catch (err) {
-    await conn.rollback();
+    await conn.query("ROLLBACK");
     console.error("saveUserData crashed:", err);
-    throw err; // IMPORTANT: do NOT hide failure
+    throw err;
   } finally {
     conn.release();
   }
 }
 
 async function loadUser(lastfmUsername) {
-  const [rows] = await db.execute(
-    `SELECT user_id FROM users WHERE username = ?`,
+  const result = await db.query(
+    `SELECT user_id FROM users WHERE username = $1`,
     [lastfmUsername]
   );
 
-  return rows[0]?.user_id || null;
+  return result.rows[0]?.user_id || null;
 }
 
 async function formatScrobbleData(scrobbleData) {
@@ -234,7 +262,7 @@ async function loadUserData(lastfmUsername) {
       return null
     }
     console.log(user_id)
-    const [rows] = await db.execute(`
+    const result = await db.query(`
       SELECT 
         s.played_at,
         so.name AS song_name,
@@ -252,16 +280,16 @@ async function loadUserData(lastfmUsername) {
       JOIN songs so ON s.song_id = so.song_id
       JOIN artists ar ON so.artist_id = ar.artist_id
       JOIN albums al ON so.album_id = al.album_id
-      WHERE s.user_id = ?
+      WHERE s.user_id = $1
       ORDER BY s.played_at DESC
     `, [user_id]);
+
     console.log("formatting left")
-    return formatScrobbleData(rows);
+    return formatScrobbleData(result.rows);
   } catch (err) {
     console.error("loadUserData crashed:", err);
   }
 }
-
 
 
 export async function getAllTracksData(username, apiKey, jobId) {
@@ -271,13 +299,6 @@ export async function getAllTracksData(username, apiKey, jobId) {
     progress: 5
   });
 
-  let totalTracks = 0;
-  try {
-    totalTracks = await getTotalTrackNumber();
-  } catch (err) {
-    console.log(err)
-    return null;
-  }
 
   async function getTotalTrackNumber() { 
     // gets the number of tracks
@@ -295,6 +316,15 @@ export async function getAllTracksData(username, apiKey, jobId) {
     }
 
     return Number(data.user.playcount)
+  }
+
+  
+  let totalTracks = 0;
+  try {
+    totalTracks = await getTotalTrackNumber();
+  } catch (err) {
+    console.log(err)
+    return null;
   }
 
   const userData = await loadUserData(username);
@@ -365,6 +395,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
   console.log("Logged Data Type: ", typeof userJSON);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
+  console.log("Saving tracks:", newData);
   await saveUserData(username, newData, (progress) => {
     updateJob(jobId, {
       status: "processing",
@@ -384,18 +415,22 @@ export async function getAllTracksData(username, apiKey, jobId) {
   });
   return data;
 }
-
 export async function getUpdateStatus(jobId) {
-  const [row] = await db.execute(`
+  const result = await db.query(`
     SELECT 
       j.status AS status,
       j.step AS step,
       j.progress AS progress
     FROM jobs j
-    WHERE j.job_id = ?
+    WHERE j.job_id = $1
   `, [jobId]);
 
+  const row = result.rows;
+
   console.log(row);
+  if (!row.length) {
+    return { ready: false, progress: 0 }
+  }
 
   if (row[0].status === "completed" || row[0].step === "done" || row[0].progress === 100) {
     return {ready: true, progress: 100}
