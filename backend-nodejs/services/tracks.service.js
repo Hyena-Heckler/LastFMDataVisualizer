@@ -135,7 +135,6 @@ async function saveUserData(lastfmUsername, data, onProgress) {
         console.error("SCROBBLE FAILED:", e);
         throw e;
       }
-      console.log("ARTIST RESULT:", artistResult);
 
       const artist_id = artistResult.rows[0].artist_id;
 
