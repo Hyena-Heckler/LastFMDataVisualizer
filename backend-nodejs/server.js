@@ -10,14 +10,27 @@ import fs from "fs";
 
 dotenv.config();
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://last-fm-data-visualizer.vercel.app",
+  "https://yourtop30.vercel.app"
+];
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // mobile apps / curl
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // handle preflight requests
-app.use(cors());
 app.options(/.*/, cors());
 
 
