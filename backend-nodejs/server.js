@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { getAllTracksData, getStoredData} from "./services/tracks.service.js";
+import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
 import { transformTracks } from "./services/tracks.transform.js";
 import { renderVideo, getStatus } from "./integrations/python/client.js"
 import path from "path";
@@ -30,18 +30,34 @@ const PORT = process.env.PORT;
 app.post("/update", async (req, res) => {
   try {
     const user = req.body.user;
-    const data = await getAllTracksData(user, process.env.LASTFM_API_KEY);
+    const jobId = Date.now().toString();
+    const data = await getAllTracksData(
+      user,
+      process.env.LASTFM_API_KEY,
+      jobId
+    );
     console.log("Finished updating tracks");
 
     res.json({
-      success: true,
-      message: "Updated"
+      jobId,
+      status: "started"
     })
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch tracks" });
   }
 });
+
+
+app.get("/update-status/:jobId", async (req, res) => {
+  try {
+    const result = await getUpdateStatus(req.params.jobId);
+    console.log(result);
+    res.json(result)
+  } catch (err) {
+    res.status(500).json({ error: "status check failed" })
+  }
+})
 
 
 app.post("/download-json", async (req, res) => {
@@ -79,7 +95,7 @@ app.post("/start-video", async (req, res) => {
   }
 });
 
-app.get("/status/:jobId", async (req, res) => {
+app.get("/video-status/:jobId", async (req, res) => {
   try {
     const result = await getStatus(req.params.jobId);
     console.log(result);

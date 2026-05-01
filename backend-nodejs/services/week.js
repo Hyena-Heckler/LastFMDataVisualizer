@@ -6,7 +6,7 @@ export class Week {
 
     addTrack(track) {
         if (!track.name || !track.artist?.["#text"]) return;
-        const key = `${track.name}||${track.artist["#text"]}||${track.image[0]["#text"]}||${track.album["#text"]}`;
+        const key = `${track.name}||${track.artist["#text"]}||${track.image[0]["#text"]}||${track.album["#text"]}||${track.color_r}||${track.color_g}||${track.color_b}`;
         this.trackCounts.set(key, (this.trackCounts.get(key) || 0) + 1); // adds 1 to the value of plays or intializes it as 1
     }
 
@@ -14,8 +14,8 @@ export class Week {
         return {
         weekStart: this.startUnix,
         tracks:  [...this.trackCounts.entries()].map(([key, count]) => {
-                const [name, artist, image, album] = key.split("||");
-                return { name, artist, image, album, count };
+                const [name, artist, image, album, color_r, color_g, color_b] = key.split("||");
+                return { name, artist, image, album, count, color_r, color_g, color_b};
             })
         };
     }

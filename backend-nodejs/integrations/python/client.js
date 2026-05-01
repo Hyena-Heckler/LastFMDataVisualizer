@@ -1,10 +1,15 @@
 import axios from "axios"
 
-const PYTHON_URL = process.env.PYTHON_API_URL
+const getPythonUrl = () => {
+  const url = process.env.PYTHON_API_URL;
+  if (!url) throw new Error("PYTHON_API_URL missing");
+  return url;
+};
+
 
 // Prep Data
 export const prepareCached = async (payload) => {
-  const res = await axios.post(`${PYTHON_URL}/prepare-cached`, {
+  const res = await axios.post(`${getPythonUrl()}/prepare-cached`, {
     payload
   })
 
@@ -13,7 +18,7 @@ export const prepareCached = async (payload) => {
 
 // Render Video
 export const renderVideo = async (payload, jobId) => {
-  const res = await axios.post(`${PYTHON_URL}/render-video`, {
+  const res = await axios.post(`${getPythonUrl()}/render-video`, {
     payload,
     jobId
   })
@@ -23,6 +28,14 @@ export const renderVideo = async (payload, jobId) => {
 
 // Status Check
 export const getStatus = async (jobId) => {
-  const res = await axios.get(`${PYTHON_URL}/status/${jobId}`)
+  const res = await axios.get(`${getPythonUrl()}/status/${jobId}`)
+  return res.data
+}
+
+// Get Color for Album
+export const getAlbumColor = async (payload) => {
+  const res = await axios.post(`${getPythonUrl()}/get-album-color`, {
+    payload
+  })
   return res.data
 }
