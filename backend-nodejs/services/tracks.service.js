@@ -1,8 +1,11 @@
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import { Pool } from "pg";
-import { getAlbumColor } from "../integrations/python/client.js"
+import { getAlbumColor } from "../integrations/python/client.js";
+import pkg from "pg-copy-streams";
+import { PassThrough } from "stream";
 
+const copyFrom = pkg.from;
 dotenv.config();
 
 export const db = new Pool({
@@ -99,13 +102,67 @@ async function updateColorOfAlbums(){
   await updateColorBatches(rows.length)
 }
 
-async function saveUserData(lastfmUsername, data, onProgress) {
+async function saveUserData(lastfmUsername, data) {
+  if (data.length === 0) {
+    console.log("No new data to insert");
+    return;
+  }
+
   const conn = await db.connect();
 
-  console.log("Begin");
-  await conn.query("BEGIN");
-  try {
+  const artistsMap = new Map();
+  const albumsMap = new Map();
+  const songsMap = new Map();
+  const scrobbles = [];
 
+  try {
+    await conn.query("BEGIN");
+
+    // -----------------------------
+    // 1. BUILD MEMORY STRUCTURES
+    // -----------------------------
+    for (const s of data) {
+      const normalize = (s) => (s || "").trim().toLowerCase();
+      const artistKey = `${normalize(s.artist['#text'])}|${s.artist.mbid || ''}`;
+
+      if (!artistsMap.has(artistKey)) {
+        artistsMap.set(artistKey, {
+          name: s.artist['#text'],
+          mbid: s.artist.mbid || null
+        });
+      }
+
+      const albumKey = `${artistKey}|${s.album['#text']}`;
+
+      if (!albumsMap.has(albumKey)) {
+        albumsMap.set(albumKey, {
+          name: s.album['#text'],
+          mbid: s.album.mbid || null,
+          image_url: s?.image?.[0]?.['#text'] || null,
+          artistKey
+        });
+      }
+
+      const songKey = `${albumKey}|${s.name}`;
+
+      if (!songsMap.has(songKey)) {
+        songsMap.set(songKey, {
+          name: s.name,
+          mbid: s.mbid || null,
+          url: s.url,
+          albumKey
+        });
+      }
+
+      scrobbles.push({
+        songKey,
+        played_at: new Date(s.date.uts * 1000)
+      });
+    }
+
+    // -----------------------------
+    // 2. USER
+    // -----------------------------
     const userResult = await conn.query(`
       INSERT INTO users (username)
       VALUES ($1)
@@ -116,97 +173,187 @@ async function saveUserData(lastfmUsername, data, onProgress) {
 
     const user_id = userResult.rows[0].user_id;
 
-    for (let i = 0; i < data.length; i++) {
-      if (i % 100 === 0) {
-        console.log("Inserted:", i);
-      }
-      const scrobble = data[i];
+    // -----------------------------
+    // 3. ARTISTS
+    // -----------------------------
+    const artists = Array.from(artistsMap.values());
 
-      let artistResult;
-      try {
-        artistResult = await conn.query(`
-          INSERT INTO artists (name, mbid)
-          VALUES ($1, $2)
-          ON CONFLICT (unique_key)
-          DO UPDATE SET name = EXCLUDED.name
-          RETURNING artist_id
-        `, [scrobble.artist['#text'], scrobble.artist['mbid'] || null]);
-      } catch (e) {
-        console.error("SCROBBLE FAILED:", e);
-        throw e;
-      }
+    const artistPlaceholders = [];
+    const artistParams = [];
 
-      const artist_id = artistResult.rows[0].artist_id;
+    artists.forEach((a, i) => {
+      artistParams.push(a.name, a.mbid);
+      artistPlaceholders.push(`($${i * 2 + 1}, $${i * 2 + 2})`);
+    });
 
-      const albumResult = await conn.query(`
-        INSERT INTO albums (name, mbid, artist_id, image_url)
-        VALUES ($1, $2, $3, $4)
-        ON CONFLICT (artist_id, name)
-        DO UPDATE SET album_id = albums.album_id
-        RETURNING album_id
-      `, [
-        scrobble.album['#text'],
-        scrobble.album['mbid'] || null,
-        artist_id,
-        scrobble?.image?.[0]?.['#text'] || null
-      ]);
+    await conn.query(`
+      INSERT INTO artists (name, mbid)
+      VALUES ${artistPlaceholders.join(",")}
+      ON CONFLICT (unique_key) DO NOTHING
+    `, artistParams);
 
-      const album_id = albumResult.rows[0].album_id;
+    // ALWAYS reselect (this is the fix)
+    const artistResult = await conn.query(`
+      SELECT artist_id, name, mbid
+      FROM artists
+    `);
 
-      const songResult = await conn.query(`
-        INSERT INTO songs (name, mbid, url, artist_id, album_id)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (artist_id, album_id, name)
-        DO UPDATE SET song_id = songs.song_id
-        RETURNING song_id
-      `, [
-        scrobble.name,
-        scrobble.mbid || null,
-        scrobble.url,
-        artist_id,
-        album_id
-      ]);
+    const normalize = (s) => (s || "").trim().toLowerCase();
 
-      const song_id = songResult.rows[0].song_id;
-
-      await conn.query(`
-        INSERT INTO scrobbles (user_id, song_id, played_at)
-        VALUES ($1, $2, $3)
-      `, [
-        user_id,
-        song_id,
-        new Date(scrobble.date['uts'] * 1000)
-      ]);
-
-      if (onProgress) {
-        onProgress({
-          stage: "db_write",
-          current: i + 1,
-          total: data.length,
-          percent: Math.floor(((i + 1) / data.length) * 100)
-        });
-      }
-
-      if ((i + 1) % 500 === 0) {
-        await conn.query("COMMIT");
-        await conn.query("BEGIN");
-      }
+    const artistIdMap = new Map();
+    for (const row of artistResult.rows) {
+      artistIdMap.set(
+        `${normalize(row.name)}|${row.mbid || ''}`,
+        row.artist_id
+      );
     }
-    await conn.query("COMMIT");
 
-    if (onProgress) {
-      onProgress({
-        stage: "db_write",
-        current: data.length,
-        total: data.length,
-        percent: 100
+    // -----------------------------
+    // 4. ALBUMS
+    // -----------------------------
+    const albums = Array.from(albumsMap.values());
+
+    const albumPlaceholders = [];
+    const albumParams = [];
+
+    albums.forEach((a, i) => {
+      const artist_id = artistIdMap.get(a.artistKey);
+
+      albumParams.push(a.name, a.mbid, artist_id, a.image_url);
+      albumPlaceholders.push(`($${i * 4 + 1}, $${i * 4 + 2}, $${i * 4 + 3}, $${i * 4 + 4})`);
+    });
+
+    await conn.query(`
+      INSERT INTO albums (name, mbid, artist_id, image_url)
+      VALUES ${albumPlaceholders.join(",")}
+      ON CONFLICT (artist_id, name) DO NOTHING
+    `, albumParams);
+
+    const albumResult = await conn.query(`
+      SELECT album_id, name, artist_id FROM albums
+    `);
+
+    const albumIdMap = new Map();
+    for (const row of albumResult.rows) {
+      albumIdMap.set(`${row.artist_id}|${row.name}`, row.album_id);
+    }
+
+    // -----------------------------
+    // 5. SONGS
+    // -----------------------------
+    const songs = Array.from(songsMap.values());
+
+    const songPlaceholders = [];
+    const songParams = [];
+
+    songs.forEach((s, i) => {
+      const album = albumsMap.get(s.albumKey);
+      const artist_id = artistIdMap.get(album.artistKey);
+      const album_id = albumIdMap.get(`${artist_id}|${album.name}`);
+
+      songParams.push(s.name, s.mbid, s.url, artist_id, album_id);
+
+      songPlaceholders.push(
+        `($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${i * 5 + 5})`
+      );
+    });
+
+    await conn.query(`
+      INSERT INTO songs (name, mbid, url, artist_id, album_id)
+      VALUES ${songPlaceholders.join(",")}
+      ON CONFLICT (artist_id, album_id, name) DO NOTHING
+    `, songParams);
+
+    const songResult = await conn.query(`
+      SELECT song_id, name, artist_id, album_id FROM songs
+    `);
+
+
+
+    const songIdMap = new Map();
+    for (const row of songResult.rows) {
+      songIdMap.set(`${row.artist_id}|${row.album_id}|${row.name}`, row.song_id);
+    }
+
+    // -----------------------------
+    // 6. SCROBBLES (COPY FROM STDIN)
+    // -----------------------------
+
+    const copyStream = conn.query(
+      copyFrom(`
+        COPY scrobbles (user_id, song_id, played_at)
+        FROM STDIN WITH (FORMAT csv)
+      `)
+    );
+
+    const passthrough = new PassThrough();
+    passthrough.pipe(copyStream);
+
+    let total = 0;
+    let skipped_no_song = 0;
+    let skipped_no_album = 0;
+    let skipped_no_artist = 0;
+    let skipped_no_song_id = 0;
+
+    for (const s of scrobbles) {
+      const song = songsMap.get(s.songKey);
+
+      if (!song) {
+        skipped_no_song++;
+        continue;
+      }
+
+      const album = albumsMap.get(song.albumKey);
+      if (!album) {
+        skipped_no_album++;
+        continue;
+      }
+
+      const artist_id = artistIdMap.get(album.artistKey);
+      if (!artist_id) {
+        skipped_no_artist++;
+        continue;
+      }
+
+      const album_id = albumIdMap.get(`${artist_id}|${album.name}`);
+      const song_id = songIdMap.get(`${artist_id}|${album_id}|${song.name}`);
+
+      if (!song_id) {
+        skipped_no_song_id++;
+        continue;
+      }
+
+      total++;
+
+      passthrough.write(
+        `${user_id},${song_id},${s.played_at.toISOString()}\n`
+      );
+    }
+
+    passthrough.end();
+
+    await new Promise((resolve, reject) => {
+      copyStream.on("error", (err) => {
+        console.error("❌ COPY ERROR:", err);
+        reject(err);
       });
-    }
+
+      copyStream.on("finish", () => {
+        console.log("COPY finished successfully");
+        resolve();
+      });
+    });
+
+    // -----------------------------
+    // 7. COMMIT
+    // -----------------------------
+    await conn.query("COMMIT");
 
   } catch (err) {
     await conn.query("ROLLBACK");
-    console.error("saveUserData crashed:", err);
+    console.error("saveUserData failed:", err);
     throw err;
+
   } finally {
     conn.release();
   }
@@ -394,7 +541,6 @@ export async function getAllTracksData(username, apiKey, jobId) {
   console.log("Logged Data Type: ", typeof userJSON);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
-  console.log("Saving tracks:", newData);
   await saveUserData(username, newData, (progress) => {
     updateJob(jobId, {
       status: "processing",
@@ -426,7 +572,6 @@ export async function getUpdateStatus(jobId) {
 
   const row = result.rows;
 
-  console.log(row);
   if (!row.length) {
     return { ready: false, progress: 0 }
   }
