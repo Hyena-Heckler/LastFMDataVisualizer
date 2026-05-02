@@ -247,7 +247,7 @@ def graph_data(data, video_output_path):
         ]
     )
 
-    ani.save(video_output_path, writer=writer)  # creates a video for song chart
+    ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
     
 
     t3 = time.perf_counter()

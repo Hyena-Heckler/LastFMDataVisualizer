@@ -156,14 +156,14 @@ def get_video(cached_song_data, path):
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
-def prep_data(command, payload, job_id = None):
+def prep_data(command, payload, video_path = None, job_id = None):
     if command == "prepare_cached_data":
         prepare_cached_data(payload)
 
     if command == "get_video":
-        output_path = os.path.join("temp", "videos", f"{job_id}.mp4")
+        output_path = video_path / f"{job_id}.mp4"
         get_video(prepare_cached_data(payload), output_path)
-        done_flag = f"temp/videos/{job_id}.done"
+        done_flag = video_path / f"{job_id}.done"
         with open(done_flag, "w") as f:
             f.write("done")
         print(f"Saved to {output_path}", file=sys.stderr)
