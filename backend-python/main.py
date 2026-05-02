@@ -6,6 +6,8 @@ from pathlib import Path
 import os
 BASE_DIR = Path(__file__).resolve().parents[1]
 VIDEO_DIR = BASE_DIR / "backend-python" / "temp" / "videos"
+output_path = Path(VIDEO_DIR)
+output_path.parent.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI()
 
