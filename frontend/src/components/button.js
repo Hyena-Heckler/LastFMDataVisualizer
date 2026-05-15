@@ -112,8 +112,7 @@ export function setupButtons() {
       // Step 3: Downloads the video as a mp4 file
       console.log("Video ready!");
       const downloadRes = await fetch(`${backend_server}/download-video/${jobId}`);
-      const blob = await downloadRes.blob();
-      const url = window.URL.createObjectURL(blob);
+      const { url } = await downloadRes.json();
       const a = document.createElement("a");
       a.href = url;
       a.download = "video.mp4";

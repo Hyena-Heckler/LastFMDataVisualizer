@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from app.scripts.prep_data import prep_data, return_color_from_urls
 from pathlib import Path
 import os
+import threading
 VIDEO_DIR = Path("/tmp/videos")
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -43,8 +44,19 @@ def process(request: ProcessRequest):
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
     payload = [w.model_dump() for w in request.payload]
-    result = prep_data("get_video", payload, VIDEO_DIR, request.jobId)
-    return {"status": "rendering_started", "jobId": request.jobId, "data": result}
+
+    result = prep_data(
+        "get_video",
+        payload,
+        VIDEO_DIR,
+        request.jobId
+    )
+
+    return {
+        "status": "rendering_started",
+        "jobId": request.jobId,
+        "r2Key": result   # 🔥 THIS IS THE IMPORTANT PART
+    }
 
 
 @app.get("/status/{job_id}")

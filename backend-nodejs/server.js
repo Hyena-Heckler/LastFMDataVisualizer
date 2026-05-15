@@ -6,9 +6,20 @@ import { transformTracks } from "./services/tracks.transform.js";
 import { renderVideo, getStatus } from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
-
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 dotenv.config();
+
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
+
 const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
@@ -35,7 +46,6 @@ app.options(/.*/, cors());
 
 
 app.use(express.json());
-app.use("/videos", express.static(path.join(process.cwd(), "../backend-python/assets/videos")));
 
 const PORT = process.env.PORT;
 
@@ -95,13 +105,18 @@ app.post("/start-video", async (req, res) => {
     const user = req.body.user;
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
-    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    renderVideo(organizedDataJson, jobId)
-    console.log("Start rendering");
+    const organizedDataJson = [...organizedData.entries()].map(([, week]) => week);
+
+    const result = await renderVideo(organizedDataJson, jobId);
+
+    console.log("Start rendering:", result);
+
     res.json({
       jobId,
-      status: "started"
-    })
+      status: "started",
+      r2Key: result.r2Key || result
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to start video tracks" });
@@ -119,50 +134,26 @@ app.get("/video-status/:jobId", async (req, res) => {
 })
 
 app.get("/download-video/:jobId", async (req, res) => {
-  const videoPath = path.join(
-    process.cwd(),
-    "..",
-    "backend-python",
-    "temp",
-    "videos",
-    `${req.params.jobId}.mp4`
-  );
-  const videoDonePath = path.join(
-    process.cwd(),
-    "..",
-    "backend-python",
-    "temp",
-    "videos",
-    `${req.params.jobId}.done`
-  );
+  try {
+    const jobId = req.params.jobId;
 
-  if (!fs.existsSync(videoPath)) {
-    return res.status(404).json({ error: "Video not ready" });
+    const objectKey = `videos/${jobId}.mp4`;
+
+    const command = new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET,
+      Key: objectKey,
+    });
+
+    const url = await getSignedUrl(r2, command, {
+      expiresIn: 3600,
+    });
+
+    res.json({ url });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to generate download URL" });
   }
-
-
-  res.download(videoPath, (err) => {
-    if (err) {
-      console.error("Download error:", err);
-      return;
-    }
-
-    // ✅ Delete AFTER successful send
-    fs.unlink(videoPath, (unlinkErr) => {
-      if (unlinkErr) {
-        console.error("Error deleting file:", unlinkErr);
-      } else {
-        console.log("File deleted:", videoPath);
-      }
-    });
-    fs.unlink(videoDonePath, (unlinkErr) => {
-      if (unlinkErr) {
-        console.error("Error deleting file:", unlinkErr);
-      } else {
-        console.log("File deleted:", videoDonePath);
-      }
-    });
-  });
 });
 
 
