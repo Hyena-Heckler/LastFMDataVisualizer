@@ -68,7 +68,7 @@ def render_video(request: ProcessRequest):
 
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
-    done_file = VIDEO_DIR / f"{job_id}.done"
+    done_file = VIDEO_DIR / f"{job_id}.json"
 
     if done_file.exists():
         with open(done_file, "r") as f:
