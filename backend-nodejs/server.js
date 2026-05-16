@@ -134,6 +134,7 @@ app.post("/start-video", async (req, res) => {
 
 app.get("/video-status/:jobId", async (req, res) => {
   try {
+    console.log("Checking...");
     const result = await getStatus(req.params.jobId);
     console.log(result);
     res.json(result)
