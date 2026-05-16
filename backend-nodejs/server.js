@@ -103,23 +103,32 @@ app.post("/start-video", async (req, res) => {
     const jobId = Date.now().toString();
 
     const user = req.body.user;
-    const data = await getStoredData(user);
-    const organizedData = transformTracks(data);
-    const organizedDataJson = [...organizedData.entries()].map(([, week]) => week);
 
-    const result = await renderVideo(organizedDataJson, jobId);
+    const data = await getStoredData(user);
+
+    const organizedData = transformTracks(data);
+
+    const organizedDataJson =
+      [...organizedData.entries()].map(([, week]) => week);
+
+    const result = await renderVideo(
+      organizedDataJson,
+      jobId
+    );
 
     console.log("Start rendering:", result);
 
     res.json({
       jobId,
-      status: "started",
-      r2Key: result.r2Key || result
+      status: "started"
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to start video tracks" });
+
+    res.status(500).json({
+      error: "Failed to start video tracks"
+    });
   }
 });
 

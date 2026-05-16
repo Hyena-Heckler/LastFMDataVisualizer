@@ -5,6 +5,7 @@ from app.scripts.prep_data import prep_data, return_color_from_urls
 from pathlib import Path
 import os
 import threading
+import json
 VIDEO_DIR = Path("/tmp/videos")
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -45,18 +46,24 @@ def process(request: ProcessRequest):
 def render_video(request: ProcessRequest):
     payload = [w.model_dump() for w in request.payload]
 
-    result = prep_data(
-        "get_video",
-        payload,
-        VIDEO_DIR,
-        request.jobId
-    )
+    def background_render():
+        prep_data(
+            "get_video",
+            payload,
+            VIDEO_DIR,
+            request.jobId
+        )
+
+    threading.Thread(
+        target=background_render,
+        daemon=True
+    ).start()
 
     return {
         "status": "rendering_started",
-        "jobId": request.jobId,
-        "r2Key": result   # 🔥 THIS IS THE IMPORTANT PART
+        "jobId": request.jobId
     }
+
 
 
 @app.get("/status/{job_id}")
@@ -64,10 +71,14 @@ def get_status(job_id: str):
     done_file = VIDEO_DIR / f"{job_id}.done"
 
     if done_file.exists():
+        with open(done_file, "r") as f:
+            data = json.load(f)
+
         return {
             "status": "done",
             "jobId": job_id,
-            "ready": True
+            "ready": True,
+            "r2Key": data["r2Key"]
         }
 
     return {

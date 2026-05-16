@@ -150,7 +150,8 @@ def get_video(cached_song_data, path):
         ]
 
         add_extra_info(song_points_by_position_data, song_position_data)
-        graph_data(song_position_data, path)
+        r2key = graph_data(song_position_data, path)
+        return r2key
 
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
