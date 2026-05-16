@@ -44,20 +44,26 @@ def process(request: ProcessRequest):
 
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
+    print("entered route")
     payload = [w.model_dump() for w in request.payload]
+    print("payload dumped")
 
     def background_render():
+        print("thread started")
         prep_data(
             "get_video",
             payload,
             VIDEO_DIR,
             request.jobId
         )
+        print("thread finished")
 
     threading.Thread(
         target=background_render,
         daemon=True
     ).start()
+
+    print("returning response")
 
     return {
         "status": "rendering_started",
