@@ -9,3 +9,4 @@ python-dotenv
 matplotlib
 boto3
 aiohttp
+psutil
