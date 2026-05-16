@@ -14,8 +14,15 @@ import unicodedata
 import logging
 from matplotlib.collections import LineCollection
 import boto3
-import os
+import psutil
+import sys
 from dotenv import load_dotenv
+
+def log_ram(tag=""):
+    process = psutil.Process(os.getpid())
+    mem_mb = process.memory_info().rss / 1024 / 1024
+    print(f"[RAM] {tag}: {mem_mb:.2f} MB", file=sys.stderr, flush=True)
+
 
 load_dotenv()  # this reads your .env file
 os.environ["PYTHONUNBUFFERED"] = "1"
@@ -209,6 +216,7 @@ def graph_data(data, video_output_path):
         previous_percentage = ((frame - 1) * 100) // total_frames
         if current_percentage != previous_percentage:
             print(f"{current_percentage}%", file=sys.stderr, flush=True)
+            log_ram("START graph_data")
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
