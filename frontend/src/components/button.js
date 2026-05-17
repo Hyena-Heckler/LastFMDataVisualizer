@@ -113,10 +113,7 @@ export function setupButtons() {
       console.log("Video ready!");
       const downloadRes = await fetch(`${backend_server}/download-video/${jobId}`);
       const { url } = await downloadRes.json();
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "video.mp4";
-      a.click();
+      window.location.href = url;
       document.getElementById("download-video").disabled = false;
       console.log("Successful download video for:", store.user);
     } catch (err) {

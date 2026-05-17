@@ -152,6 +152,7 @@ app.get("/download-video/:jobId", async (req, res) => {
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET,
       Key: objectKey,
+      ResponseContentDisposition: "attachment; filename=video.mp4"
     });
 
     const url = await getSignedUrl(r2, command, {
