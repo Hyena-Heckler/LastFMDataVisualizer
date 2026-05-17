@@ -111,12 +111,12 @@ app.post("/start-video", async (req, res) => {
     const organizedDataJson =
       [...organizedData.entries()].map(([, week]) => week);
 
-    const result = await renderVideo(
+    renderVideo(
       organizedDataJson,
       jobId
     );
 
-    console.log("Start rendering:", result);
+    console.log("Start rendering");
 
     res.json({
       jobId,
@@ -157,6 +157,8 @@ app.get("/download-video/:jobId", async (req, res) => {
     const url = await getSignedUrl(r2, command, {
       expiresIn: 3600,
     });
+
+    console.log(url)
 
     res.json({ url });
 
