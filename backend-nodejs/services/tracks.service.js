@@ -82,7 +82,7 @@ async function updateColorOfAlbums(){
   }
 
 
-  async function updateColorBatches(totalAlbums, batchSize = 5) {
+  async function updateColorBatches(totalAlbums, batchSize = 3) {
     const totalBatches = Math.ceil(totalAlbums / 500);
 
     for(let i = 0; i < totalBatches; i += batchSize) {
