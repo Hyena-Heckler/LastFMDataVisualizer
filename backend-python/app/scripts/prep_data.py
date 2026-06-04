@@ -159,7 +159,7 @@ def get_video(cached_song_data, path):
 
 def prep_data(command, payload, video_path = None, job_id = None):
     if command == "prepare_cached_data":
-        prepare_cached_data(payload)
+        return prepare_cached_data(payload)
 
     if command == "get_video":
         output_path = video_path / f"{job_id}.mp4"

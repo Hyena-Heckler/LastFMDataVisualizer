@@ -45,7 +45,9 @@ app.use(cors({
 app.options(/.*/, cors());
 
 
-app.use(express.json());
+app.use(express.json({
+  limit: "10mb"
+}));
 
 const PORT = process.env.PORT;
 
@@ -89,7 +91,7 @@ app.post("/download-json", async (req, res) => {
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    const weeklyChartJson = prepareCached(organizedDataJson);
+    const weeklyChartJson = await prepareCached(organizedDataJson);
     console.log("Finished preparing file for download");
 
     res.json(weeklyChartJson);
