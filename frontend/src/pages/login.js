@@ -11,5 +11,8 @@ export function setupLogin() {
     store.user = username;
 
     console.log("Logged in:", store.user);
+
+    await updateUser();
+    await fetchCache();
   });
 }

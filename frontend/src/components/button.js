@@ -22,16 +22,9 @@ export function setupButtons() {
       alert("Please log in first");
       return;
     }
-    
-    const res = await fetch(`${backend_server}/download-json`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({user: store.user})
-    });
-    const data = await res.json();
-    downloadJSON(data, "Data");
+
+    await fetchCache();
+    downloadJSON(store.cache, "Data");
 
     console.log("Successful download for:", store.user);
   });
@@ -44,32 +37,7 @@ export function setupButtons() {
 
     // Step 1: Start the updating process
     document.getElementById("update").disabled = true;
-    const res = await fetch(`${backend_server}/update`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({user: store.user})
-    });
-
-    const { jobId } = await res.json(); // Updating takes a long time sometimes, so there is an issue of it timing out. This allows it to run in the background.
-    console.log("Job started:", jobId);
-
-    // Step 2: Check to see if updating process is done
-    let ready = false;
-
-    while (!ready) {
-      const statusRes = await fetch(`${backend_server}/update-status/${jobId}`);
-      const statusData = await statusRes.json();
-      ready = statusData.ready;
-      let progress = statusData.progress;
-
-      console.log("Checking status...", ready, " and it's at", progress, "% done");
-
-      if (!ready) {
-        await new Promise(r => setTimeout(r, 5000)); // wait 5s
-      }
-    }
+    await updateUser();
     document.getElementById("update").disabled = false;
     console.log("Successful update for:", store.user);
   });

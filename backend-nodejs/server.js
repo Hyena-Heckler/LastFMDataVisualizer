@@ -85,19 +85,19 @@ app.get("/update-status/:jobId", async (req, res) => {
 })
 
 
-app.post("/download-json", async (req, res) => {
+app.post("/download-cache", async (req, res) => {
   try {
     const user = req.body.user;
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const weeklyChartJson = await prepareCached(organizedDataJson);
-    console.log("Finished preparing file for download");
+    console.log("Finished preparing file for cache");
 
     res.json(weeklyChartJson);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to download tracks" });
+    res.status(500).json({ error: "Failed to cache tracks" });
   }
 });
 
