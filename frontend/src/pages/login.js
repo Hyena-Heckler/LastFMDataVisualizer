@@ -1,4 +1,5 @@
 import {store} from "../store.js";
+import {updateUser, fetchCache} from "../api.js";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
@@ -6,13 +7,25 @@ export function setupLogin() {
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const username = document.getElementById("username-login").value;
+    try {
+      const submitButton = loginForm.querySelector("button");
 
-    store.user = username;
+      submitButton.disabled = true;
+      const username = document.getElementById("username-login").value;
 
-    console.log("Logged in:", store.user);
+      store.user = username;
 
-    await updateUser();
-    await fetchCache();
+      console.log("Logged in:", store.user);
+
+      await updateUser();
+
+      await fetchCache();
+
+      console.log("Cache ready");
+
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load user data");
+    }
   });
 }
