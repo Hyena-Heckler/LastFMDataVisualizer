@@ -1,5 +1,5 @@
 import {store} from "../store.js";
-import {updateUser, fetchCache} from "../api.js";
+import {updateUser, fetchCache} from "../services/api.js";
 
 
 let backend_server =  import.meta.env.VITE_API_URL

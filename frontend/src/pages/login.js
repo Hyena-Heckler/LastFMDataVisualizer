@@ -1,15 +1,15 @@
 import {store} from "../store.js";
-import {updateUser, fetchCache} from "../api.js";
+import {updateUser, fetchCache} from "../services/api.js";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    
+    const submitButton = loginForm.querySelector("button");
 
     try {
-      const submitButton = loginForm.querySelector("button");
-
       submitButton.disabled = true;
       const username = document.getElementById("username-login").value;
 
@@ -26,6 +26,8 @@ export function setupLogin() {
     } catch (err) {
       console.error(err);
       alert("Failed to load user data");
+    } finally {
+      submitButton.disabled = false;
     }
   });
 }
