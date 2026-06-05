@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+httpx
+pillow
+colorthief
+numpy
+python-dotenv
+matplotlib
+boto3
+aiohttp
+psutil

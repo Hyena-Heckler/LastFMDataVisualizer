@@ -4,8 +4,10 @@ from typing import Any, Dict, List, Optional
 from app.scripts.prep_data import prep_data, return_color_from_urls
 from pathlib import Path
 import os
-BASE_DIR = Path(__file__).resolve().parents[1]
-VIDEO_DIR = BASE_DIR / "backend-python" / "temp" / "videos"
+import threading
+import json
+VIDEO_DIR = Path("/tmp/videos")
+VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI()
 
@@ -42,20 +44,47 @@ def process(request: ProcessRequest):
 
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
+    print("entered route")
     payload = [w.model_dump() for w in request.payload]
-    result = prep_data("get_video", payload, request.jobId)
-    return {"status": "rendering_started", "jobId": request.jobId, "data": result}
+    print("payload dumped")
+
+    def background_render():
+        print("thread started")
+        prep_data(
+            "get_video",
+            payload,
+            VIDEO_DIR,
+            request.jobId
+        )
+        print("thread finished")
+
+    threading.Thread(
+        target=background_render,
+        daemon=True
+    ).start()
+
+    print("returning response")
+
+    return {
+        "status": "rendering_started",
+        "jobId": request.jobId
+    }
+
 
 
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
-    done_file = VIDEO_DIR / f"{job_id}.done"
+    done_file = VIDEO_DIR / f"{job_id}.json"
 
     if done_file.exists():
+        with open(done_file, "r") as f:
+            data = json.load(f)
+
         return {
             "status": "done",
             "jobId": job_id,
-            "ready": True
+            "ready": True,
+            "r2Key": data["r2Key"]
         }
 
     return {

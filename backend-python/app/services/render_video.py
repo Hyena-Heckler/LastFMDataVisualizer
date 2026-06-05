@@ -13,7 +13,16 @@ import os
 import unicodedata
 import logging
 from matplotlib.collections import LineCollection
+import boto3
+import psutil
+import sys
 from dotenv import load_dotenv
+
+def log_ram(tag=""):
+    process = psutil.Process(os.getpid())
+    mem_mb = process.memory_info().rss / 1024 / 1024
+    print(f"[RAM] {tag}: {mem_mb:.2f} MB", file=sys.stderr, flush=True)
+
 
 load_dotenv()  # this reads your .env file
 os.environ["PYTHONUNBUFFERED"] = "1"
@@ -25,6 +34,19 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     force=True
 )
+
+def upload_to_r2(file_path, object_name):
+    client = boto3.client(
+        "s3",
+        endpoint_url=os.getenv("R2_ENDPOINT"),
+        aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+        region_name="auto"
+    )
+
+    bucket = os.getenv("R2_BUCKET")
+    client.upload_file(str(file_path), bucket, object_name)
+    return object_name
 
 def clean_text(s):
     if not isinstance(s, str):
@@ -194,6 +216,7 @@ def graph_data(data, video_output_path):
         previous_percentage = ((frame - 1) * 100) // total_frames
         if current_percentage != previous_percentage:
             print(f"{current_percentage}%", file=sys.stderr, flush=True)
+            log_ram("START graph_data")
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
@@ -247,27 +270,33 @@ def graph_data(data, video_output_path):
         ]
     )
 
-    ani.save(video_output_path, writer=writer)  # creates a video for song chart
+    ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
     
+    object_name = f"videos/{Path(video_output_path).name}"
+    upload_to_r2(video_output_path, object_name)
 
-    t3 = time.perf_counter()
+    if os.path.exists(video_output_path):
+        os.remove(video_output_path)
 
-    if ENVIRONMENT == "development":
-        BASE_DIR = Path(__file__).resolve().parents[1]
-        efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
-        with open(efficiency_output_path, "r") as f:
-            efficency_data = json.load(f)
+    return object_name
+    # t3 = time.perf_counter()
 
-        efficency_data.append({
-            "fps": f"{total_frames / (t3 - t2):.2f}",
-            "time": f"{t3 - t2:.2f}s",
-            "rendered_frames": total_frames,
-            "timestamp": datetime.now().isoformat()
+    # if ENVIRONMENT == "development":
+    #     BASE_DIR = Path(__file__).resolve().parents[1]
+    #     efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
+    #     with open(efficiency_output_path, "r") as f:
+    #         efficency_data = json.load(f)
 
-        })
+    #     efficency_data.append({
+    #         "fps": f"{total_frames / (t3 - t2):.2f}",
+    #         "time": f"{t3 - t2:.2f}s",
+    #         "rendered_frames": total_frames,
+    #         "timestamp": datetime.now().isoformat()
 
-        with open(efficiency_output_path, "w") as f:
-            json.dump(efficency_data, f, indent=2)
-    return str(video_output_path)
+    #     })
+
+    #     with open(efficiency_output_path, "w") as f:
+    #         json.dump(efficency_data, f, indent=2)
+    # return str(video_output_path)
         #plt.show()
 

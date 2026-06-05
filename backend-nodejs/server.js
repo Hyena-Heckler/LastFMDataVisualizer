@@ -3,26 +3,51 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
 import { transformTracks } from "./services/tracks.transform.js";
-import { renderVideo, getStatus } from "./integrations/python/client.js"
+import { renderVideo, getStatus, prepareCached} from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
-
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 dotenv.config();
+
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
+
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://last-fm-data-visualizer.vercel.app",
+  "https://yourtop30.vercel.app"
+];
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // mobile apps / curl
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // handle preflight requests
-app.use(cors());
 app.options(/.*/, cors());
 
 
-app.use(express.json());
-app.use("/videos", express.static(path.join(process.cwd(), "../backend-python/assets/videos")));
+app.use(express.json({
+  limit: "10mb"
+}));
 
 const PORT = process.env.PORT;
 
@@ -60,18 +85,19 @@ app.get("/update-status/:jobId", async (req, res) => {
 })
 
 
-app.post("/download-json", async (req, res) => {
+app.post("/download-cache", async (req, res) => {
   try {
     const user = req.body.user;
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    console.log("Finished preparing file for download");
+    const weeklyChartJson = await prepareCached(organizedDataJson);
+    console.log("Finished preparing file for cache");
 
-    res.json(organizedDataJson);
+    res.json(weeklyChartJson);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to download tracks" });
+    res.status(500).json({ error: "Failed to cache tracks" });
   }
 });
 
@@ -80,23 +106,38 @@ app.post("/start-video", async (req, res) => {
     const jobId = Date.now().toString();
 
     const user = req.body.user;
+
     const data = await getStoredData(user);
+
     const organizedData = transformTracks(data);
-    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    renderVideo(organizedDataJson, jobId)
+
+    const organizedDataJson =
+      [...organizedData.entries()].map(([, week]) => week);
+
+    renderVideo(
+      organizedDataJson,
+      jobId
+    );
+
     console.log("Start rendering");
+
     res.json({
       jobId,
       status: "started"
-    })
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to start video tracks" });
+
+    res.status(500).json({
+      error: "Failed to start video tracks"
+    });
   }
 });
 
 app.get("/video-status/:jobId", async (req, res) => {
   try {
+    console.log("Checking...");
     const result = await getStatus(req.params.jobId);
     console.log(result);
     res.json(result)
@@ -106,50 +147,29 @@ app.get("/video-status/:jobId", async (req, res) => {
 })
 
 app.get("/download-video/:jobId", async (req, res) => {
-  const videoPath = path.join(
-    process.cwd(),
-    "..",
-    "backend-python",
-    "temp",
-    "videos",
-    `${req.params.jobId}.mp4`
-  );
-  const videoDonePath = path.join(
-    process.cwd(),
-    "..",
-    "backend-python",
-    "temp",
-    "videos",
-    `${req.params.jobId}.done`
-  );
+  try {
+    const jobId = req.params.jobId;
 
-  if (!fs.existsSync(videoPath)) {
-    return res.status(404).json({ error: "Video not ready" });
+    const objectKey = `videos/${jobId}.mp4`;
+
+    const command = new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET,
+      Key: objectKey,
+      ResponseContentDisposition: "attachment; filename=video.mp4"
+    });
+
+    const url = await getSignedUrl(r2, command, {
+      expiresIn: 3600,
+    });
+
+    console.log(url)
+
+    res.json({ url });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to generate download URL" });
   }
-
-
-  res.download(videoPath, (err) => {
-    if (err) {
-      console.error("Download error:", err);
-      return;
-    }
-
-    // ✅ Delete AFTER successful send
-    fs.unlink(videoPath, (unlinkErr) => {
-      if (unlinkErr) {
-        console.error("Error deleting file:", unlinkErr);
-      } else {
-        console.log("File deleted:", videoPath);
-      }
-    });
-    fs.unlink(videoDonePath, (unlinkErr) => {
-      if (unlinkErr) {
-        console.error("Error deleting file:", unlinkErr);
-      } else {
-        console.log("File deleted:", videoDonePath);
-      }
-    });
-  });
 });
 
 
