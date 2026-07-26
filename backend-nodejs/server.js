@@ -61,7 +61,7 @@ app.post("/update", async (req, res) => {
       process.env.LASTFM_API_KEY,
       jobId
     );
-    console.log("Finished updating tracks");
+    console.log("Finished Updating tracks");
 
     res.json({
       jobId,
@@ -77,7 +77,7 @@ app.post("/update", async (req, res) => {
 app.get("/update-status/:jobId", async (req, res) => {
   try {
     const result = await getUpdateStatus(req.params.jobId);
-    console.log(result);
+    console.log("Updating Job Id", result);
     res.json(result)
   } catch (err) {
     res.status(500).json({ error: "status check failed" })
@@ -92,7 +92,7 @@ app.post("/download-cache", async (req, res) => {
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const weeklyChartJson = await prepareCached(organizedDataJson);
-    console.log("Finished preparing file for cache");
+    console.log("Finished Preparing File for Cache");
 
     res.json(weeklyChartJson);
   } catch (err) {
@@ -119,7 +119,7 @@ app.post("/start-video", async (req, res) => {
       jobId
     );
 
-    console.log("Start rendering");
+    console.log("Start Rendering");
 
     res.json({
       jobId,
