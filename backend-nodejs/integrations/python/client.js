@@ -34,8 +34,11 @@ export const getStatus = async (jobId) => {
 
 // Get Color for Album
 export const getAlbumColor = async (payload) => {
+  console.log("New Batch");
+
   const res = await axios.post(`${getPythonUrl()}/get-album-color`, {
     payload
   })
+  await new Promise(resolve => setTimeout(resolve, 1000));
   return res.data
 }
