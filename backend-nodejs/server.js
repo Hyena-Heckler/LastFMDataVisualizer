@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
-import { transformTracks } from "./services/tracks.transform.js";
+import { transformTracks, weekFriendlyCache } from "./services/tracks.transform.js";
 import { renderVideo, getStatus, prepareCached} from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
@@ -91,10 +91,15 @@ app.post("/download-cache", async (req, res) => {
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    const weeklyChartJson = await prepareCached(organizedDataJson);
+    const arrayChartJson = await prepareCached(organizedDataJson);
+    const weeklyChartJson = await weekFriendlyCache(arrayChartJson);
     console.log("Finished Preparing File for Cache");
 
-    res.json(weeklyChartJson);
+    res.json(
+      {
+        normalCache: arrayChartJson,
+        weeklyCache: weeklyChartJson
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to cache tracks" });
