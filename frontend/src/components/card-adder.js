@@ -1,7 +1,7 @@
 import {store} from "../store.js";
 
 export function addCard(entry) {
-  const container = document.getElementById("chart");
+  const container = document.getElementById("chart-container");
 
   const song = store.cache.weeklyCache.songs[entry.songId];
   const card = document.createElement("div");
