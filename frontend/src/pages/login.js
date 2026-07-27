@@ -37,7 +37,7 @@ export function setupLogin() {
 export function setupDateDropdown() {
   const dateDropdown = document.getElementById("date");
   dateDropdown.innerHTML = "";
-  if (!store.cache?.weeks) {
+  if (!store.cache.weeklyCache?.weeks) {
     console.error("Missing Cache");
     return;
   }
