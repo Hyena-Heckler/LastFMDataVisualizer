@@ -138,7 +138,7 @@ async function saveUserData(lastfmUsername, data) {
         albumsMap.set(albumKey, {
           name: s.album['#text'],
           mbid: s.album.mbid || null,
-          image_url: s?.image?.[0]?.['#text'] || null,
+          image_url: s?.image?.[3]?.['#text'] || s?.image?.[2]?.['#text'] || s?.image?.[1]?.['#text'] || s?.image?.[0]?.['#text'] || null,
           artistKey
         });
       }

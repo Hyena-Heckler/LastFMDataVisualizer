@@ -13,7 +13,7 @@ export function addCard(entry) {
       <h5>LW+Symbol</h5>
     </div>
     <div class="chart__icon">
-      <img src=${song.image} alt="${song.name}/>
+      <img src=${song.image} alt=${song.name}/>
     </div>
     <div class="chart__identifier">
       <h3>${song.name}</h3>

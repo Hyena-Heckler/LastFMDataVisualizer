@@ -39,6 +39,5 @@ export const getAlbumColor = async (payload) => {
   const res = await axios.post(`${getPythonUrl()}/get-album-color`, {
     payload
   })
-  await new Promise(resolve => setTimeout(resolve, 1000));
   return res.data
 }
