@@ -38,6 +38,36 @@ export function addCard(entry) {
 }
 
 /*
+<div class="chart__song">
+          <div class="chart__position">
+            <h5>Streak</h5>
+            <h2>POS</h2>
+            <h5>LW+Symbol</h5>
+          </div>
+          <div class="chart__icon">
+            <img src="https://lastfm.freetls.fastly.net/i/u/900x900/88b646daa5e6626399ccd002ba67e50d.jpg"/>
+          </div>
+          <div class="chart__identifier">
+            <h3>Title</h3>
+            <div class="chart__identifier-extra">
+              <h4>Album</h4>
+              <h4>-</h4>
+              <h4>Artists</h4>
+            </div>
+          </div>
+          <div class="chart__main">
+            <h5>Points</h5>
+            <h5>Week</h5>
+            <h5>Peak</h5>
+          </div>
+          <div class="chart__extra">
+            <h5>Year-End</h5>
+            <h5>YE Points</h5>
+            <h5>First Appearance</h5>
+          </div>
+        </div>
+
+
 songs": {
   "0": {
     "name": "Locals (Girls like us) [with gabby start]",

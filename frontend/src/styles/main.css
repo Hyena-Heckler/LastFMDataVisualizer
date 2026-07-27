@@ -150,6 +150,7 @@ body {
   padding: 5px;
   align-items: center;
   height: 100%;
+  overflow: hidden;
 }
 
 .chart__main, .chart__extra {
