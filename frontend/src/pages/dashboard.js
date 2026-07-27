@@ -4,7 +4,7 @@ import { addCard } from "../components/card-adder.js";
 export function setupDateDropdown() {
     console.log("Set Up Dropdown Complete");
     const dateDropdown = document.getElementById("date");
-    const container = document.getElementById("chart");
+    const container = document.getElementById("chart-container");
   
     dateDropdown.addEventListener("change", () => {
         container.innerHTML = "";
