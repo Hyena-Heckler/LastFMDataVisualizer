@@ -5,7 +5,7 @@ export function addCard(entry) {
 
   const song = store.cache.weeklyCache.songs[entry.songId];
   const card = document.createElement("div");
-  const image = song.image || "/placeholder-album.png";
+  const image = song.image || "/null-image.png";
 
   card.className = "chart__song"
   card.innerHTML = `

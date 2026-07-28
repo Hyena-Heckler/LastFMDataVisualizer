@@ -3,6 +3,7 @@
 *.done
 *.DS_Store
 *.png
+!null-image.png
 song_points_by_position.json
 song_points.json
 song_positions.json
