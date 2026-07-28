@@ -53,13 +53,15 @@ export function weekFriendlyCache(cache) {
             peak: 31,
             firstAppearance: null,
             streak: 0,
-            previousPosition: null
+            previousPosition: null,
+            lifetimePoints: 0
         };
 
         song.slice(1).forEach((songEntry, index) => {
             if (songEntry["position"] != null) {
                 const song = songs[cacheSongId];
                 song.weeks ++;
+                song.lifetimePoints += songEntry.points;
                 if (songEntry.position < song.peak) song.peak = songEntry.position;
                 
                 if (song.firstAppearance == null) song.firstAppearance = weekNames[index];
@@ -73,7 +75,9 @@ export function weekFriendlyCache(cache) {
                     points: songEntry.points,
                     weeks: song.weeks,
                     previousPosition: song.previousPosition,
-                    streak: song.streak
+                    streak: song.streak,
+                    peak: song.peak,
+                    lifetimePoints: song.lifetimePoints
                 }
 
                 song.previousPosition = songEntry.position;

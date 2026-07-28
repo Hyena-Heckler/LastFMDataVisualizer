@@ -14,7 +14,7 @@ export function addCard(entry) {
       (${
         entry.previousPosition > entry.position ? "⬆" : 
         entry.previousPosition < entry.position ? "⬇" : "↔"
-      } ${
+      }${
         entry.previousPosition != entry.position ? Math.abs(entry.position - entry.previousPosition) : ""
       })` : `★ NEW`}</h5>
     </div>
@@ -32,11 +32,10 @@ export function addCard(entry) {
     <div class="chart__main">
       <h5>${entry.points.toFixed(2)} Pts</h5>
       <h5>${entry.weeks} WOC</h5>
-      <h5>Peak: #${song.peak}</h5>
+      <h5>Peak: #${entry.peak}</h5>
     </div>
     <div class="chart__extra">
-      <h5>Year-End</h5>
-      <h5>YE Points</h5>
+      <h5>Lifetime ${entry.lifetimePoints} Pts</h5>
       <h5>Appeared First: ${song.firstAppearance}</h5>
     </div>
   `
