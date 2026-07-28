@@ -54,7 +54,7 @@ export function addCard(entry) {
 
   img.onerror = function () {
     this.onerror = null;
-    this.src = "/placeholder-album.png";
+    this.src = "/null-image.png";
   };
 
   container.appendChild(card);
