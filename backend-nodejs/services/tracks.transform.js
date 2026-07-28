@@ -47,15 +47,36 @@ export function weekFriendlyCache(cache) {
     })
 
     cache.data.slice(1).forEach((song, cacheSongId) => {
-        songs[cacheSongId] = song[0];
+        songs[cacheSongId] = {
+            ...song[0],
+            weeks: 0,
+            peak: 31,
+            firstAppearance: null,
+            streak: 0,
+            previousPosition: null
+        };
 
         song.slice(1).forEach((songEntry, index) => {
             if (songEntry["position"] != null) {
-                weeks[weekNames[index]][songEntry["position"] - 1] = {
-                    "songId": cacheSongId,
-                    "position": songEntry["position"],
-                    "points": songEntry["points"]
+                const song = songs[cacheSongId];
+                song.weeks ++;
+                if (songEntry.position < song.peak) song.peak = songEntry.position;
+                
+                if (song.firstAppearance == null) song.firstAppearance = weekNames[index];
+                
+                if (song.previousPosition == songEntry.position) song.streak++;
+                else song.streak = 1;
+                
+                weeks[weekNames[index]][songEntry.position - 1] = {
+                    songId: cacheSongId,
+                    position: songEntry.position,
+                    points: songEntry.points,
+                    weeks: song.weeks,
+                    previousPosition: song.previousPosition,
+                    streak: song.streak
                 }
+
+                song.previousPosition = songEntry.position;
             }
         });
     })

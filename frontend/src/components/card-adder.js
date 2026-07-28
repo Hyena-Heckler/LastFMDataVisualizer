@@ -8,9 +8,12 @@ export function addCard(entry) {
   card.className = "chart__song"
   card.innerHTML = `
     <div class="chart__position">
-      <h5>Streak</h5>
+      <h5>${entry.streak} Streak</h5>
       <h2>${entry.position}</h2>
-      <h5>LW+Symbol</h5>
+      <h5>(LW: ${entry.previousPosition} ${
+        entry.previousPosition < entry.position ? "⬆" : 
+        entry.previousPosition > entry.position ? "⬇" : "↔"
+      })</h5>
     </div>
     <div class="chart__icon">
       <img src=${song.image} alt=${song.name}/>
@@ -24,14 +27,14 @@ export function addCard(entry) {
       </div>
     </div>
     <div class="chart__main">
-      <h5>${entry.points.toFixed(2)}</h5>
-      <h5>Week</h5>
-      <h5>Peak</h5>
+      <h5>${entry.points.toFixed(2)} Pts</h5>
+      <h5>${entry.weeks} WOC</h5>
+      <h5>Peak: #${song.peak}</h5>
     </div>
     <div class="chart__extra">
       <h5>Year-End</h5>
       <h5>YE Points</h5>
-      <h5>First Appearance</h5>
+      <h5>Appeared First: ${song.firstAppearance}</h5>
     </div>
   `
   container.appendChild(card);
