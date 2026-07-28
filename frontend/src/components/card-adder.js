@@ -12,8 +12,8 @@ export function addCard(entry) {
       <h2>${entry.position}</h2>
       <h5>${entry.previousPosition != null ? `LW: ${entry.previousPosition} <br>
       (${
-        entry.previousPosition < entry.position ? "⬆" : 
-        entry.previousPosition > entry.position ? "⬇" : "↔"
+        entry.previousPosition > entry.position ? "⬆" : 
+        entry.previousPosition < entry.position ? "⬇" : "↔"
       } ${
         entry.previousPosition != entry.position ? Math.abs(entry.position - entry.previousPosition) : ""
       })` : `★ NEW`}</h5>
