@@ -10,10 +10,13 @@ export function addCard(entry) {
     <div class="chart__position">
       <h5>${entry.streak} Streak</h5>
       <h2>${entry.position}</h2>
-      <h5>(LW: ${entry.previousPosition} ${
+      <h5>${entry.previousPosition != null ? `LW: ${entry.previousPosition} <br>
+      (${
         entry.previousPosition < entry.position ? "⬆" : 
         entry.previousPosition > entry.position ? "⬇" : "↔"
-      })</h5>
+      } ${
+        entry.previousPosition != entry.position ? Math.abs(entry.position - entry.previousPosition) : ""
+      })` : `★ NEW`}</h5>
     </div>
     <div class="chart__icon">
       <img src=${song.image} alt=${song.name}/>
