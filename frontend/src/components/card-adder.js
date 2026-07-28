@@ -10,8 +10,8 @@ export function addCard(entry) {
     <div class="chart__position">
       <h5>${entry.streak} Streak</h5>
       <h2>${entry.position}</h2>
-      <h5>${entry.previousPosition != null ? `LW: ${entry.previousPosition} <br>
-      (${
+      <h5>${entry.previousPosition != null ? `LW: ${entry.previousPosition} <h5>
+      <h5>(${
         entry.previousPosition > entry.position ? "⬆" : 
         entry.previousPosition < entry.position ? "⬇" : "↔"
       }${
@@ -35,7 +35,7 @@ export function addCard(entry) {
       <h5>Peak: #${entry.peak}</h5>
     </div>
     <div class="chart__extra">
-      <h5>Lifetime ${entry.lifetimePoints} Pts</h5>
+      <h5>Lifetime ${entry.lifetimePoints.toFixed(2)} Pts</h5>
       <h5>Appeared First: ${song.firstAppearance}</h5>
     </div>
   `
