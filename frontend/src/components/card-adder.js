@@ -5,21 +5,32 @@ export function addCard(entry) {
 
   const song = store.cache.weeklyCache.songs[entry.songId];
   const card = document.createElement("div");
+  const image = song.image || "/placeholder-album.png";
+
   card.className = "chart__song"
   card.innerHTML = `
     <div class="chart__position">
       <h5>${entry.streak} Streak</h5>
       <h2>${entry.position}</h2>
-      <h5>${entry.previousPosition != null ? `LW: ${entry.previousPosition} <h5>
-      <h5>(${
-        entry.previousPosition > entry.position ? "⬆" : 
-        entry.previousPosition < entry.position ? "⬇" : "↔"
-      }${
-        entry.previousPosition != entry.position ? Math.abs(entry.position - entry.previousPosition) : ""
-      })` : `★ NEW`}</h5>
+      ${entry.previousPosition != null 
+        ? `
+          <h5>LW: ${entry.previousPosition}</h5>
+          <h5>(${
+            entry.previousPosition > entry.position ? "⬆" : 
+            entry.previousPosition < entry.position ? "⬇" : "↔"
+          }${
+            entry.previousPosition != entry.position 
+              ? Math.abs(entry.position - entry.previousPosition) 
+              : ""
+          })</h5>` 
+        : `<h5>★ NEW</h5>`
+      }
     </div>
     <div class="chart__icon">
-      <img src=${song.image} alt=${song.name}/>
+      <img 
+        src="${image}" 
+        alt="${song.name}"
+      />
     </div>
     <div class="chart__identifier">
       <h3>${song.name}</h3>
@@ -39,6 +50,13 @@ export function addCard(entry) {
       <h5>Appeared First: ${song.firstAppearance}</h5>
     </div>
   `
+  const img = card.querySelector(".chart__icon img");
+
+  img.onerror = function () {
+    this.onerror = null;
+    this.src = "/placeholder-album.png";
+  };
+
   container.appendChild(card);
 }
 
