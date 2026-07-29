@@ -11,14 +11,13 @@ export function computeStatistics() {
 
     ranks.innerHTML = `<h2>${ranking}</h2> <ol>`;
     values.forEach((entry) => {
-        console.log(entry);
-         ranks.innerHTML += `<li>${entry.song.name} (${entry.value})</li>`;
+        ranks.innerHTML += `<li>${entry.song.name} (${entry.value})</li>`;
     })
 
     ranks.innerHTML += `</ol>`;
-  })
 
-  container.appendChild(ranks);
+    container.appendChild(ranks);
+  })
 }
 
 /*
