@@ -5,12 +5,12 @@ export function computeStatistics() {
   container.innerHTML = ``;
   const statisticsInfo = store.cache.statisticsCache.data;
 
-  Object.entries(statisticsInfo).forEach(([ranking, values]) => {
+  statisticsInfo.forEach((ranking) => {
     const ranks = document.createElement("div");
     ranks.className = "statistics__category";
 
-    let html = `<h2>${ranking}</h2> <ol>`;
-    values.slice(0, 10).forEach((entry) => {
+    let html = `<h2>${ranking.title}</h2> <ol>`;
+    ranking.values.slice(0, 10).forEach((entry) => {
         html += `<li>${entry.song.name} (${entry.value})</li>`;
     })
     html += `</ol>`;
