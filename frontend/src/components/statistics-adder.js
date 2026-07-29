@@ -5,7 +5,7 @@ export function computeStatistics() {
 
   const statisticsInfo = store.cache.statisticsCache.data;
 
-  statisticsInfo.foreach(([ranking, values]) => {
+  statisticsInfo.forEach(([ranking, values]) => {
     const ranks = document.createElement("div");
     ranks.className = "statistics__category";
 
