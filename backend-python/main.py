@@ -36,6 +36,9 @@ class CombinedData(BaseModel):
 class AlbumColorRequest(BaseModel):
     payload: List[Dict[str, Any]]
 
+class StatisticsRequest(BaseModel):
+    payload: list[list[Any]]
+
 @app.post("/prepare-cached")
 def process(request: ProcessRequest):
     payload = [w.model_dump() for w in request.payload]
@@ -71,7 +74,7 @@ def render_video(request: ProcessRequest):
     }
 
 @app.post("/calculate-statistics")
-def process(request: ProcessRequest):
+def process(request: StatisticsRequest):
     payload = [w.model_dump() for w in request.payload]
     result = prep_data("get_statistics", payload)
     return {"status": "ok", "data": result}
