@@ -9,12 +9,12 @@ export function computeStatistics() {
     const ranks = document.createElement("div");
     ranks.className = "statistics__category";
 
-    let html = `<h2>${ranking.title}</h2> <ol>`;
+    let html = `<h2>${ranking.title}</h2> ${ranking.size ? `<ol>` : `<ul>`}`;
 
     ranking.rows.slice(0, ranking.size ?? ranking.rows.length).forEach((entry) => {
         html += `<li>${entry.song.name} (${entry.value})</li>`;
     })
-    html += `</ol>`;
+    html += `${ranking.size ? `</ol>` : `</ul>`}`;
     ranks.innerHTML = html; 
 
     container.appendChild(ranks);
