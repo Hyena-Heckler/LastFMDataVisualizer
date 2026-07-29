@@ -48,7 +48,7 @@ def process(request: ProcessRequest):
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
     print("entered route")
-    payload = request.payload
+    payload = [w.model_dump() for w in request.payload]
     print("payload dumped")
 
     def background_render():
@@ -75,7 +75,7 @@ def render_video(request: ProcessRequest):
 
 @app.post("/calculate-statistics")
 def process(request: StatisticsRequest):
-    payload = [w.model_dump() for w in request.payload]
+    payload = request.payload
     result = prep_data("get_statistics", payload)
     return {"status": "ok", "data": result}
 
