@@ -121,12 +121,12 @@ def add_extra_info(cached_song_data):
         for song in songs_info
     ]
 
-    statistics["Debuts"] = []
+    statistics["Number One Debuts"] = []
     for song in song_position_data[1:]:
         for index, pos in enumerate(song[1:]):
             if pos is not None:
                 if pos == 1:
-                    statistics["numberOneDebut"].append({
+                    statistics["Number One Debuts"].append({
                         "song": song[0],
                         "value": song_position_data[0][index + 1],
                     })
