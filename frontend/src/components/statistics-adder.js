@@ -11,7 +11,8 @@ export function computeStatistics() {
 
     ranks.innerHTML = `<h2>${ranking}</h2> <ol>`;
     values.forEach((entry) => {
-         ranks.innerHTML += `<li>${entry.song.name} (${song.value})</li>`;
+        console.log(entry);
+         ranks.innerHTML += `<li>${entry.song.name} (${entry.value})</li>`;
     })
 
     ranks.innerHTML += `</ol>`;
