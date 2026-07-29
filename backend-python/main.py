@@ -70,6 +70,11 @@ def render_video(request: ProcessRequest):
         "jobId": request.jobId
     }
 
+@app.post("/calculate-statistics")
+def process(request: ProcessRequest):
+    payload = [w.model_dump() for w in request.payload]
+    result = prep_data("get_statistics", payload)
+    return {"status": "ok", "data": result}
 
 
 @app.get("/status/{job_id}")

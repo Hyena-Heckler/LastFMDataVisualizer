@@ -141,15 +141,6 @@ def get_video(cached_song_data, path):
                 for song_data in cached_song_data[1:]
             ]
         ]
-        song_points_by_position_data = [
-            cached_song_data[0],
-            *[
-                [song_data[0], *list(map(lambda x:x['points'], song_data[1:]))]
-                for song_data in cached_song_data[1:]
-            ]
-        ]
-
-        add_extra_info(song_points_by_position_data, song_position_data)
         r2key = graph_data(song_position_data, path)
         return r2key
 
@@ -157,9 +148,15 @@ def get_video(cached_song_data, path):
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
+def get_statistics(cached_song_data):
+    return add_extra_info(cached_song_data)
+
 def prep_data(command, payload, video_path = None, job_id = None):
     if command == "prepare_cached_data":
         return prepare_cached_data(payload)
+
+    if command == "get_statistics":
+        return add_extra_info(payload)
 
     if command == "get_video":
         output_path = video_path / f"{job_id}.mp4"

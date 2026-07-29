@@ -16,6 +16,15 @@ export const prepareCached = async (payload) => {
   return res.data
 }
 
+// Calculate Statistics
+export const calculateStatistics = async (payload) => {
+  const res = await axios.post(`${getPythonUrl()}/calculate-statistics`, {
+    payload
+  })
+
+  return res.data
+}
+
 // Render Video
 export const renderVideo = async (payload, jobId) => {
   const res = await axios.post(`${getPythonUrl()}/render-video`, {
@@ -41,3 +50,4 @@ export const getAlbumColor = async (payload) => {
   })
   return res.data
 }
+

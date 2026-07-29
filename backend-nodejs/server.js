@@ -93,12 +93,14 @@ app.post("/download-cache", async (req, res) => {
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const arrayChartJson = await prepareCached(organizedDataJson);
     const weeklyChartJson = await weekFriendlyCache(arrayChartJson);
+    const userStatistics = await calculateStatistics(arrayChartJson);
     console.log("Finished Preparing File for Cache");
 
     res.json(
       {
         normalCache: arrayChartJson,
-        weeklyCache: weeklyChartJson
+        weeklyCache: weeklyChartJson,
+        statisticsCache: userStatistics
       });
   } catch (err) {
     console.error(err);

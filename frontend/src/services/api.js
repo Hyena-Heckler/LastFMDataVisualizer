@@ -18,6 +18,22 @@ export async function fetchCache() {
   store.cache = await res.json();
 }
 
+export async function fetchStatistics() {
+  const res = await fetch(`${backend_server}//calculate-statistics`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user: store.user
+    })
+  });
+
+  store.cache = await res.json();
+}
+
+""
+
 export async function updateUser() {
   // Step 1: Start the updating process
   const res = await fetch(`${backend_server}/update`, {

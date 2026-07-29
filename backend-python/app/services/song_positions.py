@@ -57,7 +57,10 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
     sheet = {}  # stores the data
     logging.info("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):
-        logging.info("First Half: %f", index/len(playlist_history))
+        current_percentage = (index * 100) // len(playlist_history)
+        previous_percentage = ((index - 1) * 100) // len(playlist_history)
+        if current_percentage != previous_percentage:
+            print(f"First Half: {current_percentage}%", file=sys.stderr, flush=True)
         for song_index, song in enumerate(playlist['songs']):
             song_key = (song["name"], tuple(song["artists"]), tuple(song["album"]))
             if song_key not in sheet:  # intializes song's history
@@ -95,6 +98,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
             arr[playlist_idx] = value
 
         track[attribute] = arr
+
     
     logging.info("Midway Process 2")
 
@@ -105,7 +109,10 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
         final_sheet[0].append(format_date(playlist['date']))
     for index, track in enumerate(sheet): # formats the name of the title in the chart and adds the track image for future purposes
         # logging.info(track['name'])
-        logging.info("Second Half: %f", index/len(sheet))
+        current_percentage = (index * 100) // len(sheet)
+        previous_percentage = ((index - 1) * 100) // len(sheet)
+        if current_percentage != previous_percentage:
+            print(f"Second Half: {current_percentage}%", file=sys.stderr, flush=True)
         column = [{
             "name": track['name'],
             "artists": track['artists'],
