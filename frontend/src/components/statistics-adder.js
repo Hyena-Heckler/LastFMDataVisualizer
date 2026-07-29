@@ -2,7 +2,7 @@ import {store} from "../store.js";
 
 export function computeStatistics() {
   const container = document.getElementById("statistics-container");
-
+  container.innerHTML = ``;
   const statisticsInfo = store.cache.statisticsCache.data;
 
   Object.entries(statisticsInfo).forEach(([ranking, values]) => {
@@ -10,7 +10,7 @@ export function computeStatistics() {
     ranks.className = "statistics__category";
 
     ranks.innerHTML = `<h2>${ranking}</h2> <ol>`;
-    values.forEach((entry) => {
+    values.slice(0, 10).forEach((entry) => {
         ranks.innerHTML += `<li>${entry.song.name} (${entry.value})</li>`;
     })
 

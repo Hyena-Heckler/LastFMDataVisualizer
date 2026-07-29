@@ -186,6 +186,10 @@ body {
   max-width: 300px;
 }
 
+.statistics__category ol li {
+  list-style-type: decimal;
+}
+
 /* About Page CSS Styles */
 
 .about {
