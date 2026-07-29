@@ -30,30 +30,30 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["total_points"], reverse=True)
 
-    statistics["rankedPoints"] = [
+    statistics["Total Points"] = [
         {
             "song": song["song"],
-            "totalPoints": song["total_points"]
+            "value": song["total_points"]
         }
         for song in songs_info
     ]
     
     songs_info.sort(key=lambda n: n["total_weeks"], reverse=True)
 
-    statistics["rankedWeeks"] = [
+    statistics["Total Weeks"] = [
         {
             "song": song["song"],
-            "totalWeeks": song["total_weeks"]
+            "value": song["total_weeks"]
         }
         for song in songs_info
     ]
 
     songs_info.sort(key=lambda n: n["points_per_week"], reverse=True)
 
-    statistics["rankedPointsPerWeek"] = [
+    statistics["Total Points Per Week"] = [
         {
             "song": song["song"],
-            "pointsPerWeek": song["points_per_week"]
+            "value": song["points_per_week"]
         }
         for song in songs_info
     ]
@@ -77,58 +77,58 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_number_one"], reverse=True)
 
-    statistics["rankedNumberOne"] = [
+    statistics["Longest Number Ones"] = [
         {
             "song": song["song"],
-            "weeksNumberOne": song["weeks_number_one"]
+            "value": song["weeks_number_one"]
         }
         for song in songs_info
     ]
 
     songs_info.sort(key=lambda n: n["weeks_top_three"], reverse=True)
-    statistics["rankedTopThree"] = [
+    statistics["Longest Top Three"] = [
         {
             "song": song["song"],
-            "weeksTopThree": song["weeks_top_three"]
+            "value": song["weeks_top_three"]
         }
         for song in songs_info
     ]
 
     songs_info.sort(key=lambda n: n["weeks_top_five"], reverse=True)
-    statistics["rankedTopFive"] = [
+    statistics["Longest Top Five"] = [
         {
             "song": song["song"],
-            "weeksTopFive": song["weeks_top_five"]
+            "value": song["weeks_top_five"]
         }
         for song in songs_info
     ]
 
     songs_info.sort(key=lambda n: n["weeks_top_ten"], reverse=True)
-    statistics["rankedTopTen"] = [
+    statistics["Longest Top Ten"] = [
         {
             "song": song["song"],
-            "weeksTopTen": song["weeks_top_ten"]
+            "value": song["weeks_top_ten"]
         }
         for song in songs_info
     ]
 
     songs_info.sort(key=lambda n: n["weeks_number_two"], reverse=True)
-    statistics["rankedStuckAtTwo"] = [
+    statistics["Longest Stuck at Two"] = [
         {
             "song": song["song"],
-            "weeksNumberTwo": song["weeks_number_two"]
+            "value": song["weeks_number_two"]
         }
         for song in songs_info
     ]
 
-    statistics["numberOneDebut"] = []
+    statistics["Debuts"] = []
     for song in song_position_data[1:]:
         for index, pos in enumerate(song[1:]):
             if pos is not None:
                 if pos == 1:
                     statistics["numberOneDebut"].append({
                         "song": song[0],
-                        "date": song_position_data[0][index + 1],
+                        "value": song_position_data[0][index + 1],
                     })
                 break
 

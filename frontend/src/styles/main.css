@@ -166,6 +166,26 @@ body {
   border-radius: 0 1rem 0 0;
 }
 
+/* Overall Charts #FFC145 */
+
+.statistics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.statistics__category {
+  background-color: #FFC145;
+  list-style-position: inside;
+  padding: 10px;
+  margin: 15px;
+
+  flex-grow: 1;
+  flex-basis: 200px;
+  max-width: 300px;
+}
+
 /* About Page CSS Styles */
 
 .about {

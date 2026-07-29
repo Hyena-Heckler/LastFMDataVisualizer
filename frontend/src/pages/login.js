@@ -1,5 +1,6 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
+import {computeStatistics} from "../components/statistics-adder.js";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
@@ -22,6 +23,8 @@ export function setupLogin() {
       await fetchCache();
 
       setupDateDropdown();
+
+      computeStatistics();
 
       console.log("Found User");
 
