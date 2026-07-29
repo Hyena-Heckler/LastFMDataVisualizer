@@ -10,7 +10,7 @@ export function computeStatistics() {
     ranks.className = "statistics__category";
 
     let html = `<h2>${ranking.title}</h2> <ol>`;
-    ranking.values.slice(0, 10).forEach((entry) => {
+    ranking.rows.slice(0, 10).forEach((entry) => {
         html += `<li>${entry.song.name} (${entry.value})</li>`;
     })
     html += `</ol>`;
