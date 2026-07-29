@@ -2,6 +2,7 @@ import {store} from "../store.js";
 
 export function computeStatistics() {
   const container = document.getElementById("statistics-container");
+  container.innerHTML = ``;
   const statisticsInfo = store.cache.statisticsCache.data;
 
   Object.entries(statisticsInfo).forEach(([ranking, values]) => {

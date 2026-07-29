@@ -182,8 +182,9 @@ body {
   margin: 15px;
 
   flex-grow: 1;
-  flex-basis: 200px;
-  max-width: 300px;
+  flex-basis: 300px;
+  max-width: 400px;
+  
 }
 
 .statistics__category ol li {
