@@ -5,7 +5,7 @@ export function computeStatistics() {
 
   const statisticsInfo = store.cache.statisticsCache.data;
 
-  statisticsInfo.forEach(([ranking, values]) => {
+  Object.entries(statisticsInfo).forEach(([ranking, values]) => {
     const ranks = document.createElement("div");
     ranks.className = "statistics__category";
 
@@ -17,7 +17,7 @@ export function computeStatistics() {
     ranks.innerHTML += `</ol>`;
   })
 
-  container.appendChild(statisticsInfo);
+  container.appendChild(ranks);
 }
 
 /*
