@@ -48,7 +48,7 @@ def process(request: ProcessRequest):
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
     print("entered route")
-    payload = [w.model_dump() for w in request.payload]
+    payload = request.payload
     print("payload dumped")
 
     def background_render():
