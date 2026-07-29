@@ -154,7 +154,7 @@ def add_extra_info(cached_song_data):
         for index, pos in enumerate(song[1:]):
             if pos is not None:
                 if pos == 1:
-                    debutObject.rows.append({
+                    debutObject["rows"].append({
                         "song": song[0],
                         "value": song_position_data[0][index + 1],
                     })

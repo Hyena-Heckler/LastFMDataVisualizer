@@ -3,7 +3,6 @@ import {store} from "../store.js";
 export function computeStatistics() {
   const container = document.getElementById("statistics-container");
   container.innerHTML = ``;
-  console.logs(store.cache.statisticsCache);
   const statisticsInfo = store.cache.statisticsCache.data;
 
   statisticsInfo.forEach((ranking) => {
