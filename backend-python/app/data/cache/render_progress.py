@@ -24,5 +24,5 @@ def get(job_id):
         "job_id": job_id,
         "ready": False,
         "progress": 0.0,
-        "debug_size": len(progress)
+        "debug_size": progress.keys()
     })
