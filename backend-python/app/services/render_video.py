@@ -17,6 +17,7 @@ import boto3
 import psutil
 import sys
 from dotenv import load_dotenv
+from app.data.cache.render_progress import start, update, complete
 
 def log_ram(tag=""):
     process = psutil.Process(os.getpid())
@@ -162,79 +163,118 @@ def graph_data(data, video_output_path):
     fig, plot_frame, plot_data = setup_axes(days, num_positions_shown, graph_color)
     days = build_days(days, intro_outro_length)
 
+    song_rank_data = []
+    for song in data[1:]:
+        valid_positions = [x for x in song[1:] if x is not None]
+        if not valid_positions or min(valid_positions) > 15:
+            continue
+        
+        for i, v in enumerate(song[1:], start = 1):
+            if v is not None and v > 15:
+                if i - 1 < 1 or song[i - 1] is None or song[i - 1] > 15:
+                    if i + 1 >= len(song) or song[i + 1] is None or song[i + 1] > 15:
+                        song[i] = None
+        song_rank_data.append(song)
+
     text_labels = {}
     segments = []
-    colors = []
-    for song_id, song in enumerate(data[1:]):
+    line_colors = []
+
+    all_point_days = []
+    all_point_ranks = []
+    all_point_colors = []
+
+    
+
+    for song_id, song in enumerate(song_rank_data):
         # lines
         ranks = create_smooth_lines(song, intro_outro_length)
         points = np.column_stack([days, ranks])  # (x, y)
         segments.append(points)
         
-        colors.append(song[0]["color"])
+        line_colors.append(song[0]["color"])
 
-        # points
+        # points - MAYBE MAKE THIS INTO A SCATTER
         point_days, point_ranks  = create_points(song, intro_outro_length)
-        plot_data.plot(point_days, point_ranks, 'o')  # creates the points with 'o' making it not  a line graph
-
+        all_point_days.extend(point_days)
+        all_point_ranks.extend(point_ranks)
+        all_point_colors.extend(
+            [song[0]["color"]] * len(point_days)
+        )
+        
         # annotations
         create_text(text_labels, plot_data, graph_color, song, song_id)
+
     lc = LineCollection(
         segments,
-        colors=colors,
+        colors=line_colors,
         linewidths=3
     )
-
     plot_data.add_collection(lc)
+
+    plot_data.scatter(
+        all_point_days,
+        all_point_ranks,
+        c=all_point_colors
+    )
     
     active_songs = [[] for _ in range(len(data[0][1:]))]
-    for song_id, song in enumerate(data[1:]):
+    for song_id, song in enumerate(song_rank_data):
         first = None
         last = None
 
-        for i, v in enumerate(song[1:]):
-            if v is not None:
+        for i, v in enumerate(song[1:], start = 1):
+            if v is not None: # and v <= 15:
                 if first is None:
                     first = i
                 last = i
 
-        for valid in range(first, last+1):
+        for valid in range(first - 1, min(last + 4, len(active_songs) - 1)):
             active_songs[valid].append(song_id)
 
     total_frames = speed_per_date * (len(days) - 1) - intro_outro_length + 1
+
+    start(video_output_path)
     def animate(frame):
         xdist_per_date = frame / speed_per_date  # adjusts speed to take X frames to reach the next day
         plot_data.set_xlim([xdist_per_date - 3.5, xdist_per_date])  # actually data points
         plot_frame.set_xlim([xdist_per_date - 3.5 - intro_outro_length,
                              xdist_per_date + 3.5 - intro_outro_length])  # frame that changes the labels
 
-        last_graph_date_value = int(np.floor(xdist_per_date))  # last actual playlist date
-        next_graph_date_value = int(np.ceil(xdist_per_date))  # next actual playlist date
+        last_graph_date_value = int(np.floor(xdist_per_date))  # last actual week date
+        next_graph_date_value = int(np.ceil(xdist_per_date))  # next actual week date
 
         # progress meter
         current_percentage = (frame * 100) // total_frames
         previous_percentage = ((frame - 1) * 100) // total_frames
         if current_percentage != previous_percentage:
-            print(f"{current_percentage}%", file=sys.stderr, flush=True)
-            log_ram("START graph_data")
+            visible_count = sum(
+                label.get_visible()
+                for label in text_labels.values()
+            )
+            update(video_output_path, frame / total_frames)
+            print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
+
         for song_id in active_songs[min(last_graph_date_value, len(data[0][1:]) - 1)]:  # goes through every song in data for labels
             song_label = text_labels[song_id]
-            song = data[song_id+1]
-
+            song = song_rank_data[song_id]
+            
             # checks to see if the current date (previous_value) is in the initial date or before
             if next_value <= 0:  # checks to see if it has not started yet
                 if song[1] is not None and song[1] <= 15:  # if the intro song's position is on the charts, plot  it
                     song_label.set_position((xdist_per_date + ann_x_shift, song[1] + ann_y_shift))
                     song_label.stale = True
-                    song_label.set_visible(True)
+                    if not song_label.get_visible():
+                        song_label.set_visible(True)
             # checks to see if the current data (previous_value) is in the final date or over
             elif previous_value >= len(song) - 2:
                 if song[-1] is not None and song[-1] <= 15:  # if the intro song's position is on the charts, plot  it
                     song_label.set_position((xdist_per_date + ann_x_shift, song[-1] + ann_y_shift))
-                    song_label.set_visible(True)
+                    if not song_label.get_visible():
+                        song_label.set_visible(True)
             # math using slope and the distance from the closest point to the left to determine where it should be
             elif (next_value + 1 < len(song) and song[next_value] is not None and
                   song[next_value + 1] is not None and
@@ -243,15 +283,19 @@ def graph_data(data, video_output_path):
                          next_graph_date_value - xdist_per_date)
                 if ydist_per_date <= 15:
                     song_label.set_position((xdist_per_date + ann_x_shift, ydist_per_date + ann_y_shift))
-                    song_label.set_visible(True)
+                    if not song_label.get_visible():
+                        song_label.set_visible(True)
                 else:
-                    song_label.set_visible(False)
+                    if song_label.get_visible():
+                        song_label.set_visible(False)
             # checks to see if it is a single point
             elif xdist_per_date - intro_outro_length == next_value < len(song) - 1 and song[next_value + 1] is not None and song[next_value + 1] <= 15:
                 song_label.set_position((xdist_per_date + ann_x_shift, song[next_value + 1] + ann_y_shift))
-                song_label.set_visible(True)
+                if not song_label.get_visible():
+                    song_label.set_visible(True)
             elif song_label.get_position()[0] < xdist_per_date - 3.5:
-                song_label.set_visible(False)
+                if song_label.get_visible():
+                    song_label.set_visible(False)
 
     ani = animation.FuncAnimation(fig, animate, frames=total_frames,  blit=False, interval=1)  # how long it lasts in relation to the framerate and number of days
 
@@ -270,33 +314,51 @@ def graph_data(data, video_output_path):
         ]
     )
 
+    complete(video_output_path)
     ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
-    
-    object_name = f"videos/{Path(video_output_path).name}"
-    upload_to_r2(video_output_path, object_name)
 
-    if os.path.exists(video_output_path):
-        os.remove(video_output_path)
+    if ENVIRONMENT == "production":
+        object_name = f"videos/{Path(video_output_path).name}"
 
-    return object_name
-    # t3 = time.perf_counter()
+        upload_to_r2(video_output_path, object_name)
 
-    # if ENVIRONMENT == "development":
-    #     BASE_DIR = Path(__file__).resolve().parents[1]
-    #     efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
-    #     with open(efficiency_output_path, "r") as f:
-    #         efficency_data = json.load(f)
+        if os.path.exists(video_output_path):
+            os.remove(video_output_path)
 
-    #     efficency_data.append({
-    #         "fps": f"{total_frames / (t3 - t2):.2f}",
-    #         "time": f"{t3 - t2:.2f}s",
-    #         "rendered_frames": total_frames,
-    #         "timestamp": datetime.now().isoformat()
+        return object_name
 
-    #     })
+    t3 = time.perf_counter()
 
-    #     with open(efficiency_output_path, "w") as f:
-    #         json.dump(efficency_data, f, indent=2)
-    # return str(video_output_path)
-        #plt.show()
+    if ENVIRONMENT == "development":
+        BASE_DIR = Path(__file__).resolve().parents[1]
+        efficiency_output_path = BASE_DIR / "data" / "cache" / "render_efficiency.json"
+        with open(efficiency_output_path, "r") as f:
+            efficency_data = json.load(f)
 
+        efficency_data.append({
+            "fps": f"{total_frames / (t3 - t2):.2f}",
+            "time": f"{t3 - t2:.2f}s",
+            "rendered_frames": total_frames,
+            "timestamp": datetime.now().isoformat()
+
+        })
+
+        with open(efficiency_output_path, "w") as f:
+            json.dump(efficency_data, f, indent=2)
+
+if __name__ == "__main__":
+    BASE_DIR = Path(__file__).resolve().parents[2]
+    cache_file = BASE_DIR / "app" / "data" / "cache" / "Data.json"
+    video_output_path = BASE_DIR / "temp" / "videos" / "output.mp4"
+
+    with open(cache_file, "r", encoding="utf-8") as f:
+        cache_data = json.load(f)
+    data = cache_data["normalCache"]["data"]
+    song_position_data = [
+        data[0],
+        *[
+            [song_data[0], *list(map(lambda x:x['position'], song_data[1:]))]
+            for song_data in data[1:]
+        ]
+    ]
+    graph_data(song_position_data, video_output_path)

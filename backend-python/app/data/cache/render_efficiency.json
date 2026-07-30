@@ -399,5 +399,193 @@
     "time": "175.03s",
     "rendered_frames": 3150,
     "timestamp": "2026-04-29T12:22:24.420142"
+  },
+  {
+    "fps": "17.67",
+    "time": "183.36s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T00:45:07.724572"
+  },
+  {
+    "fps": "17.51",
+    "time": "185.02s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T01:33:16.812631",
+    "note": "added if statements to the set visible statement in animate loop"
+  },
+  {
+    "fps": "15.66",
+    "time": "206.88s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T01:51:01.384011",
+    "note": "tried optimizing active songs"
+  },
+  {
+    "fps": "24.00",
+    "time": "134.98s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T01:55:47.624317",
+    "note": "tested skipping song text labels"
+  },
+  {
+    "fps": "30.68",
+    "time": "105.62s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:09:09.422956",
+    "note": "avoids creation of lines if never visible"
+  },
+  {
+    "fps": "18.99",
+    "time": "170.58s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:12:51.099534"
+  },
+  {
+    "fps": "7.81",
+    "time": "414.85s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:28:08.613198"
+  },
+  {
+    "fps": "19.81",
+    "time": "163.59s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:31:10.820659"
+  },
+  {
+    "fps": "17.51",
+    "time": "185.00s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:36:17.540534"
+  },
+  {
+    "fps": "25.87",
+    "time": "125.25s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:39:39.496734"
+  },
+  {
+    "fps": "24.75",
+    "time": "130.93s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:43:40.742871"
+  },
+  {
+    "fps": "21.67",
+    "time": "149.52s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:50:24.843237"
+  },
+  {
+    "fps": "20.84",
+    "time": "155.49s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T02:54:31.547921"
+  },
+  {
+    "fps": "22.23",
+    "time": "145.72s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:11:22.911591"
+  },
+  {
+    "fps": "22.33",
+    "time": "145.06s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:21:42.869329"
+  },
+  {
+    "fps": "21.68",
+    "time": "149.42s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:30:57.370018"
+  },
+  {
+    "fps": "21.38",
+    "time": "151.56s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:35:59.633859"
+  },
+  {
+    "fps": "28.44",
+    "time": "113.93s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:38:27.572421",
+    "note": "Fully Functional, trim data to not include useless points"
+  },
+  {
+    "fps": "28.21",
+    "time": "114.85s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:45:14.478424",
+    "note": "Fully Functional, trim data to not include useless points"
+  },
+  {
+    "fps": "32.62",
+    "time": "99.33s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:52:09.180113",
+    "note": "Removes lines"
+  },
+  {
+    "fps": "40.47",
+    "time": "80.06s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T03:54:19.056396",
+    "note": "Removes lines and points"
+  },
+  {
+    "fps": "32.16",
+    "time": "100.74s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:00:22.667696"
+  },
+  {
+    "fps": "33.79",
+    "time": "95.90s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:04:26.644400",
+    "note": "Fully Functional, turn points into one single scatter"
+  },
+  {
+    "fps": "49.39",
+    "time": "65.60s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:07:46.713199",
+    "note": "Removes labels"
+  },
+  {
+    "fps": "38.62",
+    "time": "83.89s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:09:45.360835",
+    "note": "Removes lines"
+  },
+  {
+    "fps": "33.14",
+    "time": "97.77s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:14:51.152044",
+    "note": "Fully Functional, rasterized text"
+  },
+  {
+    "fps": "32.29",
+    "time": "100.34s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:22:39.136499",
+    "note": "Fully Functional, smarter positioning"
+  },
+  {
+    "fps": "34.21",
+    "time": "94.70s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:25:51.881750",
+    "note": "Fully Functional (Not good), skipped every other frame"
+  },
+  {
+    "fps": "33.50",
+    "time": "96.72s",
+    "rendered_frames": 3240,
+    "timestamp": "2026-07-30T04:31:37.162497"
   }
 ]
