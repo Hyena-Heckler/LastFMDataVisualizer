@@ -315,7 +315,6 @@ def graph_data(data, video_output_path, job_id):
         ]
     )
 
-    complete(job_id)
     ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
 
     if ENVIRONMENT == "production":
@@ -326,6 +325,7 @@ def graph_data(data, video_output_path, job_id):
         if os.path.exists(video_output_path):
             os.remove(video_output_path)
 
+        complete(job_id)
         return object_name
 
     t3 = time.perf_counter()
@@ -343,6 +343,7 @@ def graph_data(data, video_output_path, job_id):
             "timestamp": datetime.now().isoformat()
 
         })
+        complete(job_id)
 
         with open(efficiency_output_path, "w") as f:
             json.dump(efficency_data, f, indent=2)

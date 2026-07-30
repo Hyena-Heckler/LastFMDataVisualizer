@@ -132,7 +132,7 @@ def prepare_cached_data(history):
         sys.exit(1)
     
 
-def get_video(cached_song_data, path):
+def get_video(cached_song_data, path, job_id):
     try:
         song_position_data = [
             cached_song_data[0],
@@ -141,7 +141,7 @@ def get_video(cached_song_data, path):
                 for song_data in cached_song_data[1:]
             ]
         ]
-        r2key = graph_data(song_position_data, path)
+        r2key = graph_data(song_position_data, path, job_id)
         return r2key
 
     except Exception as e:
