@@ -44,7 +44,7 @@ body {
   font-size: 1rem;
 }
 
-.introduction__highlight {
+.highlight {
   color: #8CD867;
 }
 
@@ -108,6 +108,18 @@ body {
   background-color: #FFCAD4;
 }
 
+.chart__position-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.chart__position-header h5 {
+    margin: 0;
+    position: relative;
+    bottom: 3px; /* adjust as needed */
+}
+
 .chart__icon {
   grid-column: 2;
   grid-row: 1 / 4;
@@ -150,6 +162,7 @@ body {
   padding: 5px;
   align-items: center;
   height: 100%;
+  overflow: hidden;
 }
 
 .chart__main, .chart__extra {
@@ -165,6 +178,31 @@ body {
   border-radius: 0 1rem 0 0;
 }
 
+/* Overall Charts #FFC145 */
+
+.statistics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.statistics__category {
+  background-color: #FFC145;
+  list-style-position: inside;
+  padding: 10px;
+  margin: 15px;
+
+  flex-grow: 1;
+  flex-basis: 300px;
+  max-width: 400px;
+  
+}
+
+.statistics__category ol li {
+  list-style-type: decimal;
+}
+
 /* About Page CSS Styles */
 
 .about {
@@ -175,10 +213,14 @@ body {
 }
 
 .about__description {
-  padding: 15px 0;
+  margin: 15px 0;
   color: #363537;
 }
 
+.about__roundmap {
+  margin: 15px 0 0 0;
+  color: #363537;
+}
 
 
 

@@ -1,8 +1,22 @@
-import numpy as np
-import json
-import sys
-# just to see some info for now
-def add_extra_info(data, song_position_data):
+def add_extra_info(cached_song_data):
+    data = [
+        cached_song_data[0],
+        *[
+            [song_data[0], *list(map(lambda x:x['points'], song_data[1:]))]
+            for song_data in cached_song_data[1:]
+        ]
+    ]
+    song_position_data = [
+        cached_song_data[0],
+        *[
+            [song_data[0], *list(map(lambda x:x['position'], song_data[1:]))]
+            for song_data in cached_song_data[1:]
+        ]
+    ]
+
+    # overall statistics object
+    statistics = []
+
     # songs info
     songs_info = []
     for song in data[1:]:
@@ -15,26 +29,48 @@ def add_extra_info(data, song_position_data):
         })
 
     songs_info.sort(key=lambda n: n["total_points"], reverse=True)
-    print("Total Points", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["total_points"]}', file=sys.stderr)
 
-    print("\n", file=sys.stderr)
+    statistics.append({
+        "title": "Total Points",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": round(song["total_points"], 2)
+            }
+            for song in songs_info
+        ]
+    })
+    
     
     songs_info.sort(key=lambda n: n["total_weeks"], reverse=True)
-    print("Total Weeks", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["total_weeks"]}', file=sys.stderr)
 
-    print("\n", file=sys.stderr)
+    statistics.append({
+        "title": "Total Weeks",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": song["total_weeks"]
+            }
+            for song in songs_info
+        ]
+    })
 
     songs_info.sort(key=lambda n: n["points_per_week"], reverse=True)
-    print("Points Per Week", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["points_per_week"]}', file=sys.stderr)
 
-    print("\n", file=sys.stderr)
-
+    statistics.append({
+        "title": "Total Points Per Week",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": round(song["points_per_week"], 2)
+            }
+            for song in songs_info
+        ]
+    })
+    
     songs_info = []
     for song in song_position_data[1:]:
         only_points = list(filter(None, song[1:]))
@@ -53,49 +89,87 @@ def add_extra_info(data, song_position_data):
         })
 
     songs_info.sort(key=lambda n: n["weeks_number_one"], reverse=True)
-    print("Total Weeks at Number One", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_number_one"]}', file=sys.stderr)
-
-    print("\n", file=sys.stderr)
+    statistics.append({
+        "title": "Total Weeks at #1",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": song["weeks_number_one"]
+            }
+            for song in songs_info
+        ]
+    })
+    
 
     songs_info.sort(key=lambda n: n["weeks_top_three"], reverse=True)
-    print("Total Weeks Top Three", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_three"]}', file=sys.stderr)
-
-    print("\n", file=sys.stderr)
+    statistics.append({
+        "title": "Total Weeks in Top 3",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": song["weeks_top_three"]
+            }
+            for song in songs_info
+        ]
+    })
 
     songs_info.sort(key=lambda n: n["weeks_top_five"], reverse=True)
-    print("Total Weeks Top Five", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_five"]}', file=sys.stderr)
-
-    print("\n", file=sys.stderr)
+    statistics.append({
+        "title": "Total Weeks in Top 5",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": song["weeks_top_five"]
+            }
+            for song in songs_info
+        ]
+    })
 
     songs_info.sort(key=lambda n: n["weeks_top_ten"], reverse=True)
-    print("Total Weeks Top Ten", file=sys.stderr)
-    for index, song in enumerate(songs_info[:15]):
-        print(f'{index + 1}. {song["song"]["name"]}: {song["weeks_top_ten"]}', file=sys.stderr)
-
-    print("\n", file=sys.stderr)
+    statistics.append({
+        "title": "Total Weeks in Top 10",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": song["weeks_top_ten"]
+            }
+            for song in songs_info
+        ]
+    })
 
     songs_info.sort(key=lambda n: n["weeks_number_two"], reverse=True)
-    print("Total Weeks Stuck at Number Two", file=sys.stderr)
-    i = 1
-    for song in songs_info[:15]:
-        if song["weeks_number_one"] == 0:
-            print(f'{i}. {song["song"]["name"]}: {song["weeks_number_two"]}', file=sys.stderr)
-            i += 1
+    statistics.append({
+        "title": "Total Weeks Stuck at #2",
+        "size": 10,
+        "rows": [
+            {
+                "song": song["song"],
+                "value": song["weeks_number_two"]
+            }
+            for song in songs_info
+        ]
+    })
 
-    print("\n", file=sys.stderr)
-
-    print("Number One Debut", file=sys.stderr)
+    debutObject = {
+        "title": "Number One Debuts",
+        "size": None,
+        "rows": []
+    }
     for song in song_position_data[1:]:
         for index, pos in enumerate(song[1:]):
             if pos is not None:
                 if pos == 1:
-                    print(f'Week of {song_position_data[0][index + 1]}: {song[0]["name"]}', file=sys.stderr)
+                    debutObject["rows"].append({
+                        "song": song[0],
+                        "value": song_position_data[0][index + 1],
+                    })
                 break
+    statistics.append(debutObject)
+
+    return statistics
 
 

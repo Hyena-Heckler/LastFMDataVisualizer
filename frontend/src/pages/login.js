@@ -1,5 +1,6 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
+import {computeStatistics} from "../components/statistics-adder.js";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
@@ -21,7 +22,11 @@ export function setupLogin() {
 
       await fetchCache();
 
-      console.log("Cache ready");
+      setupDateDropdown();
+
+      computeStatistics();
+
+      console.log("Found User");
 
     } catch (err) {
       console.error(err);
@@ -30,4 +35,20 @@ export function setupLogin() {
       submitButton.disabled = false;
     }
   });
+}
+
+export function setupDateDropdown() {
+  const dateDropdown = document.getElementById("date");
+  dateDropdown.innerHTML = "";
+  if (!store.cache.weeklyCache?.weeks) {
+    console.error("Missing Cache");
+    return;
+  }
+  Object.keys(store.cache.weeklyCache.weeks).forEach(week => {
+    const option = document.createElement("option");
+    option.value = week;
+    option.textContent = week;
+    dateDropdown.appendChild(option);
+  });
+  dateDropdown.dispatchEvent(new Event("change"));
 }

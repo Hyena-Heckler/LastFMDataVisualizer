@@ -23,8 +23,11 @@ export function setupButtons() {
       alert("Please log in first");
       return;
     }
-
-    await fetchCache();
+    
+    if (store.cache == null)
+    {
+      await fetchCache();
+    }
     downloadJSON(store.cache, "Data");
 
     console.log("Successful download for:", store.user);
@@ -39,6 +42,7 @@ export function setupButtons() {
     // Step 1: Start the updating process
     document.getElementById("update").disabled = true;
     await updateUser();
+    await fetchCache();
     document.getElementById("update").disabled = false;
     console.log("Successful update for:", store.user);
   });

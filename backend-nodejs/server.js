@@ -2,8 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
-import { transformTracks } from "./services/tracks.transform.js";
-import { renderVideo, getStatus, prepareCached} from "./integrations/python/client.js"
+import { transformTracks, weekFriendlyCache } from "./services/tracks.transform.js";
+import { renderVideo, getStatus, prepareCached, calculateStatistics} from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
@@ -61,7 +61,7 @@ app.post("/update", async (req, res) => {
       process.env.LASTFM_API_KEY,
       jobId
     );
-    console.log("Finished updating tracks");
+    console.log("Finished Updating tracks");
 
     res.json({
       jobId,
@@ -77,7 +77,7 @@ app.post("/update", async (req, res) => {
 app.get("/update-status/:jobId", async (req, res) => {
   try {
     const result = await getUpdateStatus(req.params.jobId);
-    console.log(result);
+    console.log("Updating Job Id", result);
     res.json(result)
   } catch (err) {
     res.status(500).json({ error: "status check failed" })
@@ -91,10 +91,17 @@ app.post("/download-cache", async (req, res) => {
     const data = await getStoredData(user);
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
-    const weeklyChartJson = await prepareCached(organizedDataJson);
-    console.log("Finished preparing file for cache");
+    const arrayChartJson = await prepareCached(organizedDataJson);
+    const weeklyChartJson = await weekFriendlyCache(arrayChartJson);
+    const userStatistics = await calculateStatistics(arrayChartJson.data);
+    console.log("Finished Preparing File for Cache");
 
-    res.json(weeklyChartJson);
+    res.json(
+      {
+        normalCache: arrayChartJson,
+        weeklyCache: weeklyChartJson,
+        statisticsCache: userStatistics
+      });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to cache tracks" });
@@ -119,7 +126,7 @@ app.post("/start-video", async (req, res) => {
       jobId
     );
 
-    console.log("Start rendering");
+    console.log("Start Rendering");
 
     res.json({
       jobId,

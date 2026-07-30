@@ -60,7 +60,7 @@ async function updateColorOfAlbums(){
   console.log("Row Length:", rows.length)
 
   async function updateColors(initial, limit = 500) { 
-    console.log(initial, " | ", initial + limit);
+    console.log("\tBatch: ", initial, " | ", initial + limit);
     const results = await getAlbumColor(rows.slice(initial, initial + limit));
     const albums = results.data
     const ids = albums.map(r => r.album_id);
@@ -138,7 +138,7 @@ async function saveUserData(lastfmUsername, data) {
         albumsMap.set(albumKey, {
           name: s.album['#text'],
           mbid: s.album.mbid || null,
-          image_url: s?.image?.[0]?.['#text'] || null,
+          image_url: s?.image?.[3]?.['#text'] || s?.image?.[2]?.['#text'] || s?.image?.[1]?.['#text'] || s?.image?.[0]?.['#text'] || null,
           artistKey
         });
       }
@@ -407,7 +407,7 @@ async function loadUserData(lastfmUsername) {
     if(!user_id) {
       return null
     }
-    console.log(user_id)
+    console.log("User Id", user_id)
     const result = await db.query(`
       SELECT 
         s.played_at,
@@ -430,7 +430,7 @@ async function loadUserData(lastfmUsername) {
       ORDER BY s.played_at DESC
     `, [user_id]);
 
-    console.log("formatting left")
+    console.log("Finished Loading Data")
     return formatScrobbleData(result.rows);
   } catch (err) {
     console.error("loadUserData crashed:", err);
@@ -489,7 +489,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
-    console.log(`page ${page}`);
+    console.log(`Processing Page ${page}`);
     const response = await fetch(url, {
       headers: {
         "User-Agent": "LastFMAnimatedCharts/0.1 (shettyharsh248@gmail.com)"
@@ -537,8 +537,6 @@ export async function getAllTracksData(username, apiKey, jobId) {
   console.log("Logged Tracks: ", loggedTracks);
   
   let newData = await getAllTracksBatch(totalTracks - loggedTracks);
-  console.log("New Data Type: ", typeof newData);
-  console.log("Logged Data Type: ", typeof userJSON);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
   await saveUserData(username, newData, (progress) => {
@@ -549,9 +547,9 @@ export async function getAllTracksData(username, apiKey, jobId) {
     });
   });
   
-  console.log("Colors In");
+  console.log("Processing Album Colors");
   await updateColorOfAlbums();
-  console.log("Colors Out");
+  console.log("Finished Processing Album Colors");
 
   await updateJob(jobId, {
     status: "completed",

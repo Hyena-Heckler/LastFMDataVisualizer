@@ -36,3 +36,84 @@ export function transformTracks(tracks) {
 
     return userWeeklyListening
 }
+
+export function weekFriendlyCache(cache) {
+    const songs = {};
+    const weeks = {};
+    const weekNames = cache.data[0].slice(1);
+
+    weekNames.forEach(week => {
+        weeks[week] = new Array(30).fill(null);
+    })
+
+    cache.data.slice(1).forEach((song, cacheSongId) => {
+        songs[cacheSongId] = {
+            ...song[0],
+            weeks: 0,
+            peak: 31,
+            firstAppearance: null,
+            streak: 0,
+            previousPosition: null,
+            lifetimePoints: 0
+        };
+
+        song.slice(1).forEach((songEntry, index) => {
+            if (songEntry["position"] != null) {
+                const song = songs[cacheSongId];
+                song.weeks ++;
+                song.lifetimePoints += songEntry.points;
+                if (songEntry.position < song.peak) song.peak = songEntry.position;
+                
+                if (song.firstAppearance == null) song.firstAppearance = weekNames[index];
+                
+                if (song.previousPosition == songEntry.position) song.streak++;
+                else song.streak = 1;
+                
+                weeks[weekNames[index]][songEntry.position - 1] = {
+                    songId: cacheSongId,
+                    position: songEntry.position,
+                    points: songEntry.points,
+                    weeks: song.weeks,
+                    previousPosition: song.previousPosition,
+                    streak: song.streak,
+                    peak: song.peak,
+                    lifetimePoints: song.lifetimePoints
+                }
+
+                song.previousPosition = songEntry.position;
+            }
+        });
+    })
+    
+
+    return {
+        songs,
+        weeks
+    };
+}
+
+// {
+//   "songs": {
+//     "0": {
+//       "name": "Locals",
+//       "artist": "underscores",
+//       "color": [...]
+//     }
+//   },
+//   "weeks": {
+//     "11/10/23": [
+//       {
+//         "songId": 0,
+//         "position": 1,
+//         "change": null
+//       }
+//     ],
+//     "11/17/23": [
+//       {
+//         "songId": 0,
+//         "position": 3,
+//         "change": -2
+//       }
+//     ]
+//   }
+// }
