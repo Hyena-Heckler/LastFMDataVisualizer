@@ -160,7 +160,7 @@ def prep_data(command, payload, video_path = None, job_id = None):
 
     if command == "get_video":
         output_path = video_path / f"{job_id}.mp4"
-        key = get_video(prepare_cached_data(payload), output_path)
+        key = get_video(prepare_cached_data(payload), output_path, job_id)
         done_file = video_path / f"{job_id}.json"
         with open(done_file, "w") as f:
             json.dump({

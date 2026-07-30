@@ -143,7 +143,9 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
     text.set_visible(False)
     text_labels[song_id] = text
 
-def graph_data(data, video_output_path):
+def graph_data(data, video_output_path, job_id):
+    start(job_id)
+
     # Annotation Variable
     ann_x_shift = 0
     ann_y_shift = 0
@@ -234,7 +236,6 @@ def graph_data(data, video_output_path):
 
     total_frames = speed_per_date * (len(days) - 1) - intro_outro_length + 1
 
-    start(video_output_path)
     def animate(frame):
         xdist_per_date = frame / speed_per_date  # adjusts speed to take X frames to reach the next day
         plot_data.set_xlim([xdist_per_date - 3.5, xdist_per_date])  # actually data points
@@ -252,7 +253,7 @@ def graph_data(data, video_output_path):
                 label.get_visible()
                 for label in text_labels.values()
             )
-            update(video_output_path, frame / total_frames)
+            update(job_id, frame / total_frames)
             print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
 
         previous_value = last_graph_date_value - intro_outro_length
@@ -314,7 +315,7 @@ def graph_data(data, video_output_path):
         ]
     )
 
-    complete(video_output_path)
+    complete(job_id)
     ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
 
     if ENVIRONMENT == "production":
@@ -361,4 +362,4 @@ if __name__ == "__main__":
             for song_data in data[1:]
         ]
     ]
-    graph_data(song_position_data, video_output_path)
+    graph_data(song_position_data, video_output_path, "1")
