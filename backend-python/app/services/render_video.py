@@ -318,7 +318,14 @@ def graph_data(data, video_output_path):
     ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
 
     if ENVIRONMENT == "production":
-        return
+        object_name = f"videos/{Path(video_output_path).name}"
+
+        upload_to_r2(video_output_path, object_name)
+
+        if os.path.exists(video_output_path):
+            os.remove(video_output_path)
+
+        return object_name
 
     t3 = time.perf_counter()
 
