@@ -10,9 +10,6 @@ export function addCard(entry) {
   card.className = "chart__song"
   card.innerHTML = `
     <div class="chart__position">
-      <h5>${entry.streak} Streak</h5>
-      <h2>${entry.position}</h2>
-
       <div class="chart__position-header">
         <h2>#${entry.position}</h2>
         ${entry.streak > 1 ? `<h5>x${entry.streak}</h5>` : ""}
@@ -32,7 +29,7 @@ export function addCard(entry) {
         : `<h5>★ NEW</h5>`
       }
     </div>
-    
+
     <div class="chart__icon">
       <img 
         src="${image}" 
