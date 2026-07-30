@@ -12,6 +12,12 @@ export function addCard(entry) {
     <div class="chart__position">
       <h5>${entry.streak} Streak</h5>
       <h2>${entry.position}</h2>
+
+      <div class="chart__position-header">
+        <h2>#${entry.position}</h2>
+        ${entry.streak > 1 ? `<h5>x${entry.streak}</h5>` : ""}
+      </div>
+      
       ${entry.previousPosition != null 
         ? `
           <h5>LW: ${entry.previousPosition}</h5>
@@ -26,12 +32,14 @@ export function addCard(entry) {
         : `<h5>★ NEW</h5>`
       }
     </div>
+    
     <div class="chart__icon">
       <img 
         src="${image}" 
         alt="${song.name}"
       />
     </div>
+
     <div class="chart__identifier">
       <h3>${song.name}</h3>
       <div class="chart__identifier-extra">

@@ -90,7 +90,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_number_one"], reverse=True)
     statistics.append({
-        "title": "Longest Number Ones",
+        "title": "Total Weeks at #1",
         "size": 10,
         "rows": [
             {
@@ -104,7 +104,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_top_three"], reverse=True)
     statistics.append({
-        "title": "Longest Top Three",
+        "title": "Total Weeks in Top 3",
         "size": 10,
         "rows": [
             {
@@ -117,7 +117,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_top_five"], reverse=True)
     statistics.append({
-        "title": "Longest Top Five",
+        "title": "Total Weeks in Top 5",
         "size": 10,
         "rows": [
             {
@@ -130,7 +130,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_top_ten"], reverse=True)
     statistics.append({
-        "title": "Longest Top Ten",
+        "title": "Total Weeks in Top 10",
         "size": 10,
         "rows": [
             {
@@ -143,7 +143,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_number_two"], reverse=True)
     statistics.append({
-        "title": "Longest Stuck at Two",
+        "title": "Total Weeks Stuck at #2",
         "size": 10,
         "rows": [
             {
