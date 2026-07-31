@@ -96,7 +96,6 @@ export function setupButtons() {
 
       showPositionChartVideo(localVideoUrl);
 
-      document.getElementById("download-video").disabled = false;
       console.log("Successful download video for:", store.user);
     } catch (err) {
       console.error("Download failed:", err);
