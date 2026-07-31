@@ -6,7 +6,7 @@ import { transformTracks, weekFriendlyCache } from "./services/tracks.transform.
 import { renderVideo, getStatus, prepareCached, calculateStatistics} from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 dotenv.config();
@@ -60,7 +60,7 @@ app.post("/update", async (req, res) => {
       jobId,
       status: "started"
     })
-    
+
     const data = await getAllTracksData(
       user,
       process.env.LASTFM_API_KEY,
@@ -176,15 +176,31 @@ app.get("/download-video/:jobId", async (req, res) => {
     console.log(url)
 
     res.json({ url });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to generate download URL" });
   }
 });
 
+app.get("/delete-video/:jobId", async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
 
+    const objectKey = `videos/${jobId}.mp4`;
 
+    await r2.send(new DeleteObjectCommand ({
+      Bucket: process.env.R2_BUCKET,
+      Key: objectKey
+    }));
+
+    console.log("Deleted video", objectKey)
+
+    res.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete video" });
+  }
+});
 
 app.post("/top-of-the-week", async (req, res) => {
   try {

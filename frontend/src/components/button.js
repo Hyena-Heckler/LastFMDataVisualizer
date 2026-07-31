@@ -97,6 +97,9 @@ export function setupButtons() {
       showPositionChartVideo(localVideoUrl);
 
       console.log("Successful download video for:", store.user);
+
+      // Step 4: Deletes the video from the video storage
+      await fetch(`${backend_server}/delete-video/${jobId}`);
     } catch (err) {
       console.error("Download failed:", err);
       alert("Something went wrong");
