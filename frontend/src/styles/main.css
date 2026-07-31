@@ -79,6 +79,69 @@ body {
   margin: 5px 0px;
 }
 
+/* Animated Chart Style */
+
+.animated-chart__loader {
+  width: 70px;
+  height: 70px;
+  border: 5px solid white;
+  border-top-color: #F5DDDD;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animated-chart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 15px;
+  padding: 5px;
+  background: #FFC145;
+}
+
+.animated-chart__bar {
+  width: 350px;
+  height: 10px;
+  background: #F5DDDD;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.animated-chart__bar-progress {
+  height: 100%;
+  width: 0%;
+  background: #de8e8e;
+  border-radius: 5px;
+  transition: width .3s ease;
+}
+
+.animated-chart__status {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.animated-chart__status span {
+  color: #363537;
+}
+
+.animated-chart__video {
+  width: 640px;
+  height: 360px;
+}
+
 /* Chart Cards CSS Styles */
 
 .chart {
