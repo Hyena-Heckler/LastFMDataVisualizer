@@ -231,7 +231,7 @@ def graph_data(data, video_output_path, job_id):
                     first = i
                 last = i
 
-        for valid in range(first - 1, min(last + 4, len(active_songs) - 1)):
+        for valid in range(first - 1, min(last + 4, len(active_songs))):
             active_songs[valid].append(song_id)
 
     total_frames = speed_per_date * (len(days) - 1) - intro_outro_length + 1
@@ -304,7 +304,7 @@ def graph_data(data, video_output_path, job_id):
     t2 = time.perf_counter()
     metadata = dict(Title='Color Chart', artist='harshshetty')  # data for the file
     writer = FFMpegWriter(
-        fps=int(speed_per_date / 2),
+        fps=int(speed_per_date),
         metadata=metadata,
         extra_args=[
             "-vcodec", "libx264",
@@ -350,7 +350,7 @@ def graph_data(data, video_output_path, job_id):
 
 if __name__ == "__main__":
     BASE_DIR = Path(__file__).resolve().parents[2]
-    cache_file = BASE_DIR / "app" / "data" / "cache" / "Data.json"
+    cache_file = BASE_DIR / "app" / "data" / "cache" / "Data (1).json"
     video_output_path = BASE_DIR / "temp" / "videos" / "output.mp4"
 
     with open(cache_file, "r", encoding="utf-8") as f:

@@ -61,6 +61,9 @@ app.post("/update", async (req, res) => {
       process.env.LASTFM_API_KEY,
       jobId
     );
+    if (data == null) {
+      throw new Error("User Data cannot be received"); 
+    }
     console.log("Finished Updating tracks");
 
     res.json({

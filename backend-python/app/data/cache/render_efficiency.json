@@ -587,5 +587,17 @@
     "time": "96.72s",
     "rendered_frames": 3240,
     "timestamp": "2026-07-30T04:31:37.162497"
+  },
+  {
+    "fps": "35.68",
+    "time": "6.31s",
+    "rendered_frames": 225,
+    "timestamp": "2026-07-31T00:57:31.025270"
+  },
+  {
+    "fps": "41.67",
+    "time": "5.40s",
+    "rendered_frames": 225,
+    "timestamp": "2026-07-31T14:05:16.454889"
   }
 ]
