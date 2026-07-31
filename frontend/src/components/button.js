@@ -1,6 +1,6 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
-import {showPositionChartProgress, showPositionChartVideo} from "./statistics-adder.js";
+import {showPositionChartProgress, showPositionChartVideo} from "./animated-chart.js";
 
 
 let backend_server =  import.meta.env.VITE_API_URL
