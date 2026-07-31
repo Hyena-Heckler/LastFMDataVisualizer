@@ -79,7 +79,7 @@ body {
   margin: 5px 0px;
 }
 
-/* Animated Chart Style */
+/* Animated Chart Style https://freefrontend.com/css-progress-bars/ <-- idea */
 
 .animated-chart__loader {
   width: 70px;
