@@ -2,7 +2,7 @@ export function showPositionChartProgress(progress) {
   const container = document.getElementById("positions-time");
 
 
-  percentage = (progress * 100).toFixed(0)
+  const percentage = (progress * 100).toFixed(0)
   container.innerHTML = `
     <div class="animated-chart__loader">
     </div>
