@@ -76,8 +76,8 @@ export function setupButtons() {
         const statusData = await statusRes.json();
         ready = statusData.ready;
 
-        console.log("Checking status...", progress);
-        showPositionChartProgress(progress);
+        console.log("Checking status...", progress ?? 0);
+        showPositionChartProgress(progress ?? 0);
 
         if (!ready) {
           await new Promise(r => setTimeout(r, 5000)); // wait 5s
