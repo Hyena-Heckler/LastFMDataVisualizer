@@ -11,7 +11,6 @@ import numpy as np
 import sys
 import os
 import unicodedata
-import logging
 from matplotlib.collections import LineCollection
 import boto3
 import psutil
@@ -28,13 +27,6 @@ def log_ram(tag=""):
 load_dotenv()  # this reads your .env file
 os.environ["PYTHONUNBUFFERED"] = "1"
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stderr,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    force=True
-)
 
 def upload_to_r2(file_path, object_name):
     client = boto3.client(
@@ -254,6 +246,7 @@ def graph_data(data, video_output_path, job_id):
                 for label in text_labels.values()
             )
             update(job_id, frame / total_frames)
+            log_ram("RAM Usage: ")
             print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
 
         previous_value = last_graph_date_value - intro_outro_length

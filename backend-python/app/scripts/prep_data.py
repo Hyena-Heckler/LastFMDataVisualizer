@@ -5,7 +5,6 @@ from app.services.data_points import add_extra_info
 from app.services.render_video import graph_data
 from app.services.accent_color_of_image import *
 import datetime
-import logging
 import traceback
 import os
 import asyncio
@@ -20,15 +19,6 @@ sys.stdout.reconfigure(line_buffering=True, write_through=True)
 
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stderr,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    force=True
-)
-
-logging.info("PYTHON STARTED 2")
 sys.stderr.flush()
 
 def unix_to_date(unix_time): # turns Unix time to a standard date
@@ -93,16 +83,15 @@ def format_node_to_python(data):
 
 def prepare_cached_data(history):
     try:
-        print(history[0]['tracks'][0])
-        logging.info("Started Ordering Data Analysis")
+        print("Started Ordering Data Analysis")
         ordered_history = sort_week(history.copy())
-        logging.info("Started Ranking Data Analysis")
+        print("Started Ranking Data Analysis")
         ranked_history = points_each_week(ordered_history)
-        logging.info("Started Filtering Data Analysis")
+        print("Started Filtering Data Analysis")
         filtered_history = filter_songs_in_week(ranked_history, filter_size = 30)
-        logging.info("Started Formatting Data Analysis")
+        print("Started Formatting Data Analysis")
         formatted_history = format_node_to_python(filtered_history)
-        logging.info("Started Python Data Analysis")
+        print("Started Python Data Analysis")
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
 
