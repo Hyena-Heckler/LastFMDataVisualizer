@@ -7,6 +7,11 @@
     <link href="src/styles/main.css" rel="stylesheet"/>
   </head>
   <body>
+    <div class="status hidden">
+      <h2>CURRENTLY BEING WORKED ON [VIDEO RENDERING BEING TESTED].</h1>
+      <p>Download Video still being worked on.</p>
+    </div>
+
     <header class="introduction">
       <h1 class="introduction__title">YourTop30</h1>
       <p class="introduction__description">
@@ -23,15 +28,18 @@
         <input class="panel__input" type="text" id="username-login" name="username" placeholder="Enter username here">
         <button class="panel__button" id="submit-login" type="submit">Submit</button>
       </form>
-      <button class="panel__button" id="update">Update Information</button>
-      <button class="panel__button" id="download-json">Download Cache</button>
-      <button class="panel__button" id="download-video" hidden>Download Video</button>
-      <select class="panel__dropdown" id="date">
-
-      </select>
+      <button class="panel__button" id="update" hidden>Update Information</button>
+      <button class="panel__button" id="download-json" hidden>Download Cache</button>
     </div>
 
-    <div class="chart" id="chart-container">
+    <div class="animated-chart" id="positions-time">
+      <button class="panel__button" id="download-video">Download Video</button>
+    </div>
+
+    <section class="top-chart">
+      <select class="chart__dropdown" id="date">
+      </select>
+      <div class="chart" id="chart-container">
         <div class="chart__song">
           <div class="chart__position">
             <h5>Streak</h5>
@@ -55,54 +63,14 @@
             <h5>Peak</h5>
           </div>
           <div class="chart__extra">
-            <h5>Year-End</h5>
-            <h5>YE Points</h5>
-            <h5>First Appearance</h5>
+            <h5>Lifetime-Points</h5>
+            <h5>First-Appearance</h5>
           </div>
         </div>
-
-        <div class="chart__song">
-          <div class="chart__position">
-            <h5>1 Streak</h5>
-            <div class="chart__position-header">
-              <h2>#2</h2>
-              <h5>x2</h5>
-            </div>
-            <h5>LW: #4 (⬆2)</h5>
-          </div>
-          <div class="chart__icon">
-            <img src="https://lastfm.freetls.fastly.net/i/u/300x300/88b646daa5e6626399ccd002ba67e50d.jpg"/>
-          </div>
-          <div class="chart__identifier">
-            <h3>Enchanted</h3>
-            <div class="chart__identifier-extra">
-              <h4>Speak Now</h4>
-              <h4>-</h4>
-              <h4>Taylor Swift</h4>
-            </div>
-          </div>
-          <div class="chart__main">
-            <h5>23 Points</h5>
-            <h5>(3 Weeks)</h5>
-            <h5>Peak: #2</h5>
-          </div>
-          <div class="chart__extra">
-            <h5>YE: #59</h5>
-            <h5>YE Points: (51 Pts)</h5>
-            <h5>April 10th, 2026</h5>
-          </div>
-        </div>
-    </div>
+      </div>
+    </section>
 
     <div class="statistics" id="statistics-container">
-      <div class="statistics__category">
-        <h2>Ranking</h2>
-        <ol>
-          <li>First item and maybe something else (put something here)</li>
-          <li>Second item</li>
-          <li>Third item</li>
-        </ol>
-      </div>
       <div class="statistics__category">
         <h2>Ranking</h2>
         <ol>
@@ -142,9 +110,7 @@
           <li>Group Chart (use data from multiple users)</li>
           <li>Improve UI/UX of website</li>
         </ul>
-      
       </p>
-
     </section>
     <script type="module" src="src/main.js"></script>
   </body>

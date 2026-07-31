@@ -470,6 +470,11 @@ export async function getAllTracksData(username, apiKey, jobId) {
     totalTracks = await getTotalTrackNumber();
   } catch (err) {
     console.log(err)
+    await updateJob(jobId, {
+      status: "failed",
+      step: "loading",
+      progress: 100
+    });
     return null;
   }
 
@@ -575,9 +580,9 @@ export async function getUpdateStatus(jobId) {
   }
 
   if (row[0].status === "completed" || row[0].step === "done" || row[0].progress === 100) {
-    return {ready: true, progress: 100}
+    return {ready: true, progress: 100, status: row[0].status}
   } else {
-    return {ready: false, progress: row[0].progress}
+    return {ready: false, progress: row[0].progress, status: "processing"}
   }
 }
 

@@ -1,5 +1,6 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
+import {showPositionChartProgress, showPositionChartVideo} from "./animated-chart.js";
 
 
 let backend_server =  import.meta.env.VITE_API_URL
@@ -75,7 +76,8 @@ export function setupButtons() {
         const statusData = await statusRes.json();
         ready = statusData.ready;
 
-        console.log("Checking status...", ready);
+        console.log("Checking status...", statusData.progress ?? 0);
+        showPositionChartProgress(statusData.progress ?? 0);
 
         if (!ready) {
           await new Promise(r => setTimeout(r, 5000)); // wait 5s
@@ -86,9 +88,18 @@ export function setupButtons() {
       console.log("Video ready!");
       const downloadRes = await fetch(`${backend_server}/download-video/${jobId}`);
       const { url } = await downloadRes.json();
-      window.location.href = url;
-      document.getElementById("download-video").disabled = false;
+      
+      const videoRes = await fetch(url);
+      const videoBlob = await videoRes.blob();
+
+      const localVideoUrl = URL.createObjectURL(videoBlob)
+
+      showPositionChartVideo(localVideoUrl);
+
       console.log("Successful download video for:", store.user);
+
+      // Step 4: Deletes the video from the video storage
+      await fetch(`${backend_server}/delete-video/${jobId}`);
     } catch (err) {
       console.error("Download failed:", err);
       alert("Something went wrong");

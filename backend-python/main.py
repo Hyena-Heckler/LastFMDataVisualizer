@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 from app.scripts.prep_data import prep_data, return_color_from_urls
+from app.data.cache.render_progress import get
 from pathlib import Path
 import os
 import threading
@@ -82,24 +83,7 @@ def process(request: StatisticsRequest):
 
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
-    done_file = VIDEO_DIR / f"{job_id}.json"
-
-    if done_file.exists():
-        with open(done_file, "r") as f:
-            data = json.load(f)
-
-        return {
-            "status": "done",
-            "jobId": job_id,
-            "ready": True,
-            "r2Key": data["r2Key"]
-        }
-
-    return {
-        "status": "processing",
-        "jobId": job_id,
-        "ready": False
-    }
+    return get(job_id)
 
 @app.post("/get-album-color")
 async def get_colors(request: AlbumColorRequest):

@@ -47,6 +47,8 @@ export async function updateUser() {
 
     if (!ready) {
       await new Promise(r => setTimeout(r, 5000));
+    } else {
+      return statusData.status
     }
   }
 }

@@ -18,7 +18,12 @@ export function setupLogin() {
 
       console.log("Logged in:", store.user);
 
-      await updateUser();
+      let status = await updateUser();
+      if (status == "failed") {
+        store.user = null;
+        alert("Invalid Username");
+        return
+      }
 
       await fetchCache();
 
