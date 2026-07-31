@@ -56,23 +56,24 @@ app.post("/update", async (req, res) => {
   try {
     const user = req.body.user;
     const jobId = Date.now().toString();
+    res.json({
+      jobId,
+      status: "started"
+    })
+    
     const data = await getAllTracksData(
       user,
       process.env.LASTFM_API_KEY,
       jobId
     );
+
     if (data == null) {
       throw new Error("User Data cannot be received"); 
     }
-    console.log("Finished Updating tracks");
 
-    res.json({
-      jobId,
-      status: "started"
-    })
+    console.log("Finished Updating tracks");
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch tracks" });
   }
 });
 
