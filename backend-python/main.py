@@ -59,8 +59,12 @@ def render_video(request: ProcessRequest):
 
     log_ram("After FastAPI parsing")
 
-    payload = request.payload
-    job_id = request.jobId
+    payload = request.payload.copy()
+    
+    job_id = request.jobId.copy()
+    del request
+    gc.collect()
+    log_ram("After deleting request")
 
     log_ram("After payload reference")
 
@@ -81,6 +85,7 @@ def render_video(request: ProcessRequest):
             print("thread finished")
 
         finally:
+            payload.clear()
             del payload
             gc.collect()
             log_ram("After thread cleanup")
@@ -96,6 +101,7 @@ def render_video(request: ProcessRequest):
     gc.collect()
 
     print("returning response")
+    print("Threads:", len(threading.enumerate()))
 
     return {
         "status": "rendering_started",

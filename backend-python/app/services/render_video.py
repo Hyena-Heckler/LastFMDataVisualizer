@@ -156,28 +156,14 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
         color=graph_color,
         ha="left",
         va="center",
-        clip_on=False
+        clip_on=False,
+        parse_math=False
     )
     text.set_visible(False)
     text_labels[song_id] = text
 
 def graph_data(data, video_output_path, job_id):
     log_ram("RAM Usage (Beginning): ")
-    # objects = gc.get_objects()
-
-    # print("Objects:", len(objects))
-
-    # types = {}
-    # for obj in objects:
-    #     name = type(obj).__name__
-    #     types[name] = types.get(name, 0) + 1
-
-    # for k,v in sorted(types.items(), key=lambda x:x[1], reverse=True)[:20]:
-    #     print(k,v)
-
-    
-
-    # print("DATA SIZE:", rough_size(data) / 1024 / 1024, "MB")
 
     largest = []
 
@@ -411,6 +397,25 @@ def graph_data(data, video_output_path, job_id):
 
     ani.save(str(video_output_path), writer=writer)  # creates a video for song chart
 
+    log_ram("After saving animation")
+
+    plt.close("all")
+
+    del ani
+    del writer
+    del fig
+
+    segments.clear()
+    all_point_days.clear()
+    all_point_ranks.clear()
+    all_point_colors.clear()
+    text_labels.clear()
+    active_songs.clear()
+
+    gc.collect()
+
+    log_ram("After matplotlib cleanup")
+
     if ENVIRONMENT == "production":
         object_name = f"videos/{Path(video_output_path).name}"
 
@@ -443,18 +448,38 @@ def graph_data(data, video_output_path, job_id):
             json.dump(efficency_data, f, indent=2)
 
 if __name__ == "__main__":
+    log_ram("Start")
     BASE_DIR = Path(__file__).resolve().parents[2]
-    cache_file = BASE_DIR / "app" / "data" / "cache" / "Data (1).json"
+    cache_file = BASE_DIR / "app" / "data" / "cache" / "Data.json"
     video_output_path = BASE_DIR / "temp" / "videos" / "output.mp4"
 
+    log_ram("Before file")
     with open(cache_file, "r", encoding="utf-8") as f:
         cache_data = json.load(f)
+    log_ram("After file")
     data = cache_data["normalCache"]["data"]
     song_position_data = [
-        data[0],
+        data[0].copy(),
         *[
-            [song_data[0], *list(map(lambda x:x['position'], song_data[1:]))]
+            [
+                dict(song_data[0]),
+                *[x["position"] for x in song_data[1:]]
+            ]
             for song_data in data[1:]
         ]
     ]
+    log_ram("After transformation")
+
+    del cache_data
+    del data
+
+    gc.collect()
+
+    log_ram("After deleting cache")
+
     graph_data(song_position_data, video_output_path, "1")
+
+    del song_position_data
+    gc.collect()
+
+    log_ram("Final")
