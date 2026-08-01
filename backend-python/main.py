@@ -69,6 +69,8 @@ def render_video(request: ProcessRequest):
     print("payload dumped")
 
     def background_render(payload, job_id):
+        print("START", job_id, threading.current_thread().name)
+        
         try:
             print("thread started")
 
@@ -82,10 +84,12 @@ def render_video(request: ProcessRequest):
             print("thread finished")
 
         finally:
-            payload.clear()
-            del payload
+            print("FINISH", job_id, threading.current_thread().name)
+
             gc.collect()
             log_ram("After thread cleanup")
+
+            print("Threads now:", threading.enumerate())
 
     threading.Thread(
         target=background_render,
@@ -98,7 +102,6 @@ def render_video(request: ProcessRequest):
     gc.collect()
 
     print("returning response")
-    print("Threads:", len(threading.enumerate()))
 
     return {
         "status": "rendering_started",
