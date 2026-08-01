@@ -18,6 +18,7 @@ import gc
 import sys
 from dotenv import load_dotenv
 from app.data.cache.render_progress import start, update, complete
+from collections import Counter
 
 def log_ram(tag=""):
     process = psutil.Process(os.getpid())
@@ -162,21 +163,73 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
 
 def graph_data(data, video_output_path, job_id):
     log_ram("RAM Usage (Beginning): ")
-    objects = gc.get_objects()
+    # objects = gc.get_objects()
 
-    print("Objects:", len(objects))
+    # print("Objects:", len(objects))
 
-    types = {}
-    for obj in objects:
-        name = type(obj).__name__
-        types[name] = types.get(name, 0) + 1
+    # types = {}
+    # for obj in objects:
+    #     name = type(obj).__name__
+    #     types[name] = types.get(name, 0) + 1
 
-    for k,v in sorted(types.items(), key=lambda x:x[1], reverse=True)[:20]:
-        print(k,v)
+    # for k,v in sorted(types.items(), key=lambda x:x[1], reverse=True)[:20]:
+    #     print(k,v)
+
+    
+
+    # print("DATA SIZE:", rough_size(data) / 1024 / 1024, "MB")
+
+    largest = []
+
+    for obj in gc.get_objects():
+        if isinstance(obj, dict):
+            largest.append((sys.getsizeof(obj), obj))
+
+    largest.sort(reverse=True, key=lambda x: x[0])
+
+    modules = Counter()
+
+    for obj in gc.get_objects():
+        if isinstance(obj, dict):
+            modules[type(obj).__module__] += 1
+
+    print(modules.most_common(20))
+
+    for size, obj in largest[:10]:
+        print(
+            "SHALLOW:",
+            size / 1024,
+            "KB"
+        )
+
+        print(
+            "DEEP:",
+            rough_size(obj) / 1024 / 1024,
+            "MB"
+        )
+
+        print(
+            "KEYS:",
+            list(obj.keys())[:10]
+        )
+
+        print("---")
 
     start(job_id)
 
-    print("DATA SIZE:", rough_size(data) / 1024 / 1024, "MB")
+    for size, obj in largest[:10]:
+        print(
+            "DICT SIZE:",
+            size / 1024,
+            "KB",
+            "KEYS:",
+            list(obj.keys())[:5]
+        )
+
+    largest.clear()
+
+    gc.collect()
+    log_ram("After GC")
 
     # Annotation Variable
     ann_x_shift = 0
