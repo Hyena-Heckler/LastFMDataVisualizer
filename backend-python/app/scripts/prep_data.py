@@ -2,7 +2,7 @@ import json
 import sys
 from app.services.song_positions import get_song_position_data
 from app.services.data_points import add_extra_info
-from app.services.render_video import graph_data
+from app.services.render_video import graph_data, log_ram
 from app.services.accent_color_of_image import *
 import datetime
 import traceback
@@ -149,7 +149,17 @@ def prep_data(command, payload, video_path = None, job_id = None):
 
     if command == "get_video":
         output_path = video_path / f"{job_id}.mp4"
-        key = get_video(prepare_cached_data(payload), output_path, job_id)
+
+        log_ram("Before prepare_cached_data")
+
+        prepared_data = prepare_cached_data(payload)
+
+        log_ram("After prepare_cached_data")
+        
+        key = get_video(prepared_data, output_path, job_id)
+
+        log_ram("After get_video")
+        
         done_file = video_path / f"{job_id}.json"
         with open(done_file, "w") as f:
             json.dump({
