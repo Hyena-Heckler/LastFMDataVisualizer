@@ -44,8 +44,10 @@ class StatisticsRequest(BaseModel):
 
 @app.post("/prepare-cached")
 def process(request: ProcessRequest):
+    log_ram("Before prepare-cached")
     payload = request.payload
     result = prep_data("prepare_cached_data", payload)
+    log_ram("After prepare-cached")
     return {"status": "ok", "data": result}
 
 @app.post("/render-video")
@@ -61,7 +63,7 @@ def render_video(request: ProcessRequest):
 
     payload = request.payload.copy()
     
-    job_id = request.jobId.copy()
+    job_id = request.jobId
     del request
     gc.collect()
     log_ram("After deleting request")
