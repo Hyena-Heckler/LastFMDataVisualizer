@@ -173,44 +173,7 @@ def graph_data(data, video_output_path, job_id):
 
     largest.sort(reverse=True, key=lambda x: x[0])
 
-    modules = Counter()
-
-    for obj in gc.get_objects():
-        if isinstance(obj, dict):
-            modules[type(obj).__module__] += 1
-
-    print(modules.most_common(20))
-
-    for size, obj in largest[:10]:
-        print(
-            "SHALLOW:",
-            size / 1024,
-            "KB"
-        )
-
-        print(
-            "DEEP:",
-            rough_size(obj) / 1024 / 1024,
-            "MB"
-        )
-
-        print(
-            "KEYS:",
-            list(obj.keys())[:10]
-        )
-
-        print("---")
-
     start(job_id)
-
-    for size, obj in largest[:10]:
-        print(
-            "DICT SIZE:",
-            size / 1024,
-            "KB",
-            "KEYS:",
-            list(obj.keys())[:5]
-        )
 
     largest.clear()
 
@@ -316,15 +279,16 @@ def graph_data(data, video_output_path, job_id):
         next_graph_date_value = int(np.ceil(xdist_per_date))  # next actual week date
 
         # progress meter
-        if ENVIRONMENT == "development":
-            current_percentage = (frame * 100) // total_frames
-            previous_percentage = ((frame - 1) * 100) // total_frames
-            if current_percentage != previous_percentage:
+        current_percentage = (frame * 100) // total_frames
+        previous_percentage = ((frame - 1) * 100) // total_frames
+        if current_percentage != previous_percentage:
+            update(job_id, frame / total_frames)
+            
+            if ENVIRONMENT == "development":
                 visible_count = sum(
                     label.get_visible()
                     for label in text_labels.values()
                 )
-                update(job_id, frame / total_frames)
                 log_ram("RAM Usage: ")
                 print(gc.get_count())
                 print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
