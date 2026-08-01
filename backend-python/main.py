@@ -64,11 +64,6 @@ def render_video(request: ProcessRequest):
     payload = request.payload.copy()
     
     job_id = request.jobId
-    del request
-    gc.collect()
-    log_ram("After deleting request")
-
-    log_ram("After payload reference")
 
     print("entered route")
     print("payload dumped")
@@ -112,9 +107,12 @@ def render_video(request: ProcessRequest):
 
 @app.post("/calculate-statistics")
 def process(request: StatisticsRequest):
+    log_ram("Before statistics")
     payload = request.payload
     result = prep_data("get_statistics", payload)
+    log_ram("After statistics")
     return {"status": "ok", "data": result}
+    
 
 
 @app.get("/status/{job_id}")
@@ -124,4 +122,5 @@ def get_status(job_id: str):
 @app.post("/get-album-color")
 async def get_colors(request: AlbumColorRequest):
     result = await return_color_from_urls(request.payload)
+    log_ram("After album color request")
     return {"status": "ok", "data": result}
