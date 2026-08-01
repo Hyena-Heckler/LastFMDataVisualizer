@@ -14,6 +14,7 @@ import unicodedata
 from matplotlib.collections import LineCollection
 import boto3
 import psutil
+import gc
 import sys
 from dotenv import load_dotenv
 from app.data.cache.render_progress import start, update, complete
@@ -136,6 +137,7 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
     text_labels[song_id] = text
 
 def graph_data(data, video_output_path, job_id):
+    log_ram("RAM Usage (Beginning): ")
     start(job_id)
 
     # Annotation Variable
@@ -158,6 +160,9 @@ def graph_data(data, video_output_path, job_id):
     days = build_days(days, intro_outro_length)
 
     song_rank_data = []
+
+    log_ram("RAM Usage (Axes Setup): ")
+
     for song in data[1:]:
         valid_positions = [x for x in song[1:] if x is not None]
         if not valid_positions or min(valid_positions) > 15:
@@ -178,7 +183,7 @@ def graph_data(data, video_output_path, job_id):
     all_point_ranks = []
     all_point_colors = []
 
-    
+    log_ram("RAM Usage (Data Setup): ")
 
     for song_id, song in enumerate(song_rank_data):
         # lines
@@ -211,6 +216,8 @@ def graph_data(data, video_output_path, job_id):
         all_point_ranks,
         c=all_point_colors
     )
+
+    log_ram("RAM Usage (Draw Lines and Points): ")
     
     active_songs = [[] for _ in range(len(data[0][1:]))]
     for song_id, song in enumerate(song_rank_data):
@@ -227,6 +234,8 @@ def graph_data(data, video_output_path, job_id):
             active_songs[valid].append(song_id)
 
     total_frames = speed_per_date * (len(days) - 1) - intro_outro_length + 1
+
+    log_ram("RAM Usage (Active Songs): ")
 
     def animate(frame):
         xdist_per_date = frame / speed_per_date  # adjusts speed to take X frames to reach the next day
@@ -247,6 +256,7 @@ def graph_data(data, video_output_path, job_id):
             )
             update(job_id, frame / total_frames)
             log_ram("RAM Usage: ")
+            print(gc.get_count())
             print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
 
         previous_value = last_graph_date_value - intro_outro_length

@@ -3,13 +3,6 @@ import datetime
 import re
 import sys
 from app.services.accent_color_of_image import *
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stderr,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
 
 class SongPositions:  # class for creating the playlist information
     def __init__(self, name, artists, image, positions, points):
@@ -55,7 +48,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
     attribute = 'positions' if is_position else 'points'
 
     sheet = {}  # stores the data
-    logging.info("Started creating sheet")
+    print("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):
         current_percentage = (index * 100) // len(playlist_history)
         previous_percentage = ((index - 1) * 100) // len(playlist_history)
@@ -81,7 +74,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
                 sheet[song_key][attribute].append(
                     (index - 1, song['points']))
     
-    logging.info("Midway Process 1")
+    print("Midway Process 1")
 
     if is_position:
         sheet = {
@@ -100,7 +93,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
         track[attribute] = arr
 
     
-    logging.info("Midway Process 2")
+    print("Midway Process 2")
 
     sheet = list(sheet.values())
 
@@ -108,7 +101,7 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
     for playlist in playlist_history: #adds the playlist date as a row in data
         final_sheet[0].append(format_date(playlist['date']))
     for index, track in enumerate(sheet): # formats the name of the title in the chart and adds the track image for future purposes
-        # logging.info(track['name'])
+        # print(track['name'])
         current_percentage = (index * 100) // len(sheet)
         previous_percentage = ((index - 1) * 100) // len(sheet)
         if current_percentage != previous_percentage:
@@ -122,6 +115,6 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
         }]
         column.extend(track[attribute])
         final_sheet.append(column)
-    logging.info("Finished creating sheet")
+    print("Finished creating sheet")
     return final_sheet
 

@@ -4,9 +4,8 @@ from typing import Any, Dict, List, Optional
 from app.scripts.prep_data import prep_data, return_color_from_urls
 from app.data.cache.render_progress import get
 from pathlib import Path
-import os
 import threading
-import json
+
 VIDEO_DIR = Path("/tmp/videos")
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
