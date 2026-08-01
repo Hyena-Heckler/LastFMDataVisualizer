@@ -26,7 +26,7 @@ class Week(BaseModel):
     tracks: List[Track]
 
 class ProcessRequest(BaseModel):
-    payload: List[Week]
+    payload: list
     jobId: Optional[str] = None
 
 class CombinedData(BaseModel):
@@ -41,14 +41,14 @@ class StatisticsRequest(BaseModel):
 
 @app.post("/prepare-cached")
 def process(request: ProcessRequest):
-    payload = [w.model_dump() for w in request.payload]
+    payload = request.payload
     result = prep_data("prepare_cached_data", payload)
     return {"status": "ok", "data": result}
 
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
     print("entered route")
-    payload = [w.model_dump() for w in request.payload]
+    payload = request.payload
     print("payload dumped")
 
     def background_render():
