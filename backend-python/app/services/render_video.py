@@ -238,8 +238,6 @@ def graph_data(data, video_output_path, job_id):
 
     song_rank_data = []
 
-    log_ram("RAM Usage (Axes Setup): ")
-
     for song in data[1:]:
         valid_positions = [x for x in song[1:] if x is not None]
         if not valid_positions or min(valid_positions) > 15:
@@ -259,8 +257,6 @@ def graph_data(data, video_output_path, job_id):
     all_point_days = []
     all_point_ranks = []
     all_point_colors = []
-
-    log_ram("RAM Usage (Data Setup): ")
 
     for song_id, song in enumerate(song_rank_data):
         # lines
@@ -293,8 +289,6 @@ def graph_data(data, video_output_path, job_id):
         all_point_ranks,
         c=all_point_colors
     )
-
-    log_ram("RAM Usage (Draw Lines and Points): ")
     
     active_songs = [[] for _ in range(len(data[0][1:]))]
     for song_id, song in enumerate(song_rank_data):
@@ -312,8 +306,6 @@ def graph_data(data, video_output_path, job_id):
 
     total_frames = speed_per_date * (len(days) - 1) - intro_outro_length + 1
 
-    log_ram("RAM Usage (Active Songs): ")
-
     def animate(frame):
         xdist_per_date = frame / speed_per_date  # adjusts speed to take X frames to reach the next day
         plot_data.set_xlim([xdist_per_date - 3.5, xdist_per_date])  # actually data points
@@ -324,17 +316,18 @@ def graph_data(data, video_output_path, job_id):
         next_graph_date_value = int(np.ceil(xdist_per_date))  # next actual week date
 
         # progress meter
-        current_percentage = (frame * 100) // total_frames
-        previous_percentage = ((frame - 1) * 100) // total_frames
-        if current_percentage != previous_percentage:
-            visible_count = sum(
-                label.get_visible()
-                for label in text_labels.values()
-            )
-            update(job_id, frame / total_frames)
-            log_ram("RAM Usage: ")
-            print(gc.get_count())
-            print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
+        if ENVIRONMENT == "development":
+            current_percentage = (frame * 100) // total_frames
+            previous_percentage = ((frame - 1) * 100) // total_frames
+            if current_percentage != previous_percentage:
+                visible_count = sum(
+                    label.get_visible()
+                    for label in text_labels.values()
+                )
+                update(job_id, frame / total_frames)
+                log_ram("RAM Usage: ")
+                print(gc.get_count())
+                print(f"{current_percentage}% and {visible_count} labels active", file=sys.stderr, flush=True)
 
         previous_value = last_graph_date_value - intro_outro_length
         next_value = next_graph_date_value - intro_outro_length
