@@ -165,17 +165,7 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
 def graph_data(data, video_output_path, job_id):
     log_ram("RAM Usage (Beginning): ")
 
-    largest = []
-
-    for obj in gc.get_objects():
-        if isinstance(obj, dict):
-            largest.append((sys.getsizeof(obj), obj))
-
-    largest.sort(reverse=True, key=lambda x: x[0])
-
     start(job_id)
-
-    largest.clear()
 
     gc.collect()
     log_ram("After GC")
@@ -356,11 +346,18 @@ def graph_data(data, video_output_path, job_id):
 
     log_ram("After saving animation")
 
-    plt.close("all")
+    ani._func = None
+    ani._fig = None
 
     del ani
     del writer
+
+    fig.clear()
+    plt.close(fig)
+
     del fig
+    del plot_frame
+    del plot_data
 
     segments.clear()
     all_point_days.clear()
@@ -368,6 +365,7 @@ def graph_data(data, video_output_path, job_id):
     all_point_colors.clear()
     text_labels.clear()
     active_songs.clear()
+    song_rank_data.clear()
 
     gc.collect()
 
