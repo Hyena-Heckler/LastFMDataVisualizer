@@ -68,18 +68,22 @@ def render_video(request: ProcessRequest):
     print("payload dumped")
 
     def background_render(payload, job_id):
-        print("thread started")
-        prep_data(
-            "get_video",
-            payload,
-            VIDEO_DIR,
-            job_id
-        )
-        print("thread finished")
+        try:
+            print("thread started")
 
-    del payload
-    del request
-    gc.collect()
+            prep_data(
+                "get_video",
+                payload,
+                VIDEO_DIR,
+                job_id
+            )
+
+            print("thread finished")
+
+        finally:
+            del payload
+            gc.collect()
+            log_ram("After thread cleanup")
 
     threading.Thread(
         target=background_render,
@@ -87,11 +91,15 @@ def render_video(request: ProcessRequest):
         daemon=True
     ).start()
 
+    job_id_response = job_id
+    del request
+    gc.collect()
+
     print("returning response")
 
     return {
         "status": "rendering_started",
-        "jobId": request.jobId
+        "jobId": job_id_response
     }
 
 @app.post("/calculate-statistics")
