@@ -62,7 +62,7 @@ export function setupButtons() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({user: store.user})
+        body: JSON.stringify({data: store.cache.normalCache.data})
       })
 
       const { jobId } = await startRes.json(); // Download video takes a long time, so there is an issue of it timing out. This allows it to run in the background.

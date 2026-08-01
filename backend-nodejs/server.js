@@ -116,17 +116,10 @@ app.post("/start-video", async (req, res) => {
   try {
     const jobId = Date.now().toString();
 
-    const user = req.body.user;
-
-    const data = await getStoredData(user);
-
-    const organizedData = transformTracks(data);
-
-    const organizedDataJson =
-      [...organizedData.entries()].map(([, week]) => week);
+    const data = req.body.data;
 
     renderVideo(
-      organizedDataJson,
+      data,
       jobId
     );
 

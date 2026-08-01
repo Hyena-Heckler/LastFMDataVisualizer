@@ -150,13 +150,9 @@ def prep_data(command, payload, video_path = None, job_id = None):
     if command == "get_video":
         output_path = video_path / f"{job_id}.mp4"
 
-        log_ram("Before prepare_cached_data")
-
-        prepared_data = prepare_cached_data(payload)
-
-        log_ram("After prepare_cached_data")
+        log_ram("Before get_video")
         
-        key = get_video(prepared_data, output_path, job_id)
+        key = get_video(payload, output_path, job_id)
 
         log_ram("After get_video")
         
