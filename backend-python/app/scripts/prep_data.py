@@ -8,6 +8,7 @@ import datetime
 import traceback
 import os
 import asyncio
+import gc
 
 semaphore = asyncio.Semaphore(30)
 
@@ -153,6 +154,9 @@ def prep_data(command, payload, video_path = None, job_id = None):
         log_ram("Before get_video")
         
         key = get_video(payload, output_path, job_id)
+
+        del payload
+        gc.collect()
 
         log_ram("After get_video")
         

@@ -7,6 +7,7 @@ from app.services.render_video import log_ram
 from pathlib import Path
 import json
 import threading
+import gc
 
 VIDEO_DIR = Path("/tmp/videos")
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)
@@ -59,25 +60,30 @@ def render_video(request: ProcessRequest):
     log_ram("After FastAPI parsing")
 
     payload = request.payload
+    job_id = request.jobId
 
     log_ram("After payload reference")
 
     print("entered route")
-    payload = request.payload
     print("payload dumped")
 
-    def background_render():
+    def background_render(payload, job_id):
         print("thread started")
         prep_data(
             "get_video",
             payload,
             VIDEO_DIR,
-            request.jobId
+            job_id
         )
         print("thread finished")
 
+    del payload
+    del request
+    gc.collect()
+
     threading.Thread(
         target=background_render,
+        args=(payload, job_id),
         daemon=True
     ).start()
 
