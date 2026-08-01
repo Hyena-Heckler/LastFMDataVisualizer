@@ -24,6 +24,30 @@ def log_ram(tag=""):
     mem_mb = process.memory_info().rss / 1024 / 1024
     print(f"[RAM] {tag}: {mem_mb:.2f} MB", file=sys.stderr, flush=True)
 
+def rough_size(obj, seen=None):
+    if seen is None:
+        seen = set()
+
+    obj_id = id(obj)
+    if obj_id in seen:
+        return 0
+
+    seen.add(obj_id)
+
+    size = sys.getsizeof(obj)
+
+    if isinstance(obj, dict):
+        size += sum(
+            rough_size(k, seen) + rough_size(v, seen)
+            for k, v in obj.items()
+        )
+    elif isinstance(obj, (list, tuple, set)):
+        size += sum(
+            rough_size(i, seen)
+            for i in obj
+        )
+
+    return size
 
 load_dotenv()  # this reads your .env file
 os.environ["PYTHONUNBUFFERED"] = "1"
@@ -138,7 +162,21 @@ def create_text(text_labels, plot_data, graph_color, song, song_id):
 
 def graph_data(data, video_output_path, job_id):
     log_ram("RAM Usage (Beginning): ")
+    objects = gc.get_objects()
+
+    print("Objects:", len(objects))
+
+    types = {}
+    for obj in objects:
+        name = type(obj).__name__
+        types[name] = types.get(name, 0) + 1
+
+    for k,v in sorted(types.items(), key=lambda x:x[1], reverse=True)[:20]:
+        print(k,v)
+
     start(job_id)
+
+    print("DATA SIZE:", rough_size(data) / 1024 / 1024, "MB")
 
     # Annotation Variable
     ann_x_shift = 0
