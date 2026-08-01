@@ -3,7 +3,9 @@ from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 from app.scripts.prep_data import prep_data, return_color_from_urls
 from app.data.cache.render_progress import get
+from app.services.render_video import log_ram
 from pathlib import Path
+import json
 import threading
 
 VIDEO_DIR = Path("/tmp/videos")
@@ -47,6 +49,19 @@ def process(request: ProcessRequest):
 
 @app.post("/render-video")
 def render_video(request: ProcessRequest):
+
+    print(
+        "Payload JSON size:",
+        len(json.dumps(request.payload)) / 1024 / 1024,
+        "MB"
+    )
+
+    log_ram("After FastAPI parsing")
+
+    payload = request.payload
+
+    log_ram("After payload reference")
+
     print("entered route")
     payload = request.payload
     print("payload dumped")
