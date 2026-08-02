@@ -7,9 +7,9 @@ import { videoSetup } from "./components/video.js";
 
 
 function init() {
-    //setupButtons();
-    //setupDateDropdown();
-    //setupLogin();
+    setupButtons();
+    setupDateDropdown();
+    setupLogin();
     videoSetup();
 }
 
