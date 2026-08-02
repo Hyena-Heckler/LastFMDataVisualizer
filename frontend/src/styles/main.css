@@ -81,11 +81,48 @@ body {
 
 /* Animated Chart Style https://freefrontend.com/css-progress-bars/ <-- idea */
 
+#canvas-container {
+  position: relative;
+  height: 540px;
+  width: 960px;
+}
+
+#canvas {
+  height: 540px;
+  width: 960px;
+}
+
+#progress {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.animated-chart__progress-overlay {
+  position: absolute;
+  inset: 0;
+  /* bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%); */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+ 
+
+  /* width: 60%; */
+  background: rgba(0, 0, 0, 0.6);
+  /* padding: 12px; */
+  gap: 30px;
+  /* border-radius: 8px; */
+}
+
 .animated-chart__loader {
   width: 70px;
   height: 70px;
-  border: 5px solid white;
-  border-top-color: #F5DDDD;
+  border: 5px solid #F5DDDD;
+  border-top-color: #de8e8e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -105,6 +142,7 @@ body {
   margin: 15px;
   padding: 5px;
   background: #FFC145;
+  flex-shrink: 0;
 }
 
 .animated-chart__bar {
@@ -125,21 +163,22 @@ body {
 
 .animated-chart__status {
   margin-top: 10px;
-  width: 100%;
+  width: 350px;
   display: flex;
   justify-content: space-between;
   font-size: 0.9em;
   letter-spacing: 1px;
+  color: #de8e8e;
   text-transform: uppercase;
 }
 
 .animated-chart__status span {
-  color: #363537;
+  color: #de8e8e;
 }
 
 .animated-chart__video {
-  width: 640px;
-  height: 360px;
+  width: 960px;
+  height: 540px;
 }
 
 /* Chart Cards CSS Styles */
