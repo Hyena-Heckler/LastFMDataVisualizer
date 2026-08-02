@@ -69,12 +69,11 @@ export function videoSetup() {
                 height: canvas.height
             }
         });
-        console.log("Not Okay");
+
         const data = store.cache.normalCache.data;
-        console.log("Okay");
         const positionsData = [
-            data.normalCache.data[0],
-            ...data.normalCache.data.slice(1).map(songData => [
+            data[0],
+            ...data.slice(1).map(songData => [
                 songData[0],
                 ...songData.slice(1).map(x => x.position)
             ])
