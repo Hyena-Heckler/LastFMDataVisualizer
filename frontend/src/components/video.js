@@ -3,6 +3,10 @@ import {store} from "../store.js";
 //import cache from "./Data.json";
 
 function rgbToHsl(r, g, b) {
+    r = parseFloat(r);
+    g = parseFloat(g);
+    b = parseFloat(b);
+
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
 
