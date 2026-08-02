@@ -1,5 +1,6 @@
 import { Muxer, ArrayBufferTarget } from "webm-muxer";
 import {store} from "../store.js";
+//import cache from "./Data.json";
 
 function rgbToHsl(r, g, b) {
     const max = Math.max(r, g, b);
@@ -85,6 +86,7 @@ export function videoSetup() {
         // Line Creation
         let songLines = [];
         positionsData.slice(1).forEach(song => {
+            console.log(song[0].color);
             let points = [];
             song.slice(1).forEach((pos, index) => {
                 const point = {
