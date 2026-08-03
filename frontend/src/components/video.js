@@ -1,6 +1,7 @@
 import { Muxer, ArrayBufferTarget } from "webm-muxer";
 import {store} from "../store.js";
-//import cache from "./Data.json";
+
+const ENVIRONMENT = import.meta.env.MODE;
 
 function rgbToHsl(r, g, b) {
     r = parseFloat(r);
@@ -43,7 +44,7 @@ function rgbToHsl(r, g, b) {
 
 }
 
-export function videoSetup() {
+export function setUpVideo() {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const framerate = 30;
@@ -63,7 +64,14 @@ export function videoSetup() {
     const textPadding = 3;
     const fontSize = graphHeight / 20;
 
+    let currentVideoUrl = null;
+
     async function renderVideo() {
+        const canvasContainer = document.getElementById("canvas-container");
+        if (currentVideoUrl) {
+            URL.revokeObjectURL(currentVideoUrl);
+        }
+
         // Downloads Video
         const target = new ArrayBufferTarget();
         const muxer = new Muxer({
@@ -74,8 +82,15 @@ export function videoSetup() {
                 height: canvas.height
             }
         });
-
-        const data = store.cache.normalCache.data;
+        
+        let data;
+        if (ENVIRONMENT == "development") {
+            const cache = await import("./Data.json");
+            data = cache.default.normalCache.data;
+        } else if (ENVIRONMENT == "production") {
+            data = store.cache.normalCache.data;
+        }
+        
         const positionsData = [
             data[0],
             ...data.slice(1).map(songData => [
@@ -90,7 +105,6 @@ export function videoSetup() {
         // Line Creation
         let songLines = [];
         positionsData.slice(1).forEach(song => {
-            console.log(song[0].color);
             let points = [];
             song.slice(1).forEach((pos, index) => {
                 const point = {
@@ -317,7 +331,8 @@ export function videoSetup() {
         })
 
         const totalFrames = (tailendLength * 2 + totalWeeks - 2) * framesPerWeek;
-        
+        document.getElementById("render-video").hidden = true;
+        canvasContainer.hidden = false;
         for (let frame = 0; frame < totalFrames; frame++) {
             while (encoder.encodeQueueSize > 5) { // buffer
                 await new Promise(resolve => setTimeout(resolve, 1));
@@ -350,12 +365,12 @@ export function videoSetup() {
         );
 
         const localVideoUrl  = URL.createObjectURL(blob);
-
+        currentVideoUrl = localVideoUrl;
         showPositionChartVideo(localVideoUrl);
     }
 
     document.getElementById("render-video").addEventListener("click", async () => {
-        if (!store.user) {
+        if (!store.user && ENVIRONMENT == "production") {
             alert("Please log in first");
             return;
         }
@@ -367,37 +382,16 @@ export function videoSetup() {
 }
 
 function showPositionChartProgress(progress) {
-  const container = document.getElementById("progress");
-
-  console.log(progress);
-  const percentage = (progress * 100).toFixed(0)
-  container.innerHTML = `
-    <div class="animated-chart__progress-overlay">
-        <div class="animated-chart__loader">
-        </div>
-        <div class="animated-chart__bar">
-            <div class="animated-chart__bar-progress"
-                style="width: ${percentage}%"
-            ></div>
-        </div>
-        <div class="animated-chart__status">
-            <span>Rendering</span>
-            <span>${percentage}%</span>
-        </div>
-    </div>
-  `
+    const percentage = (progress * 100).toFixed(0)
+    document.getElementById("video-progress-bar")
+        .style.width = `${percentage}%`
+    document.getElementById("video-status-percent")
+        .textContent = `${percentage}%`
 }
 
 function showPositionChartVideo(videoFile) {
-    const container = document.getElementById("positions-time");
-
-    container.innerHTML = `
-        <video class="animated-chart__video" controls src="${videoFile}">
-        </video>
-    `
-    const video = container.querySelector("video");
-
-    video.onended = () => {
-        URL.revokeObjectURL(videoFile);
-    };
+    const video = document.getElementById("animated-video");
+    video.hidden = false;
+    document.getElementById("canvas-container").hidden = true;
+    video.src = videoFile;
 }

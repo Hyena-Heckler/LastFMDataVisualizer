@@ -14,12 +14,8 @@
 }
 
 button {
-  color: none;
+  color: #363537;
   border: none;
-}
-
-.hidden {
-  visibility: hidden;
 }
 
 /* Body */
@@ -71,15 +67,49 @@ body {
 }
 
 .panel__input {
-  padding: 10px;
+  padding: 0.5rem 1rem;
 }
 
 .panel__button {
-  padding: 10px 20px;
+  padding: 0.5rem 1rem;
   margin: 5px 0px;
 }
 
-/* Animated Chart Style https://freefrontend.com/css-progress-bars/ <-- idea */
+.panel_tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.panel_tab {
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  background: #FFC145;
+  color: #363537;
+}
+
+.panel_tab.active {
+  background: #B37400;
+  color: #F5DDDD;
+}
+
+.tab-content {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tab-content[hidden] {
+    display: none;
+}
+
+/* #region Animated Chart Style https://freefrontend.com/css-progress-bars/ <-- idea */
 
 #canvas-container {
   position: relative;
@@ -142,6 +172,9 @@ body {
   margin: 15px;
   padding: 5px;
   background: #FFC145;
+
+  width: fit-content;
+  height: fit-content;
   flex-shrink: 0;
 }
 
@@ -181,7 +214,9 @@ body {
   height: 540px;
 }
 
-/* Chart Cards CSS Styles */
+/* #endregion */
+
+/* #region Chart Cards CSS Styles */
 
 .top-chart {
   display: flex;
@@ -303,7 +338,9 @@ body {
   border-radius: 0 1rem 0 0;
 }
 
-/* Overall Charts #FFC145 */
+/* #endregion */
+
+/* #region Statistic CSS Styles */
 
 .statistics {
   display: flex;
@@ -328,7 +365,9 @@ body {
   list-style-type: decimal;
 }
 
-/* About Page CSS Styles */
+/* #endregion */
+
+/* #region About Page CSS Styles */
 
 .about {
   padding: 50px;
@@ -347,5 +386,5 @@ body {
   color: #363537;
 }
 
-
+/* #endregion */
 

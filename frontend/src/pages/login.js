@@ -38,6 +38,9 @@ export function setupLogin() {
       alert("Failed to load user data");
     } finally {
       submitButton.disabled = false;
+      document.getElementById("render-video").disabled = false;
+      document.getElementById("render-video").hidden = false;
+      document.getElementById("animated-video").hidden = true;
     }
   });
 }
