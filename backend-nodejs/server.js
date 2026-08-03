@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
 import { transformTracks, weekFriendlyCache } from "./services/tracks.transform.js";
-import { renderVideo, getStatus, prepareCached, calculateStatistics} from "./integrations/python/client.js"
+import { prepareCached, calculateStatistics} from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
 import { S3Client, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
@@ -111,107 +111,6 @@ app.post("/download-cache", async (req, res) => {
     res.status(500).json({ error: "Failed to cache tracks" });
   }
 });
-
-app.post("/start-video", async (req, res) => {
-  try {
-    const jobId = Date.now().toString();
-
-    const user = req.body.user;
-
-    const data = await getStoredData(user);
-
-    const organizedData = transformTracks(data);
-
-    const organizedDataJson =
-      [...organizedData.entries()].map(([, week]) => week);
-
-    renderVideo(
-      organizedDataJson,
-      jobId
-    );
-
-    console.log("Start Rendering");
-
-    res.json({
-      jobId,
-      status: "started"
-    });
-
-  } catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-      error: "Failed to start video tracks"
-    });
-  }
-});
-
-app.get("/video-status/:jobId", async (req, res) => {
-  try {
-    console.log("Checking...");
-    const result = await getStatus(req.params.jobId);
-    console.log(result);
-    res.json(result)
-  } catch (err) {
-    res.status(500).json({ error: "status check failed" })
-  }
-})
-
-app.get("/download-video/:jobId", async (req, res) => {
-  try {
-    const jobId = req.params.jobId;
-
-    const objectKey = `videos/${jobId}.mp4`;
-
-    const command = new GetObjectCommand({
-      Bucket: process.env.R2_BUCKET,
-      Key: objectKey,
-      ResponseContentType: "video/mp4"
-    });
-
-    const url = await getSignedUrl(r2, command, {
-      expiresIn: 3600,
-    });
-
-    console.log(url)
-
-    res.json({ url });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to generate download URL" });
-  }
-});
-
-app.get("/delete-video/:jobId", async (req, res) => {
-  try {
-    const jobId = req.params.jobId;
-
-    const objectKey = `videos/${jobId}.mp4`;
-
-    await r2.send(new DeleteObjectCommand ({
-      Bucket: process.env.R2_BUCKET,
-      Key: objectKey
-    }));
-
-    console.log("Deleted video", objectKey)
-
-    res.sendStatus(204);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to delete video" });
-  }
-});
-
-app.post("/top-of-the-week", async (req, res) => {
-  try {
-    
-    res.json("WORK IN PROGRESS");
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch tracks" });
-  }
-});
-
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);

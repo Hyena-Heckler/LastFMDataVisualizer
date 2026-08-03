@@ -12,6 +12,7 @@ export function setupLogin() {
 
     try {
       submitButton.disabled = true;
+      document.getElementById("login-disclaimer").hidden = false;
       const username = document.getElementById("username-login").value;
 
       store.user = username;
@@ -30,7 +31,7 @@ export function setupLogin() {
       setupDateDropdown();
 
       computeStatistics();
-
+      document.getElementById("login-disclaimer").hidden = true;
       console.log("Found User");
 
     } catch (err) {
@@ -38,6 +39,9 @@ export function setupLogin() {
       alert("Failed to load user data");
     } finally {
       submitButton.disabled = false;
+      document.getElementById("render-video").disabled = false;
+      document.getElementById("render-video").hidden = false;
+      document.getElementById("animated-video").hidden = true;
     }
   });
 }

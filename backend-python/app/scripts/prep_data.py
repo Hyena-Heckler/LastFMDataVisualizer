@@ -1,11 +1,8 @@
-import json
 import sys
 from app.services.song_positions import get_song_position_data
 from app.services.data_points import add_extra_info
-from app.services.render_video import graph_data
 from app.services.accent_color_of_image import *
 import datetime
-import logging
 import traceback
 import os
 import asyncio
@@ -20,15 +17,6 @@ sys.stdout.reconfigure(line_buffering=True, write_through=True)
 
 sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stderr,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    force=True
-)
-
-logging.info("PYTHON STARTED 2")
 sys.stderr.flush()
 
 def unix_to_date(unix_time): # turns Unix time to a standard date
@@ -93,27 +81,12 @@ def format_node_to_python(data):
 
 def prepare_cached_data(history):
     try:
-        print(history[0]['tracks'][0])
-        logging.info("Started Ordering Data Analysis")
         ordered_history = sort_week(history.copy())
-        logging.info("Started Ranking Data Analysis")
         ranked_history = points_each_week(ordered_history)
-        logging.info("Started Filtering Data Analysis")
         filtered_history = filter_songs_in_week(ranked_history, filter_size = 30)
-        logging.info("Started Formatting Data Analysis")
         formatted_history = format_node_to_python(filtered_history)
-        logging.info("Started Python Data Analysis")
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
-
-        with open('app/data/cache/song_points.json', 'w') as f:
-            json.dump(formatted_history, f, indent=2)
-
-        with open('app/data/cache/song_positions.json', 'w') as f:
-            json.dump(song_position_data, f, indent=2)
-
-        with open('app/data/cache/song_points_by_positions.json', 'w') as f:
-            json.dump(song_points_by_position_data, f, indent=2)
             
         def combine_poi_and_pos(in1, in2):
             return [
@@ -130,23 +103,6 @@ def prepare_cached_data(history):
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
-    
-
-def get_video(cached_song_data, path, job_id):
-    try:
-        song_position_data = [
-            cached_song_data[0],
-            *[
-                [song_data[0], *list(map(lambda x:x['position'], song_data[1:]))]
-                for song_data in cached_song_data[1:]
-            ]
-        ]
-        r2key = graph_data(song_position_data, path, job_id)
-        return r2key
-
-    except Exception as e:
-        traceback.print_exc(file=sys.stderr)
-        sys.exit(1)
 
 def get_statistics(cached_song_data):
     return add_extra_info(cached_song_data)
@@ -157,17 +113,6 @@ def prep_data(command, payload, video_path = None, job_id = None):
 
     if command == "get_statistics":
         return add_extra_info(payload)
-
-    if command == "get_video":
-        output_path = video_path / f"{job_id}.mp4"
-        key = get_video(prepare_cached_data(payload), output_path, job_id)
-        done_file = video_path / f"{job_id}.json"
-        with open(done_file, "w") as f:
-            json.dump({
-                "status": "done",
-                "r2Key": key
-            }, f)
-        print(f"Saved to {output_path}", file=sys.stderr)
 
 async def return_color_from_urls(payload):
     print(f"[color] start batch size={len(payload)}")

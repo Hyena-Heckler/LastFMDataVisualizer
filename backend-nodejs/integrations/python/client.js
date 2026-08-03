@@ -25,22 +25,6 @@ export const calculateStatistics = async (payload) => {
   return res.data
 }
 
-// Render Video
-export const renderVideo = async (payload, jobId) => {
-  const res = await axios.post(`${getPythonUrl()}/render-video`, {
-    payload,
-    jobId
-  })
-
-  return res.data
-}
-
-// Status Check
-export const getStatus = async (jobId) => {
-  const res = await axios.get(`${getPythonUrl()}/status/${jobId}`)
-  return res.data
-}
-
 // Get Color for Album
 export const getAlbumColor = async (payload) => {
   console.log("New Batch");

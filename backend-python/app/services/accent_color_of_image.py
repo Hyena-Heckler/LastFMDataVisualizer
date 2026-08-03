@@ -1,7 +1,5 @@
-from PIL import Image
 import httpx
 from io import BytesIO
-import json
 import sys
 import asyncio
 from colorthief import ColorThief

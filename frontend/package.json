@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "vite": "^8.0.10"
+  },
+  "dependencies": {
+    "webm-muxer": "^5.1.4"
   }
 }
