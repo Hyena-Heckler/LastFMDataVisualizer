@@ -10,11 +10,16 @@ export function setupLogin() {
     event.preventDefault();
     
     const submitButton = loginForm.querySelector("button");
+    const loginDisclaimer = document.getElementById("login-disclaimer");
 
     try {
       submitButton.disabled = true;
-      document.getElementById("login-disclaimer").hidden = false;
+      loginDisclaimer.hidden = false;
       const username = document.getElementById("username-login").value;
+      if (username === "") {
+        alert("No Username Inputted");
+        return
+      }
 
       store.user = username;
 
@@ -41,6 +46,7 @@ export function setupLogin() {
       alert("Failed to load user data");
     } finally {
       submitButton.disabled = false;
+      loginDisclaimer.hidden = true;
       document.getElementById("render-video").disabled = false;
       document.getElementById("render-video").hidden = false;
       document.getElementById("animated-video").hidden = true;
