@@ -1,6 +1,7 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
 import {computeStatistics} from "../components/statistics-adder.js";
+import data from "./Data.json";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
@@ -19,16 +20,17 @@ export function setupLogin() {
 
       console.log("Logged in:", store.user);
 
-      let status = await updateUser();
-      if (status == "failed") {
-        store.user = null;
-        alert("Invalid Username");
-        return
-      }
+      store.cache = data;
+      // let status = await updateUser();
+      // if (status == "failed") {
+      //   store.user = null;
+      //   alert("Invalid Username");
+      //   return
+      // }
 
-      await fetchCache();
+      // await fetchCache();
 
-      setupDateDropdown();
+      addDateDropdown();
 
       computeStatistics();
       document.getElementById("login-disclaimer").hidden = true;
@@ -46,7 +48,7 @@ export function setupLogin() {
   });
 }
 
-export function setupDateDropdown() {
+export function addDateDropdown() {
   const dateDropdown = document.getElementById("date");
   dateDropdown.innerHTML = "";
   if (!store.cache.weeklyCache?.weeks) {
@@ -60,4 +62,7 @@ export function setupDateDropdown() {
     dateDropdown.appendChild(option);
   });
   dateDropdown.dispatchEvent(new Event("change"));
+
+  document.getElementById("previous").disabled = false;
+  document.getElementById("next").disabled = false;
 }

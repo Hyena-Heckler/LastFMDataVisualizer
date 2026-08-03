@@ -15,4 +15,26 @@ export function setupDateDropdown() {
         });
         console.log("Finished Week");
     });
+
+    document.getElementById("previous").addEventListener("click", () => {
+        dateDropdown.selectedIndex--; 
+        dateDropdown.selectedIndex = Math.max(dateDropdown.selectedIndex, 0);
+        container.innerHTML = "";
+        store.cache.weeklyCache.weeks[dateDropdown.value]
+            .filter(entry => entry !== null)
+            .forEach((entry) => {
+                addCard(entry);
+        });
+    });
+
+    document.getElementById("next").addEventListener("click", () => {
+        dateDropdown.selectedIndex++; 
+        dateDropdown.selectedIndex = Math.min(dateDropdown.selectedIndex, dateDropdown.options.length)
+        container.innerHTML = "";
+        store.cache.weeklyCache.weeks[dateDropdown.value]
+            .filter(entry => entry !== null)
+            .forEach((entry) => {
+                addCard(entry);
+        });
+    });
 }

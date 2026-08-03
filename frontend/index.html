@@ -65,8 +65,12 @@
 
     <div id="chart-tab" class="tab-content">
       <section class="top-chart">
-        <select class="chart__dropdown" id="date">
-        </select>
+        <div class="chart-navigation">
+          <button class="chart-arrow" id="previous" disabled>&#x25C0;</button>
+          <select class="chart__dropdown" id="date">
+          </select>
+          <button class="chart-arrow" id="next" disabled>&#x25B6;</button>
+        </div>
         <div class="chart" id="chart-container">
           <div class="chart__song">
             <div class="chart__position">
