@@ -1,8 +1,6 @@
 import { Muxer, ArrayBufferTarget } from "webm-muxer";
 import {store} from "../store.js";
 
-const ENVIRONMENT = import.meta.env.MODE;
-
 function rgbToHsl(r, g, b) {
     r = parseFloat(r);
     g = parseFloat(g);
@@ -84,12 +82,7 @@ export function setUpVideo() {
         });
         
         let data;
-        if (ENVIRONMENT == "development") {
-            const cache = await import("./Data.json");
-            data = cache.default.normalCache.data;
-        } else if (ENVIRONMENT == "production") {
-            data = store.cache.normalCache.data;
-        }
+        data = store.cache.normalCache.data;
         
         const positionsData = [
             data[0],
@@ -370,7 +363,7 @@ export function setUpVideo() {
     }
 
     document.getElementById("render-video").addEventListener("click", async () => {
-        if (!store.user && ENVIRONMENT == "production") {
+        if (!store.user) {
             alert("Please log in first");
             return;
         }
