@@ -1,7 +1,5 @@
-import json
 import datetime
 import re
-import sys
 from app.services.accent_color_of_image import *
 
 class SongPositions:  # class for creating the playlist information
