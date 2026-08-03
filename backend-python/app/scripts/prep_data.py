@@ -1,4 +1,3 @@
-import json
 import sys
 from app.services.song_positions import get_song_position_data
 from app.services.data_points import add_extra_info
@@ -7,7 +6,6 @@ import datetime
 import traceback
 import os
 import asyncio
-import gc
 
 semaphore = asyncio.Semaphore(30)
 
