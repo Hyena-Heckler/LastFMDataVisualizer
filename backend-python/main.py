@@ -2,12 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 from app.scripts.prep_data import prep_data, return_color_from_urls
-from app.data.cache.render_progress import get
 from app.services.render_video import log_ram
 from pathlib import Path
-import json
-import threading
-import gc
 
 VIDEO_DIR = Path("/tmp/videos")
 VIDEO_DIR.mkdir(parents=True, exist_ok=True)

@@ -2,7 +2,6 @@ import json
 import sys
 from app.services.song_positions import get_song_position_data
 from app.services.data_points import add_extra_info
-from app.services.render_video import graph_data, log_ram
 from app.services.accent_color_of_image import *
 import datetime
 import traceback
@@ -84,15 +83,10 @@ def format_node_to_python(data):
 
 def prepare_cached_data(history):
     try:
-        log_ram("Started Ordering Data Analysis")
         ordered_history = sort_week(history.copy())
-        log_ram("Started Ranking Data Analysis")
         ranked_history = points_each_week(ordered_history)
-        log_ram("Started Filtering Data Analysis")
         filtered_history = filter_songs_in_week(ranked_history, filter_size = 30)
-        log_ram("Started Formatting Data Analysis")
         formatted_history = format_node_to_python(filtered_history)
-        log_ram("Started Python Data Analysis")
         song_position_data = get_song_position_data(formatted_history, True)
         song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
             
@@ -106,26 +100,7 @@ def prepare_cached_data(history):
             ]
         cached_song_data = [song_position_data[0]] + [combine_poi_and_pos(pos_data, poi_data) for pos_data, poi_data in zip(song_position_data[1:], song_points_by_position_data[1:]) ]
 
-        log_ram("after combine")
-        
         return cached_song_data
-
-    except Exception as e:
-        traceback.print_exc(file=sys.stderr)
-        sys.exit(1)
-    
-
-def get_video(cached_song_data, path, job_id):
-    try:
-        song_position_data = [
-            cached_song_data[0],
-            *[
-                [song_data[0], *list(map(lambda x:x['position'], song_data[1:]))]
-                for song_data in cached_song_data[1:]
-            ]
-        ]
-        r2key = graph_data(song_position_data, path, job_id)
-        return r2key
 
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
@@ -140,26 +115,6 @@ def prep_data(command, payload, video_path = None, job_id = None):
 
     if command == "get_statistics":
         return add_extra_info(payload)
-
-    if command == "get_video":
-        output_path = video_path / f"{job_id}.mp4"
-
-        log_ram("Before get_video")
-        
-        key = get_video(payload, output_path, job_id)
-
-        del payload
-        gc.collect()
-
-        log_ram("After get_video")
-        
-        done_file = video_path / f"{job_id}.json"
-        with open(done_file, "w") as f:
-            json.dump({
-                "status": "done",
-                "r2Key": key
-            }, f)
-        print(f"Saved to {output_path}", file=sys.stderr)
 
 async def return_color_from_urls(payload):
     print(f"[color] start batch size={len(payload)}")

@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
 import { transformTracks, weekFriendlyCache } from "./services/tracks.transform.js";
-import { renderVideo, getStatus, prepareCached, calculateStatistics} from "./integrations/python/client.js"
+import { prepareCached, calculateStatistics} from "./integrations/python/client.js"
 import path from "path";
 import fs from "fs";
 import { S3Client, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
