@@ -91,29 +91,3 @@ export function weekFriendlyCache(cache) {
         weeks
     };
 }
-
-// {
-//   "songs": {
-//     "0": {
-//       "name": "Locals",
-//       "artist": "underscores",
-//       "color": [...]
-//     }
-//   },
-//   "weeks": {
-//     "11/10/23": [
-//       {
-//         "songId": 0,
-//         "position": 1,
-//         "change": null
-//       }
-//     ],
-//     "11/17/23": [
-//       {
-//         "songId": 0,
-//         "position": 3,
-//         "change": -2
-//       }
-//     ]
-//   }
-// }

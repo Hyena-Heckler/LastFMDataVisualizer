@@ -50,64 +50,6 @@ def process(request: ProcessRequest):
     log_ram("After prepare-cached")
     return {"status": "ok", "data": result}
 
-@app.post("/render-video")
-def render_video(request: ProcessRequest):
-
-    print(
-        "Payload JSON size:",
-        len(json.dumps(request.payload)) / 1024 / 1024,
-        "MB"
-    )
-
-    log_ram("After FastAPI parsing")
-
-    payload = request.payload.copy()
-    
-    job_id = request.jobId
-
-    print("entered route")
-    print("payload dumped")
-
-    def background_render(payload, job_id):
-        print("START", job_id, threading.current_thread().name)
-        
-        try:
-            print("thread started")
-
-            prep_data(
-                "get_video",
-                payload,
-                VIDEO_DIR,
-                job_id
-            )
-
-            print("thread finished")
-
-        finally:
-            print("FINISH", job_id, threading.current_thread().name)
-
-            gc.collect()
-            log_ram("After thread cleanup")
-
-            print("Threads now:", threading.enumerate())
-
-    threading.Thread(
-        target=background_render,
-        args=(payload, job_id),
-        daemon=True
-    ).start()
-
-    job_id_response = job_id
-    del request
-    gc.collect()
-
-    print("returning response")
-
-    return {
-        "status": "rendering_started",
-        "jobId": job_id_response
-    }
-
 @app.post("/calculate-statistics")
 def process(request: StatisticsRequest):
     log_ram("Before statistics")
@@ -115,12 +57,6 @@ def process(request: StatisticsRequest):
     result = prep_data("get_statistics", payload)
     log_ram("After statistics")
     return {"status": "ok", "data": result}
-    
-
-
-@app.get("/status/{job_id}")
-def get_status(job_id: str):
-    return get(job_id)
 
 @app.post("/get-album-color")
 async def get_colors(request: AlbumColorRequest):
