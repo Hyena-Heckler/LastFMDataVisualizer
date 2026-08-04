@@ -9,16 +9,18 @@ export function setupLogin() {
     event.preventDefault();
     
     const submitButton = loginForm.querySelector("button");
+    const loginDisclaimer = document.getElementById("login-disclaimer");
 
     try {
       submitButton.disabled = true;
-      document.getElementById("login-disclaimer").hidden = false;
+      loginDisclaimer.hidden = false;
       const username = document.getElementById("username-login").value;
+      if (username === "") {
+        alert("No Username Inputted");
+        return
+      }
 
       store.user = username;
-
-      console.log("Logged in:", store.user);
-
       let status = await updateUser();
       if (status == "failed") {
         store.user = null;
@@ -28,17 +30,16 @@ export function setupLogin() {
 
       await fetchCache();
 
-      setupDateDropdown();
+      addDateDropdown();
 
       computeStatistics();
       document.getElementById("login-disclaimer").hidden = true;
-      console.log("Found User");
-
     } catch (err) {
       console.error(err);
       alert("Failed to load user data");
     } finally {
       submitButton.disabled = false;
+      loginDisclaimer.hidden = true;
       document.getElementById("render-video").disabled = false;
       document.getElementById("render-video").hidden = false;
       document.getElementById("animated-video").hidden = true;
@@ -46,7 +47,7 @@ export function setupLogin() {
   });
 }
 
-export function setupDateDropdown() {
+export function addDateDropdown() {
   const dateDropdown = document.getElementById("date");
   dateDropdown.innerHTML = "";
   if (!store.cache.weeklyCache?.weeks) {
@@ -60,4 +61,8 @@ export function setupDateDropdown() {
     dateDropdown.appendChild(option);
   });
   dateDropdown.dispatchEvent(new Event("change"));
+
+  dateDropdown.disabled = false;
+  document.getElementById("previous").disabled = false;
+  document.getElementById("next").disabled = false;
 }

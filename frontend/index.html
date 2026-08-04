@@ -7,20 +7,94 @@
     <link href="src/styles/main.css" rel="stylesheet"/>
   </head>
   <body>
+    <!-- Banner For When Site is Down -->
     <div class="status" hidden>
       <h2>CURRENTLY BEING WORKED ON [VIDEO RENDERING BEING TESTED].</h1>
       <p>Download Video still being worked on.</p>
     </div>
 
+    <!-- Title and Introduction -->
     <header class="introduction">
       <h1 class="introduction__title">YourTop30</h1>
       <p class="text">
         Input your <a href="https://www.last.fm/home" target="_blank"><span class="highlight">lastfm</span></a> username and see your own personal charts and additional metrics. 
         Want to visually see it? Your history can be graphed!
       </p>
-      <p class="text" style="font-size: x-small;">[This site is a demo with more features coming soon (check roadmap below). Input usernames to fill in the sample cards and sample charts. Scroll down more to see the github code.]</p>
     </header>
 
+    <!-- The Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-chart-container">
+        <div class="chart__song">
+          <div class="chart__position">
+            <div class="chart__position-header">
+              <div class="tooltip">
+                <h2>1</h2>
+                <h5><span class="tooltiptext">Position of Song That Week</span></h5>
+              </div>
+              <div class="tooltip">
+                <h6>x2</h6>
+                <h5><span class="tooltiptext">Streak: Number of Weeks in a Row at that Position</span></h5>
+              </div>
+            </div>
+            <div class="tooltip">
+              <h5>LW: 3</h5>
+              <h5><span class="tooltiptext">Position Last Week</span></h5>
+            </div>
+            <div class="tooltip">
+              <h5>(⬆2)</h5>
+              <h5><span class="tooltiptext">Change in Position:
+                <br>⬆ - Rise
+                <br>⬇ - Fall
+                <br>↔ - Hold
+                <br>★ NEW - First Appearance
+                <br>★ RE - Re-Entry
+              </span></h5>
+            </div>
+          </div>
+          <div class="chart__icon">
+            <img src="null-image.png"/>
+          </div>
+          <div class="chart__identifier">
+            <h3>Title</h3>
+            <div class="chart__identifier-extra">
+              <h4>Album</h4>
+              <h4>-</h4>
+              <h4>Artists</h4>
+            </div>
+          </div>
+          <div class="chart__main">
+            <div class="tooltip">
+              <h5>Points</h5>
+              <h5><span class="tooltiptext"># of Listens This Week + [Last Week's Points * (1/2) ^ (1/4)]</span></h5>
+            </div>
+            <div class="tooltip">
+              <h5>WOC</h5>
+              <h5><span class="tooltiptext">Weeks On Chart</span></h5>
+            </div>
+            <div class="tooltip">
+              <h5>Peak</h5>
+              <h5><span class="tooltiptext">Highest Position So Far</span></h5>
+            </div>
+          </div>
+          <div class="chart__extra">
+            <div class="tooltip">
+              <h5>Lifetime-Points</h5>
+              <h5><span class="tooltiptext">Total Accumulated Points So Far</span></h5>
+            </div>
+            <div class="tooltip">
+              <h5>First-Appearance</h5>
+              <h5><span class="tooltiptext">First Week It Appeared on Chart</span></h5>
+            </div>
+          </div>
+          <div class="modal-close-box" id="modal-close">
+            <span class="close">&times;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Panel For Website -->
     <div class="panel">
       <form id="panel__form" action="/submit-username" method="POST">
         <label class="panel__form-label" for="username-login">Username:</label>
@@ -37,6 +111,7 @@
       </div>
     </div>
 
+    <!-- Video Rendering Tab -->
     <div id="video-tab" class="tab-content" hidden>
       <div class="animated-chart" id="positions-time">
         <button class="panel__button" id="render-video">Render Video</button>
@@ -63,42 +138,23 @@
       </div>
     </div>
 
+    <!-- Chart Explorer Tab -->
     <div id="chart-tab" class="tab-content">
       <section class="top-chart">
-        <select class="chart__dropdown" id="date">
-        </select>
+        <div class="chart-navigation">
+          <button class="chart__arrow" id="previous" disabled>&#x25C0;</button>
+          <select class="chart__dropdown" id="date" disabled>
+          </select>
+          <button class="chart__arrow" id="next" disabled>&#x25B6;</button>
+          <button class="chart__info-button" id="chart-help">i</button>
+        </div>
         <div class="chart" id="chart-container">
-          <div class="chart__song">
-            <div class="chart__position">
-              <h5>Streak</h5>
-              <h2>POS</h2>
-              <h5>LW+Symbol</h5>
-            </div>
-            <div class="chart__icon">
-              <img src="https://lastfm.freetls.fastly.net/i/u/900x900/88b646daa5e6626399ccd002ba67e50d.jpg"/>
-            </div>
-            <div class="chart__identifier">
-              <h3>Title</h3>
-              <div class="chart__identifier-extra">
-                <h4>Album</h4>
-                <h4>-</h4>
-                <h4>Artists</h4>
-              </div>
-            </div>
-            <div class="chart__main">
-              <h5>Points</h5>
-              <h5>Week</h5>
-              <h5>Peak</h5>
-            </div>
-            <div class="chart__extra">
-              <h5>Lifetime-Points</h5>
-              <h5>First-Appearance</h5>
-            </div>
-          </div>
+          
         </div>
       </section>
     </div>
 
+    <!-- Statistics Tab -->
     <div id="statistic-tab" class="tab-content" hidden>
       <div class="statistics" id="statistics-container">
         <div class="statistics__category">
@@ -112,39 +168,44 @@
       </div>
     </div>
 
-
-
-    <section class="about">
-      <h2 class="about__title">A Little Bit More About This Site</h2>
-      <p class="about__description"> 
-        I was inspired to make this site after viewing videos online that showed different animated charts of artists or specific years over time. 
-        I wanted something similar for myself, so I, originally, manually collected the data and graphed the data myself.
-        During a talk with a friend, who is a software engineer, he suggested that I should automate the website, which I held off doing until winter break of senior year.
-        At first, the automation was only for myself and I still had to manually create playlists with my top songs on Spotify (On Repeat Playlist).
-        During my freshman year, I added more functionalities to my program.
-        In my sophomore year of college, I decided to switch to using the Last.fm API to be able to get more accurate data without having to do anything manually on my end.
-        With this switch, I was also able to allow other people use my program, so I thought of creating a website.
-        I have little formal experience with website design, but I used what I can and learned more about specific components that I wanted to be in my website.
-        During my summer before Junior Year, I was able to finally publish the first version of my website.
-        I hope you enjoy!
-      </p>
-      <P>
-        Check out the <a href="https://github.com/Hyena-Heckler/LastFMDataVisualizer" target="_blank"><span>Github</span></a> and see the code for yourself!
-      </p>
-      <h3 class="about__roundmap">
-        Roadmap for the Future (in no particular order):
-      </h3>
-      <p>
-        <ul>
-          <li>Input Username Progress Bar</li>
-          <li>Albums Chart</li>
-          <li>Artists Chart</li>
-          <li>Create a smart system to combine different album and song versions</li>
-          <li>Group Chart (use data from multiple users)</li>
-          <li>Improve UI/UX of website</li>
-        </ul>
-      </p>
+    <!-- About + Roadmap -->
+    <div class="about__buffer">
+    </div>
+    <section class="about" id="footer">
+      <div class="about__content">
+        <h2 class="about__title" id="footer-title">A Little Bit More About This Site</h2>
+        <p class="about__description" id="footer-description"> 
+          I was inspired to make this site after viewing videos online that showed different animated charts of artists or specific years over time. 
+          I wanted something similar for myself, so I, originally, manually collected the data and graphed the data myself.
+          During a talk with a friend, who is a software engineer, he suggested that I should automate the website, which I held off doing until winter break of senior year.
+          At first, the automation was only for myself and I still had to manually create playlists with my top songs on Spotify (On Repeat Playlist).
+          During my freshman year, I added more functionalities to my program.
+          In my sophomore year of college, I decided to switch to using the Last.fm API to be able to get more accurate data without having to do anything manually on my end.
+          With this switch, I was also able to allow other people use my program, so I thought of creating a website.
+          I have little formal experience with website design, but I used what I can and learned more about specific components that I wanted to be in my website.
+          During my summer before Junior Year, I was able to finally publish the first version of my website.
+          I hope you enjoy!
+        </p>
+        <P>
+          Check out the <a href="https://github.com/Hyena-Heckler/LastFMDataVisualizer" target="_blank"><span>Github</span></a> and see the code for yourself!
+        </p>
+        <h3 class="about__roundmap">
+          Roadmap for the Future (in no particular order):
+        </h3>
+        <p>
+          <ul>
+            <li>Input Username Progress Bar: Show how much longer it will take to load in data when logging in.</li>
+            <li>Albums Chart: Use album data instead of songs.</li>
+            <li>Artists Chart: Use artist data instead of songs.</li>
+            <li>Variant Grouping: Create a smart system to combine different album and song versions to be associated with the Standard Version</li>
+            <li>Group Chart: Use multiple user's data to create a chart (and adjust point system for this)</li>
+            <li>Improve UI/UX of website: Add transitions, clean up elements, etc.</li>
+            <li>Optimization: Improve speed of the site wherever possible.</li>
+          </ul>
+        </p>
+      </div>
     </section>
+
     <script type="module" src="src/main.js"></script>
   </body>
 </html>

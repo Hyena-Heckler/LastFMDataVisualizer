@@ -5,6 +5,8 @@ import {addCard} from "./components/card-adder.js";
 import {store} from "./store.js";
 import { setUpVideo } from "./components/video.js";
 import { setUpTabs } from "./pages/tabs.js";
+import { setUpCardInfo } from "./pages/card-info.js";
+import { setUpFooter } from "./pages/footer.js";
 
 
 function init() {
@@ -13,6 +15,8 @@ function init() {
     setupLogin();
     setUpTabs();
     setUpVideo();
+    setUpCardInfo();
+    setUpFooter();
 }
 
 init();
