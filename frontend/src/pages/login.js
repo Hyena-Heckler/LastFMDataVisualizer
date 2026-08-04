@@ -22,9 +22,6 @@ export function setupLogin() {
       }
 
       store.user = username;
-
-      console.log("Logged in:", store.user);
-
       store.cache = data;
       // let status = await updateUser();
       // if (status == "failed") {
@@ -39,8 +36,6 @@ export function setupLogin() {
 
       computeStatistics();
       document.getElementById("login-disclaimer").hidden = true;
-      console.log("Found User");
-
     } catch (err) {
       console.error(err);
       alert("Failed to load user data");
@@ -69,6 +64,7 @@ export function addDateDropdown() {
   });
   dateDropdown.dispatchEvent(new Event("change"));
 
+  dateDropdown.disabled = false;
   document.getElementById("previous").disabled = false;
   document.getElementById("next").disabled = false;
 }

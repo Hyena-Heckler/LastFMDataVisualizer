@@ -2,7 +2,6 @@ import {store} from "../store.js";
 import { addCard } from "../components/card-adder.js";
 
 export function setupDateDropdown() {
-    console.log("Set Up Dropdown Complete");
     const dateDropdown = document.getElementById("date");
     const container = document.getElementById("chart-container");
   
@@ -13,7 +12,6 @@ export function setupDateDropdown() {
             .forEach((entry) => {
                 addCard(entry);
         });
-        console.log("Finished Week");
     });
 
     document.getElementById("previous").addEventListener("click", () => {

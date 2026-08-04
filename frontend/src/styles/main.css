@@ -23,7 +23,119 @@
   --green: #8CD867;
 }
 
-/* Body */
+/* #region Modal Overlay */
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-chart-container {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+
+  width: 100%;
+}
+
+.modal-close-box {
+  width: 56px;
+  height: 56px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-color: var(--black);
+  border-width: 5px;
+  border-style: solid;
+  border-radius: 28px;
+
+  position: absolute;
+  top: -12%;
+  right: -3%;
+  background-color:var(--orange);
+}
+
+.close {
+  font-size: 56px;
+  font-weight: bold;
+
+  transform: translateY(-4px) translateX(0.5px);
+}
+
+.modal-close-box:hover,
+.modal-close-box:focus {
+  background-color: var(--dark-orange);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* #endregion */
+
+/* #region Tooltip CSS Styles */
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted var(--black) ; /* If you want dots under the hoverable text */
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: var(--dark-pink);
+  color: var(--light-pink);
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+
+  border-width: 4px;
+  border-style: solid;
+  border-color: var(--black);
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -10px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: var(--black) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* #endregion */
+
+/* #region Body CSS Styles */
 
 body {
   background-color: var(--black);
@@ -32,7 +144,9 @@ body {
   align-items: center;
 }
 
-/* Status Banner */
+/* #endregion */
+
+/* #region Status Banner CSS Styles */
 
 .status {
   background-color: var(--orange);
@@ -41,7 +155,9 @@ body {
   width:100%;
 }
 
-/* Introduction */ 
+/* #endregion */
+
+/* #region Introduction CSS Styles */ 
 
 .introduction {
   padding: 50px;
@@ -62,7 +178,9 @@ body {
   color: var(--green);
 }
 
-/* Panel */ 
+/* #endregion */
+
+/* #region Panel CSS Styles */ 
 .panel {
   display: flex;
   flex-direction: column;
@@ -117,8 +235,10 @@ body {
     display: none;
 }
 
-/* #region Animated Chart Style https://freefrontend.com/css-progress-bars/ <-- idea */
+/* #endregion */
 
+/* #region Animated Video CSS Styles */
+/* https://freefrontend.com/css-progress-bars/ <<-- Adapt Ideas from Here*/
 #canvas-container {
   position: relative;
   height: 540px;
@@ -242,13 +362,15 @@ body {
 }
 
 .chart-navigation {
+  display: flex;
+  align-items: center;
   height: 40px;
   background: var(--pink);
   padding: 10px;
   border-radius: 1rem;
 }
 
-.chart-arrow {
+.chart__arrow {
   padding: 0px 10px;
   height: 100%;
   cursor: pointer;
@@ -258,19 +380,40 @@ body {
   border-radius: 1rem 0 0 1rem;
 }
 
-#next {
-  border-radius: 0 1rem 1rem 0;
-}
-
 .chart__dropdown {
   cursor: pointer;
   width: 200px;
   height: 100%;
-  margin: 0px 10px;
+  margin: 10px;
+}
+
+#next {
+  border-radius: 0 1rem 1rem 0;
+}
+
+.chart__info-button {
+  background-color: var(--orange);
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+
+  margin-left: 10px;
+
+  border-width: 4px;
+  border-color: var(--black);
+  border-style: solid;
+  border-radius: 28px;
+}
+
+.chart__info-button:hover {
+  background-color: var(--dark-orange);
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .chart__song {
   display: grid;
+  position: relative;
   width: 100%;
   max-width: 750px;
 
@@ -289,6 +432,7 @@ body {
 
 .chart__position {
   display: flex;
+  position: relative;
   grid-column: 1;
   grid-row: 1 / 4;
   height: 100%;
@@ -303,12 +447,12 @@ body {
 .chart__position-header {
   display: flex;
   align-items: flex-end;
-  gap: 3px;
+  gap: 0 3px;
 }
 
-.chart__position-header h5 {
-    margin: 0;
+.chart__position-header h6 {
     position: relative;
+    margin: 5px 0 0 0;
     bottom: 3px; /* adjust as needed */
 }
 
@@ -354,7 +498,7 @@ body {
   padding: 5px;
   align-items: center;
   height: 100%;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .chart__main, .chart__extra {
@@ -401,11 +545,37 @@ body {
 
 /* #region About Page CSS Styles */
 
+.about__buffer {
+  position: sticky;
+  bottom: -10px;
+  
+  background-color: var(--light-pink);
+  width: 100%;
+  height: 50px;
+  transform: translateY(5px);
+
+  border-top: 5px solid var(--black);
+}
+
 .about {
-  padding: 50px;
-  margin: 50px 0px 0px 0px;
+  position: sticky;
+  bottom: -480px;
+  
+  margin: 0px 0 0 0;
   background-color: var(--light-pink);
   color: var(--black);
+}
+
+.about__border {
+  position: absolute;
+  top: -5px;
+  left: 0;
+
+  width: 100%;
+}
+
+.about__content {
+  padding: 0 50px 50px 50px;
 }
 
 .about__description {
