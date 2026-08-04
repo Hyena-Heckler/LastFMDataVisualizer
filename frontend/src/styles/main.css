@@ -415,7 +415,7 @@ body {
   display: grid;
   position: relative;
   width: 100%;
-  max-width: 750px;
+  max-width: 700px;
 
   grid-template-columns: 75px 190px 1fr;
   grid-template-rows: 2fr 1fr 1fr;
@@ -559,7 +559,7 @@ body {
 
 .about {
   position: sticky;
-  bottom: -480px;
+  bottom: var(--about-bottom);
   
   margin: 0px 0 0 0;
   background-color: var(--light-pink);

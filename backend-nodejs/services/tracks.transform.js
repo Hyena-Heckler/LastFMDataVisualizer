@@ -54,6 +54,7 @@ export function weekFriendlyCache(cache) {
             firstAppearance: null,
             streak: 0,
             previousPosition: null,
+            previousIndex: -1,
             lifetimePoints: 0
         };
 
@@ -74,16 +75,16 @@ export function weekFriendlyCache(cache) {
                     position: songEntry.position,
                     points: songEntry.points,
                     weeks: song.weeks,
-                    previousPosition: song.previousPosition,
+                    previousPosition: previousIndex === index - 1 ? song.previousPosition : null,
                     streak: song.streak,
                     peak: song.peak,
                     lifetimePoints: song.lifetimePoints
                 }
-
+                song.previousIndex = index;
                 song.previousPosition = songEntry.position;
             }
         });
-    })
+    });
     
 
     return {

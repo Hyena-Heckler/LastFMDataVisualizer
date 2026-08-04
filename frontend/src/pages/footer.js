@@ -1,6 +1,6 @@
 export function setUpFooter() {
     const footerTitle = document.getElementById("footer-title");
-    const footerDescription = document.getElementById("footer-description");
+    const footer = document.getElementById("footer");
 
     footerTitle.addEventListener("click", () => {
         window.scrollTo({
@@ -8,4 +8,16 @@ export function setUpFooter() {
             behavior: "smooth"
         });
     });
+
+    function updateAboutSticky() {
+        const peekHeight = 28;
+        const height = footer.getBoundingClientRect().height;
+
+        footer.style.bottom = `-${height - peekHeight}px`;
+    }
+
+    const observer = new ResizeObserver(updateAboutSticky);
+    observer.observe(footer);
+
+    updateAboutSticky();
 }

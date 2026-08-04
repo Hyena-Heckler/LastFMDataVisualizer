@@ -1,12 +1,13 @@
 import {store} from "../store.js";
 
-export function addCard(entry) {
+export function addCard(entry, currentWeek) {
   const container = document.getElementById("chart-container");
 
   const song = store.cache.weeklyCache.songs[entry.songId];
   const card = document.createElement("div");
   const image = song.image || "/null-image.png";
 
+  if(entry.previousPosition == null && currentWeek != song.firstAppearance) console.log("hi");
   card.className = "chart__song"
   card.innerHTML = `
     <div class="chart__position">
@@ -26,7 +27,9 @@ export function addCard(entry) {
               ? Math.abs(entry.position - entry.previousPosition) 
               : ""
           })</h5>` 
-        : `<h5>★ NEW</h5>`
+        : currentWeek == song.firstAppearance
+          ? `<h5>★ NEW</h5>`
+          : `<h5>★ RE</h5>`
       }
     </div>
 

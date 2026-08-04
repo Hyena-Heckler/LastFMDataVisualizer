@@ -10,7 +10,7 @@ export function setupDateDropdown() {
         store.cache.weeklyCache.weeks[dateDropdown.value]
             .filter(entry => entry !== null)
             .forEach((entry) => {
-                addCard(entry);
+                addCard(entry, dateDropdown.value);
         });
     });
 
@@ -21,7 +21,7 @@ export function setupDateDropdown() {
         store.cache.weeklyCache.weeks[dateDropdown.value]
             .filter(entry => entry !== null)
             .forEach((entry) => {
-                addCard(entry);
+                addCard(entry, dateDropdown.value);
         });
     });
 
@@ -32,7 +32,7 @@ export function setupDateDropdown() {
         store.cache.weeklyCache.weeks[dateDropdown.value]
             .filter(entry => entry !== null)
             .forEach((entry) => {
-                addCard(entry);
+                addCard(entry, dateDropdown.value);
         });
     });
 }
