@@ -92,3 +92,53 @@ export function weekFriendlyCache(cache) {
         weeks
     };
 }
+
+
+export function normalizeAlbum(albumText) {
+    return albumText
+        // Remove parenthesized/bracketed editions
+        .replace(
+            /\s*[\(\[](?=[^\)\]]*(?:deluxe|super deluxe|expanded|special|remastered|anniversary|3am|til dawn))[^\)\]]*[\)\]]/gi,
+            ""
+        )
+        .replace(/\s+deluxe:.*$/i, "")
+        .replace(
+            /\s+(?:special edition|deluxe edition|expanded edition|deluxe|expanded|remastered)$/i,
+            ""
+        )
+
+        // Remove versions/remixes
+        .replace(/\s*-\s*(?:(?!taylor['’]s version).)*(?:remix|version|acoustic|remastered|cover|spotify singles).*$/i, "")
+        .replace(
+            /\s*[\(\[](?!(?:[^\)\]]*taylor['’]s version))[^\)\]]*(?:remix|version|ver\.|remastered|sped up|mash[- ]?up|single|acoustic)[^\)\]]*[\)\]]/gi,
+            ""
+        )
+        .replace(/\s*[\(\[]from the vault[\)\]]/gi, "")
+
+        // Remove features
+        .replace(/\s*[\(\[](?:feat\.?\s|featuring\s|feat\s).*?[\)\]]/gi, "")
+        .replace(/\s+featuring\s+.*/gi, "")
+        .replace(/\s+feat\.?\s+.*/gi, "")
+
+        .replace(/\s{2,}/g, " ")
+        .trim();
+}   
+
+export function normalizeSong(songText) {
+    return songText
+        // Remove versions/remixes
+        .replace(/\s*-\s*(?:(?!taylor['’]s version).)*(?:remix|version|acoustic|remastered|cover|spotify singles).*$/i, "")
+        .replace(
+            /\s*[\(\[](?!(?:[^\)\]]*taylor['’]s version))[^\)\]]*(?:remix|version|ver\.|remastered|sped up|mash[- ]?up|single|acoustic)[^\)\]]*[\)\]]/gi,
+            ""
+        )
+        .replace(/\s*[\(\[]from the vault[\)\]]/gi, "")
+
+        // Remove features
+        .replace(/\s*[\(\[](?:feat\.?\s|featuring\s|feat\s).*?[\)\]]/gi, "")
+        .replace(/\s+featuring\s+.*/gi, "")
+        .replace(/\s+feat\.?\s+.*/gi, "")
+
+        .replace(/\s{2,}/g, " ")
+        .trim();
+}

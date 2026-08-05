@@ -11,6 +11,8 @@ Data.json
 Data (1).json
 albums_to_colors.json
 cache.json
+results.json
+test.service.js
 
 # Logs
 logs
