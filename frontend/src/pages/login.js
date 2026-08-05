@@ -63,6 +63,4 @@ export function addDateDropdown() {
   dateDropdown.dispatchEvent(new Event("change"));
 
   dateDropdown.disabled = false;
-  document.getElementById("previous").disabled = false;
-  document.getElementById("next").disabled = false;
 }
