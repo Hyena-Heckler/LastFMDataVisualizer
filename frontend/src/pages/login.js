@@ -1,6 +1,7 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
 import {computeStatistics} from "../components/statistics-adder.js";
+import data from "./Data.json";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
@@ -21,14 +22,15 @@ export function setupLogin() {
       }
 
       store.user = username;
-      let status = await updateUser();
-      if (status == "failed") {
-        store.user = null;
-        alert("Invalid Username");
-        return
-      }
+      // let status = await updateUser();
+      // if (status == "failed") {
+      //   store.user = null;
+      //   alert("Invalid Username");
+      //   return
+      // }
 
-      await fetchCache();
+      // await fetchCache();
+      store.cache = data;
 
       addDateDropdown();
 
