@@ -13,6 +13,7 @@ function init() {
     setupButtons();
     setupDateDropdown();
     setupLogin();
+    console.log("works");
     setUpTabs();
     setUpVideo();
     setUpCardInfo();

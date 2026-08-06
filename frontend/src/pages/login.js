@@ -1,16 +1,18 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
 import {computeStatistics} from "../components/statistics-adder.js";
-//import data from "./Data.json";
+import data from "./Data.json";
 
 export function setupLogin() {
-  const loginForm = document.getElementById("panel__form")
+  const loginForm = document.getElementById("panel__form");
+  const submitButton = loginForm.querySelector("button");
+  const loginDisclaimer = document.getElementById("login-disclaimer");
+  submitButton.disabled = false;
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     
-    const submitButton = loginForm.querySelector("button");
-    const loginDisclaimer = document.getElementById("login-disclaimer");
+    
 
     try {
       submitButton.disabled = true;
@@ -22,15 +24,15 @@ export function setupLogin() {
       }
 
       store.user = username;
-      let status = await updateUser();
-      if (status == "failed") {
-        store.user = null;
-        alert("Invalid Username");
-        return
-      }
+      // let status = await updateUser();
+      // if (status == "failed") {
+      //   store.user = null;
+      //   alert("Invalid Username");
+      //   return
+      // }
 
-      await fetchCache();
-      // store.cache = data;
+      // await fetchCache();
+      store.cache = data;
 
       addDateDropdown();
 
