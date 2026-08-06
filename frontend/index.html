@@ -135,12 +135,28 @@
       <div class="panel_tabs">
         <button class="panel_tab active" data-tab="chart">Chart</button>
         <button class="panel_tab" data-tab="video">Video</button>
-        <button class="panel_tab" data-tab="statistic">Statistic</button>
+        <button class="panel_tab" data-tab="statistics">Statistics</button>
       </div>
     </div>
 
+    <!-- Chart Explorer Tab -->
+    <div id="chart-tab" class="tab-content active">
+      <section class="top-chart">
+        <div class="chart-navigation">
+          <button class="chart__arrow" id="previous" disabled>&#x25C0;</button>
+          <select class="chart__dropdown" id="date" disabled>
+          </select>
+          <button class="chart__arrow" id="next" disabled>&#x25B6;</button>
+          <button class="chart__info-button" id="chart-help">i</button>
+        </div>
+        <div class="chart" id="chart-container">
+          
+        </div>
+      </section>
+    </div>
+
     <!-- Video Rendering Tab -->
-    <div id="video-tab" class="tab-content" hidden>
+    <div id="video-tab" class="tab-content">
       <div class="animated-chart" id="positions-time">
         <button class="panel__button" id="render-video">Render Video</button>
         <div id="canvas-container" hidden>
@@ -166,34 +182,8 @@
       </div>
     </div>
 
-    <!-- Chart Explorer Tab -->
-    <div id="chart-tab" class="tab-content">
-      <section class="top-chart">
-        <div class="chart-navigation">
-          <button class="chart__arrow" id="previous" disabled>&#x25C0;</button>
-          <select class="chart__dropdown" id="date" disabled>
-          </select>
-          <button class="chart__arrow" id="next" disabled>&#x25B6;</button>
-          <button class="chart__info-button" id="chart-help">i</button>
-        </div>
-        <div class="chart" id="chart-container">
-          
-        </div>
-      </section>
-    </div>
-
     <!-- Statistics Tab -->
-    <div id="statistic-tab" class="tab-content" hidden>
-      <div class="statistics" id="statistics-container">
-        <div class="statistics__category">
-          <h2>Ranking</h2>
-          <ol>
-            <li>First item</li>
-            <li>Second item</li>
-            <li>Third item</li>
-          </ol>
-        </div>
-      </div>
+    <div id="statistics-tab" class="tab-content">
     </div>
 
     <!-- About + Roadmap -->

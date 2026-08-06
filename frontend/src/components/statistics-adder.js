@@ -1,11 +1,36 @@
 import {store} from "../store.js";
 
 export function computeStatistics() {
-  const container = document.getElementById("statistics-container");
+  const container = document.getElementById("statistics-tab");
   container.innerHTML = ``;
   const statisticsInfo = store.cache.statisticsCache.data;
 
   statisticsInfo.forEach((ranking) => {
+    let statisticsContainer = document.getElementById(`${ranking.bucket}-container`);
+
+    // Creates accordion section of bucket
+    if (statisticsContainer == null) {
+      const statisticsButton = document.createElement("button");
+      statisticsButton.classList.add("accordion", "active");
+      statisticsButton.textContent = `${ranking.bucket}`;
+      statisticsContainer = document.createElement("div");
+      statisticsContainer.id = `${ranking.bucket}-container`;
+      statisticsContainer.classList.add("statistics");
+      statisticsContainer.style.display = "flex"
+      container.appendChild(statisticsButton);
+      container.appendChild(statisticsContainer);
+
+      statisticsButton.addEventListener("click", async () => {
+        statisticsButton.classList.toggle("active");
+        if (statisticsContainer.style.maxHeight) {
+          statisticsContainer.style.maxHeight = null;
+        } else {
+          statisticsContainer.style.maxHeight = statisticsContainer.scrollHeight + "px";
+        }
+      });
+    }
+
+    // Adding Statistics Card
     const ranks = document.createElement("div");
     ranks.className = "statistics__category";
 
@@ -17,27 +42,11 @@ export function computeStatistics() {
     html += `${ranking.size ? `</ol>` : `</ul>`}`;
     ranks.innerHTML = html; 
 
-    container.appendChild(ranks);
-  })
-}
+    statisticsContainer.appendChild(ranks);
+  });
 
-/*
-<div class="statistics" id="statistics-container">
-      <div class="statistics__category">
-        <h2>Ranking</h2>
-        <ol>
-          <li>First item and maybe something else (put something here)</li>
-          <li>Second item</li>
-          <li>Third item</li>
-        </ol>
-      </div>
-      <div class="statistics__category">
-        <h2>Ranking</h2>
-        <ol>
-          <li>First item</li>
-          <li>Second item</li>
-          <li>Third item</li>
-        </ol>
-      </div>
-    </div>
-*/
+  document.querySelectorAll(".statistics").forEach(container => {
+    container.style.maxHeight = container.scrollHeight + "px";
+    console.log(container.style.maxHeight);
+  });
+}

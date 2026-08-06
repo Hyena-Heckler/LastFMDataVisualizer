@@ -229,10 +229,22 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.tab-content.active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .25s ease, transform .25s ease;
+
+  pointer-events: auto;
 }
 
 .tab-content[hidden] {
-    display: none;
+  display: none;
 }
 
 /* #endregion */
@@ -518,11 +530,19 @@ body {
 
 /* #region Statistic CSS Styles */
 
+#statistics-tab {
+  flex-direction: column;
+  padding: 10px;
+}
+
 .statistics {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
 
 .statistics__category {
@@ -534,11 +554,39 @@ body {
   flex-grow: 1;
   flex-basis: 300px;
   max-width: 400px;
-  
 }
 
 .statistics__category ol li {
   list-style-type: decimal;
+}
+
+.accordion {
+  background-color: var(--pink);
+  color: var(--black);
+  cursor: pointer;
+  padding: 20;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+  font-size: 28px;
+}
+
+.accordion.active, .accordion:hover {
+  background-color: var(--dark-pink);
+}
+
+.accordion:after {
+  content: '\02795';
+  font-size: 28px;
+  color: var(--black);
+  float: right;
+  margin-left: 5px;
+}
+
+.accordion.active:after {
+  content: "\2796";
 }
 
 /* #endregion */
