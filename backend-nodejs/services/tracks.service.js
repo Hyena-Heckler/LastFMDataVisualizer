@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import fetch from "node-fetch";
 import { Pool } from "pg";
 import { getAlbumColor } from "../integrations/python/client.js";
+import { normalizeAlbum, normalizeSong } from "./tracks.transform.js";
 import pkg from "pg-copy-streams";
 import { PassThrough } from "stream";
 
@@ -132,22 +133,24 @@ async function saveUserData(lastfmUsername, data) {
         });
       }
 
-      const albumKey = `${artistKey}|${s.album['#text']}`;
+      const albumText = normalizeAlbum(s.album['#text']);
+      const albumKey = `${artistKey}|${albumText}`;
 
       if (!albumsMap.has(albumKey)) {
         albumsMap.set(albumKey, {
-          name: s.album['#text'],
+          name: albumText,
           mbid: s.album.mbid || null,
           image_url: s?.image?.[3]?.['#text'] || s?.image?.[2]?.['#text'] || s?.image?.[1]?.['#text'] || s?.image?.[0]?.['#text'] || null,
           artistKey
         });
       }
-
-      const songKey = `${albumKey}|${s.name}`;
+      
+      const songText = normalizeSong(s.name);
+      const songKey = `${albumKey}|${songText}`;
 
       if (!songsMap.has(songKey)) {
         songsMap.set(songKey, {
-          name: s.name,
+          name: songText,
           mbid: s.mbid || null,
           url: s.url,
           albumKey
@@ -192,7 +195,6 @@ async function saveUserData(lastfmUsername, data) {
       ON CONFLICT (unique_key) DO NOTHING
     `, artistParams);
 
-    // ALWAYS reselect (this is the fix)
     const artistResult = await conn.query(`
       SELECT artist_id, name, mbid
       FROM artists
@@ -276,7 +278,7 @@ async function saveUserData(lastfmUsername, data) {
     }
 
     // -----------------------------
-    // 6. SCROBBLES (COPY FROM STDIN)
+    // 6. SCROBBLES
     // -----------------------------
 
     const copyStream = conn.query(
@@ -334,7 +336,7 @@ async function saveUserData(lastfmUsername, data) {
 
     await new Promise((resolve, reject) => {
       copyStream.on("error", (err) => {
-        console.error("❌ COPY ERROR:", err);
+        console.error("COPY ERROR:", err);
         reject(err);
       });
 

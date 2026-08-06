@@ -4,6 +4,8 @@
 *.DS_Store
 *.png
 !null-image.png
+!icon.png
+!preview.png
 song_points_by_positions.json
 song_points.json
 song_positions.json
@@ -11,6 +13,8 @@ Data.json
 Data (1).json
 albums_to_colors.json
 cache.json
+results.json
+test.service.js
 
 # Logs
 logs

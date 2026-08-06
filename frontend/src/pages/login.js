@@ -1,6 +1,7 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
 import {computeStatistics} from "../components/statistics-adder.js";
+//import data from "./Data.json";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form")
@@ -29,6 +30,7 @@ export function setupLogin() {
       }
 
       await fetchCache();
+      // store.cache = data;
 
       addDateDropdown();
 
@@ -63,6 +65,4 @@ export function addDateDropdown() {
   dateDropdown.dispatchEvent(new Event("change"));
 
   dateDropdown.disabled = false;
-  document.getElementById("previous").disabled = false;
-  document.getElementById("next").disabled = false;
 }

@@ -7,7 +7,6 @@ export function addCard(entry, currentWeek) {
   const card = document.createElement("div");
   const image = song.image || "/null-image.png";
 
-  if(entry.previousPosition == null && currentWeek != song.firstAppearance) console.log("hi");
   card.className = "chart__song"
   card.innerHTML = `
     <div class="chart__position">
