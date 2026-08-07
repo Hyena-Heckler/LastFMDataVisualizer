@@ -31,6 +31,7 @@ def add_extra_info(cached_song_data):
     songs_info.sort(key=lambda n: n["total_points"], reverse=True)
 
     statistics.append({
+        "bucket": "Overall",
         "title": "Total Points",
         "size": 10,
         "rows": [
@@ -46,6 +47,7 @@ def add_extra_info(cached_song_data):
     songs_info.sort(key=lambda n: n["total_weeks"], reverse=True)
 
     statistics.append({
+        "bucket": "Longevity",
         "title": "Total Weeks",
         "size": 10,
         "rows": [
@@ -60,7 +62,8 @@ def add_extra_info(cached_song_data):
     songs_info.sort(key=lambda n: n["points_per_week"], reverse=True)
 
     statistics.append({
-        "title": "Total Points Per Week",
+        "bucket": "Overall",
+        "title": "Highest Average Points",
         "size": 10,
         "rows": [
             {
@@ -90,6 +93,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_number_one"], reverse=True)
     statistics.append({
+        "bucket": "Longevity",
         "title": "Total Weeks at #1",
         "size": 10,
         "rows": [
@@ -104,6 +108,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_top_three"], reverse=True)
     statistics.append({
+        "bucket": "Longevity",
         "title": "Total Weeks in Top 3",
         "size": 10,
         "rows": [
@@ -117,6 +122,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_top_five"], reverse=True)
     statistics.append({
+        "bucket": "Longevity",
         "title": "Total Weeks in Top 5",
         "size": 10,
         "rows": [
@@ -130,6 +136,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_top_ten"], reverse=True)
     statistics.append({
+        "bucket": "Longevity",
         "title": "Total Weeks in Top 10",
         "size": 10,
         "rows": [
@@ -143,6 +150,7 @@ def add_extra_info(cached_song_data):
 
     songs_info.sort(key=lambda n: n["weeks_number_two"], reverse=True)
     statistics.append({
+        "bucket": "Misses",
         "title": "Total Weeks Stuck at #2",
         "size": 10,
         "rows": [
@@ -155,6 +163,7 @@ def add_extra_info(cached_song_data):
     })
 
     debutObject = {
+        "bucket": "Starshot",
         "title": "Number One Debuts",
         "size": None,
         "rows": []

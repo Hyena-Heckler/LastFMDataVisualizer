@@ -12,7 +12,7 @@ export function addCard(entry, currentWeek) {
     <div class="chart__position">
       <div class="chart__position-header">
         <h2>#${entry.position}</h2>
-        ${entry.streak > 1 ? `<h5>x${entry.streak}</h5>` : ""}
+        ${entry.streak > 1 ? `<h6>x${entry.streak}</h6>` : ""}
       </div>
       
       ${entry.previousPosition != null 

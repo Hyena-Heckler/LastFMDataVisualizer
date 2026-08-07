@@ -34,12 +34,18 @@ export function computeStatistics() {
     const ranks = document.createElement("div");
     ranks.className = "statistics__category";
 
-    let html = `<h2>${ranking.title}</h2> ${ranking.size ? `<ol>` : `<ul>`}`;
+    let html = `
+    <div class="statistics__title">
+      <h2>${ranking.title}</h2> 
+    </div>
+    <div class="statistics__content">
+      ${ranking.size ? `<ol>` : `<ul>`}`;
 
     ranking.rows.slice(0, ranking.size ?? ranking.rows.length).forEach((entry) => {
         html += `<li>${entry.song.name} (${entry.value})</li>`;
     })
-    html += `${ranking.size ? `</ol>` : `</ul>`}`;
+    html += `${ranking.size ? `</ol>` : `</ul>`}
+    </div>`;
     ranks.innerHTML = html; 
 
     statisticsContainer.appendChild(ranks);
@@ -47,6 +53,13 @@ export function computeStatistics() {
 
   document.querySelectorAll(".statistics").forEach(container => {
     container.style.maxHeight = container.scrollHeight + "px";
-    console.log(container.style.maxHeight);
+  });
+
+  window.addEventListener("resize", async () => {
+    document.querySelectorAll(".statistics").forEach(container => {
+      if (container.style.maxHeight) {
+        container.style.maxHeight = container.scrollHeight + "px";
+      }
+    });
   });
 }
