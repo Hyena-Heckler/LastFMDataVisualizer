@@ -558,6 +558,7 @@ body {
   /* flex-grow: 1;
   flex-basis: 300px; */
   max-width: 400px;
+  min-width: 300px;
 }
 
 .statistics__title {
@@ -589,6 +590,10 @@ body {
   border-bottom: 1px solid var(--dark-pink);
 }
 
+.statistics__category ul li {
+  border-bottom: 1px solid var(--dark-pink);
+}
+
 .accordion {
   background-color: var(--pink);
   color: var(--black);
@@ -607,15 +612,16 @@ body {
 }
 
 .accordion:after {
-  content: '\02795';
+  content: '+';
   font-size: 28px;
   color: var(--black);
   float: right;
-  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .accordion.active:after {
-  content: "\2796";
+  content: "—";
+  font-size: 28px;
 }
 
 /* #endregion */

@@ -5,6 +5,7 @@ import { getAlbumColor } from "../integrations/python/client.js";
 import { normalizeAlbum, normalizeSong } from "./tracks.transform.js";
 import pkg from "pg-copy-streams";
 import { PassThrough } from "stream";
+import { update, complete, get} from "./job_progress.js";
 
 const copyFrom = pkg.from;
 dotenv.config();
@@ -27,25 +28,6 @@ async function getUser(lastfmUsername) {
 
   return result.rows[0]?.user_id;
 }
-
-export async function updateJob(jobId, update) {
-  await db.query(`
-    INSERT INTO jobs (job_id, status, step, progress)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (job_id)
-    DO UPDATE SET
-      status = EXCLUDED.status,
-      step = EXCLUDED.step,
-      progress = EXCLUDED.progress
-  `, [
-    jobId,
-    update.status,
-    update.step,
-    update.progress
-  ]);
-}
-
-
 
 async function updateColorOfAlbums(){
   const result = await db.query(`
@@ -441,12 +423,7 @@ async function loadUserData(lastfmUsername) {
 
 
 export async function getAllTracksData(username, apiKey, jobId) {
-  await updateJob(jobId, {
-    status: "processing",
-    step: "fetching",
-    progress: 5
-  });
-
+  update(jobId, "fetching", 5);
 
   async function getTotalTrackNumber() { 
     // gets the number of tracks
@@ -472,11 +449,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
     totalTracks = await getTotalTrackNumber();
   } catch (err) {
     console.log(err)
-    await updateJob(jobId, {
-      status: "failed",
-      step: "loading",
-      progress: 100
-    });
+    update(jobId, "failed", 1.0);
     return null;
   }
 
@@ -488,11 +461,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
     userJSON = userData;
   }
 
-  await updateJob(jobId, {
-    status: "processing",
-    step: "db_write",
-    progress: 10
-  });
+  update(jobId, "fetching", 10);
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
@@ -547,22 +516,14 @@ export async function getAllTracksData(username, apiKey, jobId) {
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
   await saveUserData(username, newData, (progress) => {
-    updateJob(jobId, {
-      status: "processing",
-      step: progress.stage,
-      progress: progress.percent
-    });
+    update(jobId, "progress", progress.stage);
   });
   
   console.log("Processing Album Colors");
   await updateColorOfAlbums();
   console.log("Finished Processing Album Colors");
 
-  await updateJob(jobId, {
-    status: "completed",
-    step: "done",
-    progress: 100
-  });
+  complete(jobId);
   return data;
 }
 export async function getUpdateStatus(jobId) {
