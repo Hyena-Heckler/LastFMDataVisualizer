@@ -1,6 +1,6 @@
-progress = new Map();
+let progress = new Map();
 
-export async function start(jobId) {
+export function start(jobId) {
   progress.set(jobId, {
     "status": "rendering",
     "job_id": jobId,
@@ -9,7 +9,7 @@ export async function start(jobId) {
   });
 }
 
-export async function complete(jobId) {
+export function complete(jobId) {
   if (progress.has(jobId)) {
     progress.set(jobId, {
       "status": "complete",
@@ -20,15 +20,16 @@ export async function complete(jobId) {
   }
 }
 
-export async function update(jobId, status, value) {
-    if (progress.has(jobId)) {
-        progress[jobId]["status"] = status;
-        progress[jobId]["progress"] = value;
-    }
+export function update(jobId, status, value) {
+  const job = progress.get(jobId);
+  if (job) {
+      job.status = status;
+      job.progress = value;
+  }
 }
 
-export async function get(jobId) {
+export function get(jobId) {
   if (progress.has(jobId)) {
-    return progress[jobId];
+    return progress.get(jobId);
   }
 }

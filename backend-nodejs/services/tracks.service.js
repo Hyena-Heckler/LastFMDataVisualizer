@@ -515,9 +515,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
   let newData = await getAllTracksBatch(totalTracks - loggedTracks);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
-  await saveUserData(username, newData, (progress) => {
-    update(jobId, "progress", progress.stage);
-  });
+  await saveUserData(username, newData);
   
   console.log("Processing Album Colors");
   await updateColorOfAlbums();
@@ -525,28 +523,6 @@ export async function getAllTracksData(username, apiKey, jobId) {
 
   complete(jobId);
   return data;
-}
-export async function getUpdateStatus(jobId) {
-  const result = await db.query(`
-    SELECT 
-      j.status AS status,
-      j.step AS step,
-      j.progress AS progress
-    FROM jobs j
-    WHERE j.job_id = $1
-  `, [jobId]);
-
-  const row = result.rows;
-
-  if (!row.length) {
-    return { ready: false, progress: 0 }
-  }
-
-  if (row[0].status === "completed" || row[0].step === "done" || row[0].progress === 100) {
-    return {ready: true, progress: 100, status: row[0].status}
-  } else {
-    return {ready: false, progress: row[0].progress, status: "processing"}
-  }
 }
 
 export async function getStoredData(username) {
