@@ -29,7 +29,7 @@ async function getUser(lastfmUsername) {
   return result.rows[0]?.user_id;
 }
 
-async function updateColorOfAlbums(){
+async function updateColorOfAlbums(jobId){
   const result = await db.query(`
     SELECT album_id, image_url
     FROM albums
@@ -38,7 +38,9 @@ async function updateColorOfAlbums(){
       OR color_b IS NULL
   `);
 
-  const rows = result.rows
+  const rows = result.rows;
+  let completedRows = 0;
+  const totalRows = rows.length;
 
   console.log("Row Length:", rows.length)
 
@@ -62,6 +64,9 @@ async function updateColorOfAlbums(){
         color_b = CASE album_id ${bCase} END
       WHERE album_id = ANY($1::int[])
     `, [ids]);
+
+    completedRows += ids.length;
+    update(jobId, "coloring", completedRows / totalRows);
   }
 
 
@@ -70,7 +75,7 @@ async function updateColorOfAlbums(){
 
     for(let i = 0; i < totalBatches; i += batchSize) {
       const batch = [];
-      console.error("New Batch");
+      
       for(let j = i; j < i + batchSize && j <= totalBatches; j++) {
         const limit = j < totalBatches ? 500 : totalAlbums % 500 || 500;
         batch.push(updateColors(j * 500, limit));
@@ -423,7 +428,7 @@ async function loadUserData(lastfmUsername) {
 
 
 export async function getAllTracksData(username, apiKey, jobId) {
-  update(jobId, "fetching", 5);
+  update(jobId, "fetching", .05);
 
   async function getTotalTrackNumber() { 
     // gets the number of tracks
@@ -461,7 +466,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
     userJSON = userData;
   }
 
-  update(jobId, "fetching", 10);
+  update(jobId, "fetching", 0.10);
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
@@ -518,7 +523,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
   await saveUserData(username, newData);
   
   console.log("Processing Album Colors");
-  await updateColorOfAlbums();
+  await updateColorOfAlbums(jobId);
   console.log("Finished Processing Album Colors");
 
   complete(jobId);
