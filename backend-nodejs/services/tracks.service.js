@@ -70,7 +70,7 @@ async function updateColorOfAlbums(jobId){
   }
 
 
-  async function updateColorBatches(totalAlbums, batchSize = 3, limit = 200) {
+  async function updateColorBatches(totalAlbums, batchSize = 10, limit = 200) {
     const totalBatches = Math.ceil(totalAlbums / limit);
 
     for(let i = 0; i < totalBatches; i += batchSize) {
