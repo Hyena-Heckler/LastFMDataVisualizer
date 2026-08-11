@@ -72,9 +72,10 @@ export function addDateDropdown() {
 }
 
 function showLoginProgress(progress) {
-    const percentage = (progress * 100).toFixed(0)
-    document.getElementById("login-progress-bar")
-        .style.width = `${percentage}%`
-    document.getElementById("login-status-percent")
-        .textContent = `${percentage}%`
+  console.log(progress);
+  const percentage = (progress * 100).toFixed(0)
+  document.getElementById("login-progress-bar")
+      .style.width = `${percentage}%`
+  document.getElementById("login-status-percent")
+      .textContent = `${percentage}%`
 }
