@@ -46,7 +46,7 @@ export async function updateUser(onProgress) {
     ready = statusData.ready;
 
     if (onProgress) {
-      onProgress(statusData.progress);
+      onProgress(statusData.progress, statusData.status);
     }
 
     if (!ready) {
