@@ -70,15 +70,15 @@ async function updateColorOfAlbums(jobId){
   }
 
 
-  async function updateColorBatches(totalAlbums, batchSize = 3) {
-    const totalBatches = Math.ceil(totalAlbums / 500);
+  async function updateColorBatches(totalAlbums, batchSize = 3, limit = 200) {
+    const totalBatches = Math.ceil(totalAlbums / limit);
 
     for(let i = 0; i < totalBatches; i += batchSize) {
       const batch = [];
       
-      for(let j = i; j < i + batchSize && j <= totalBatches; j++) {
-        const limit = j < totalBatches ? 500 : totalAlbums % 500 || 500;
-        batch.push(updateColors(j * 500, limit));
+      for(let j = i; j < i + batchSize && j < totalBatches; j++) {
+        const batchLimit = j < totalBatches - 1 ? limit : totalAlbums % limit || limit;
+        batch.push(updateColors(j * limit, batchLimit));
       }
 
       await Promise.all(batch);
@@ -497,7 +497,6 @@ export async function getAllTracksData(username, apiKey, jobId) {
     let userPlaylistHistory = [];
     for(let i = 1; i <= totalPages; i += batchSize) {
       const batch = []; // allows pages to be done in batches so it is processed faster, but not overwhelm lastfm api
-      console.error("New Batch");
       for(let j = i; j < i + batchSize && j <= totalPages; j++) {
         const limit = j < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
         batch.push(getMaxTracksFromPage(j, limit));
