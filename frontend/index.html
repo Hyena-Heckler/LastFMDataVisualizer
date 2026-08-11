@@ -51,7 +51,7 @@
     </header>
 
     <!-- The Modal -->
-    <div id="modal" class="modal">
+    <div id="info__modal" class="modal">
       <div class="modal-chart-container">
         <div class="chart__song">
           <div class="chart__position">
@@ -129,8 +129,20 @@
         <input class="panel__input" type="text" id="username-login" name="username" placeholder="Enter username here">
         <button class="panel__button" id="submit-login" type="submit" disabled>Submit</button>
       </form>
-      <p class="text" id="login-disclaimer" style="font-size: x-small;" hidden>May Take Several Minutes If It Is Your First Time on this Site</p>
-      <button class="panel__button" id="update" hidden>Update Information</button>
+      <div class="login__waiting" id="login-waiting-progress" hidden>
+        <div class="progress" id="login_progress">
+            <div class="progress__bar">
+                <div class="progress__complete-bar" id="login-progress-bar"
+                    style="width: 0"
+                ></div>
+            </div>
+            <div class="progress__status">
+                <span>LOADING</span>
+                <span id="login-status-percent">0</span>
+            </div>
+        </div>
+        <p class="text" id="login-disclaimer" style="font-size: x-small;">May Take Several Minutes If It Is Your First Time on this Site</p>
+      </div>
       <button class="panel__button" id="download-json" hidden>Download Cache</button>
       <div class="panel__tabs">
         <button class="panel__tab active" data-tab="chart">Chart</button>
@@ -162,16 +174,16 @@
         <button class="panel__button" id="render-video">Render Video</button>
         <div id="canvas-container" hidden>
           <canvas id="canvas" width="1920" height="1080"></canvas>
-          <div id="progress">
-            <div class="animated-chart__progress-overlay">
-                <div class="animated-chart__loader">
+          <div class="progress" id="animated-chart_progress">
+            <div class="progress__overlay">
+                <div class="progress__loader">
                 </div>
-                <div class="animated-chart__bar">
-                    <div class="animated-chart__bar-progress" id="video-progress-bar"
+                <div class="progress__bar">
+                    <div class="progress__complete-bar" id="video-progress-bar"
                         style="width: 0"
                     ></div>
                 </div>
-                <div class="animated-chart__status">
+                <div class="progress__status">
                     <span>Rendering</span>
                     <span id="video-status-percent">0</span>
                 </div>

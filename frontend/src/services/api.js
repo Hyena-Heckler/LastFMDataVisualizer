@@ -18,7 +18,7 @@ export async function fetchCache() {
   store.cache = await res.json();
 }
 
-export async function updateUser() {
+export async function updateUser(onProgress) {
   // Step 1: Start the updating process
   const res = await fetch(`${backend_server}/update`, {
     method: "POST",
@@ -44,6 +44,10 @@ export async function updateUser() {
     const statusData = await statusRes.json();
 
     ready = statusData.ready;
+
+    if (onProgress) {
+      onProgress(statusData.progress);
+    }
 
     if (!ready) {
       await new Promise(r => setTimeout(r, 5000));

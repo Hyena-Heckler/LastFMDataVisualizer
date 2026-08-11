@@ -201,6 +201,10 @@ body {
   cursor: pointer;
 }
 
+.login__waiting {
+  position: relative;
+}
+
 .panel__tabs {
   display: flex;
   gap: 0.5rem;
@@ -439,13 +443,12 @@ body {
   width: 960px;
 }
 
-#progress {
-  position: absolute;
+.progress {
   inset: 0;
   pointer-events: none;
 }
 
-.animated-chart__progress-overlay {
+.progress__overlay {
   position: absolute;
   inset: 0;
   /* bottom: 20px;
@@ -465,7 +468,7 @@ body {
   /* border-radius: 8px; */
 }
 
-.animated-chart__loader {
+.progress__loader {
   width: 70px;
   height: 70px;
   border: 5px solid var(--light-pink);
@@ -478,6 +481,37 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+.progress__bar {
+  width: 350px;
+  height: 10px;
+  background: #F5DDDD;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress__complete-bar {
+  height: 100%;
+  width: 0%;
+  background: #de8e8e;
+  border-radius: 5px;
+  transition: width .3s ease;
+}
+
+.progress__status {
+  margin-top: 10px;
+  width: 350px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  letter-spacing: 1px;
+  color: #de8e8e;
+  text-transform: uppercase;
+}
+
+.progress__status span {
+  color: #de8e8e;
 }
 
 .animated-chart {
@@ -493,37 +527,6 @@ body {
   width: fit-content;
   height: fit-content;
   flex-shrink: 0;
-}
-
-.animated-chart__bar {
-  width: 350px;
-  height: 10px;
-  background: #F5DDDD;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.animated-chart__bar-progress {
-  height: 100%;
-  width: 0%;
-  background: #de8e8e;
-  border-radius: 5px;
-  transition: width .3s ease;
-}
-
-.animated-chart__status {
-  margin-top: 10px;
-  width: 350px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9em;
-  letter-spacing: 1px;
-  color: #de8e8e;
-  text-transform: uppercase;
-}
-
-.animated-chart__status span {
-  color: #de8e8e;
 }
 
 .animated-chart__video {
@@ -557,8 +560,8 @@ body {
 
   /* flex-grow: 1;
   flex-basis: 300px; */
-  max-width: 400px;
-  min-width: 300px;
+  max-width: 500px;
+  min-width: 400px;
 }
 
 .statistics__title {
