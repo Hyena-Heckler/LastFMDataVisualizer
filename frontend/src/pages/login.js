@@ -25,8 +25,8 @@ export function setupLogin() {
       
 
       store.user = username;
-      const status = await updateUser((progress) => {
-        showLoginProgress(progress);
+      const status = await updateUser((progress, status) => {
+        showLoginProgress(progress, status);
       });
       if (status == "failed") {
         store.user = null;
