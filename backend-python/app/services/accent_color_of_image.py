@@ -8,7 +8,7 @@ client = httpx.AsyncClient(timeout=10)
 
 async def get_color(img_link=""):
 
-    if img_link == "null":
+    if img_link == "null" or img_link is None:
         return (0, 0, 0)
 
     try:
