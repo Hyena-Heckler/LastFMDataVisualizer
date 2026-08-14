@@ -1,17 +1,29 @@
 export function setUpTabs() {
-    const tabs = document.querySelectorAll(".panel_tab");
+    const tabs = document.querySelectorAll(".panel__tab");
 
     tabs.forEach(tab => {
         tab.addEventListener("click", () => {
-            document.querySelector(".panel_tab.active")?.classList.remove("active");
+            document.querySelector(".panel__tab.active")?.classList.remove("active");
             tab.classList.add("active");
 
+            const selectedTab = document.getElementById(`${tab.dataset.tab}-tab`);
+
             document.querySelectorAll(".tab-content").forEach(content => {
-                content.hidden = true;
+                if (content !== selectedTab) {
+                    content.classList.remove("active");
+                    content.hidden = true;
+                }
             });
 
-            document.getElementById(`${tab.dataset.tab}-tab`)
-                .hidden = false;
+            if (selectedTab) {
+                selectedTab.hidden = false;
+                requestAnimationFrame(() => {
+                    selectedTab.classList.add("active");
+                });
+            }
+            
         });
+
+        
     });
 }

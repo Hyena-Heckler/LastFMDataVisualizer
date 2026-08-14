@@ -153,6 +153,9 @@ body {
   position:fixed;
   top:0;
   width:100%;
+  z-index: 100;
+  padding: 5px;
+  border-bottom: 5px solid var(--black);
 }
 
 /* #endregion */
@@ -194,24 +197,27 @@ body {
 .panel__input {
   padding: 0.5rem 1rem;
 }
-
+ 
 .panel__button {
   padding: 0.5rem 1rem;
   margin: 5px 0px;
   cursor: pointer;
 }
 
-.panel_tabs {
+.login__waiting {
+  position: relative;
+}
+
+.panel__tabs {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1rem;
   margin-top: 1rem;
 
   justify-content: center;
   align-items: center;
 }
 
-.panel_tab {
+.panel__tab {
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
@@ -219,9 +225,15 @@ body {
   color: var(--black);
 }
 
-.panel_tab.active {
+.panel__tab.active {
   background: var(--dark-orange);
   color: var(--light-pink);
+}
+
+.panel__tab-footer {
+  border: 5px solid var(--dark-orange);
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 .tab-content {
@@ -229,117 +241,22 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-}
 
-.tab-content[hidden] {
-    display: none;
-}
-
-/* #endregion */
-
-/* #region Animated Video CSS Styles */
-/* https://freefrontend.com/css-progress-bars/ <<-- Adapt Ideas from Here*/
-#canvas-container {
-  position: relative;
-  height: 540px;
-  width: 960px;
-}
-
-#canvas {
-  height: 540px;
-  width: 960px;
-}
-
-#progress {
-  position: absolute;
-  inset: 0;
+  opacity: 0;
+  transform: translateY(8px);
   pointer-events: none;
 }
 
-.animated-chart__progress-overlay {
-  position: absolute;
-  inset: 0;
-  /* bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%); */
+.tab-content.active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .25s ease, transform .25s ease;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
- 
-
-  /* width: 60%; */
-  background: rgba(0, 0, 0, 0.6);
-  /* padding: 12px; */
-  gap: 30px;
-  /* border-radius: 8px; */
+  pointer-events: auto;
 }
 
-.animated-chart__loader {
-  width: 70px;
-  height: 70px;
-  border: 5px solid #F5DDDD;
-  border-top-color: #de8e8e;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animated-chart {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin: 15px;
-  padding: 5px;
-  background: #FFC145;
-
-  width: fit-content;
-  height: fit-content;
-  flex-shrink: 0;
-}
-
-.animated-chart__bar {
-  width: 350px;
-  height: 10px;
-  background: #F5DDDD;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.animated-chart__bar-progress {
-  height: 100%;
-  width: 0%;
-  background: #de8e8e;
-  border-radius: 5px;
-  transition: width .3s ease;
-}
-
-.animated-chart__status {
-  margin-top: 10px;
-  width: 350px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9em;
-  letter-spacing: 1px;
-  color: #de8e8e;
-  text-transform: uppercase;
-}
-
-.animated-chart__status span {
-  color: #de8e8e;
-}
-
-.animated-chart__video {
-  width: 960px;
-  height: 540px;
+.tab-content[hidden] {
+  display: none;
 }
 
 /* #endregion */
@@ -350,6 +267,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  max-width: 700px;
 }
 
 .chart {
@@ -358,6 +277,8 @@ body {
   align-items: center;
   gap: 15px;
   margin: 15px;
+  width: 100%;
+  max-width: 700px;
   color: var(--black);
 }
 
@@ -453,7 +374,7 @@ body {
 .chart__position-header h6 {
     position: relative;
     margin: 5px 0 0 0;
-    bottom: 3px; /* adjust as needed */
+    bottom: 3px;
 }
 
 .chart__icon {
@@ -516,29 +437,201 @@ body {
 
 /* #endregion */
 
+/* #region Animated Video CSS Styles */
+/* https://freefrontend.com/css-progress-bars/ <<-- Adapt Ideas from Here*/
+#canvas-container {
+  position: relative;
+  height: 540px;
+  width: 960px;
+}
+
+#canvas {
+  height: 540px;
+  width: 960px;
+}
+
+.progress {
+  inset: 0;
+  pointer-events: none;
+}
+
+.progress__overlay {
+  position: absolute;
+  inset: 0;
+  /* bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%); */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+ 
+
+  /* width: 60%; */
+  background: rgba(0, 0, 0, 0.6);
+  /* padding: 12px; */
+  gap: 30px;
+  /* border-radius: 8px; */
+}
+
+.progress__loader {
+  width: 70px;
+  height: 70px;
+  border: 5px solid var(--light-pink);
+  border-top-color: var(--dark-pink);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progress__bar {
+  width: 350px;
+  height: 10px;
+  background: #F5DDDD;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress__complete-bar {
+  height: 100%;
+  width: 0%;
+  background: #de8e8e;
+  border-radius: 5px;
+  transition: width .3s ease;
+}
+
+.progress__status {
+  margin-top: 10px;
+  width: 350px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  letter-spacing: 1px;
+  color: #de8e8e;
+  text-transform: uppercase;
+}
+
+.progress__status span {
+  color: #de8e8e;
+}
+
+.animated-chart {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 15px;
+  padding: 5px;
+  background: #FFC145;
+
+  width: fit-content;
+  height: fit-content;
+  flex-shrink: 0;
+}
+
+.animated-chart__video {
+  width: 960px;
+  height: 540px;
+}
+
+/* #endregion */
+
 /* #region Statistic CSS Styles */
+
+#statistics-tab {
+  flex-direction: column;
+  padding: 10px;
+}
 
 .statistics {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   width: 100%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
 
 .statistics__category {
-  background-color: var(--orange);
+  /* background-color: var(--orange); */
   list-style-position: inside;
-  padding: 10px;
   margin: 15px;
 
-  flex-grow: 1;
-  flex-basis: 300px;
-  max-width: 400px;
-  
+  /* flex-grow: 1;
+  flex-basis: 300px; */
+  max-width: 500px;
+  min-width: 400px;
 }
+
+.statistics__title {
+  width: fit-content;
+  min-width: 50%;
+  padding: 0 10px;
+  
+  height: 24px;
+  border-radius: 24px 24px 0 0;
+  background-color: var(--dark-pink);
+}
+
+.statistics__title h2 {
+  text-align: center;
+  padding: 0 15px;
+}
+
+.statistics__content {
+  padding: 10px;
+
+  border: 10px solid var(--dark-pink);
+  border-radius: 0 24px 24px 24px;
+  background-color: var(--light-pink);
+}
+
 
 .statistics__category ol li {
   list-style-type: decimal;
+  border-bottom: 1px solid var(--dark-pink);
+}
+
+.statistics__category ul li {
+  border-bottom: 1px solid var(--dark-pink);
+}
+
+.accordion {
+  background-color: var(--pink);
+  color: var(--black);
+  cursor: pointer;
+  padding: 20;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+  font-size: 28px;
+}
+
+.accordion.active, .accordion:hover {
+  background-color: var(--dark-pink);
+}
+
+.accordion:after {
+  content: '+';
+  font-size: 28px;
+  color: var(--black);
+  float: right;
+  margin-right: 5px;
+}
+
+.accordion.active:after {
+  content: "—";
+  font-size: 28px;
 }
 
 /* #endregion */

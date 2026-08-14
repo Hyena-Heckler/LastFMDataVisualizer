@@ -1,9 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import { getAllTracksData, getStoredData, getUpdateStatus} from "./services/tracks.service.js";
+import { getAllTracksData, getStoredData } from "./services/tracks.service.js";
 import { transformTracks, weekFriendlyCache } from "./services/tracks.transform.js";
 import { prepareCached, calculateStatistics} from "./integrations/python/client.js"
+import { start, get} from "./services/job_progress.js";
 import path from "path";
 import fs from "fs";
 import { S3Client, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
@@ -56,9 +57,9 @@ app.post("/update", async (req, res) => {
   try {
     const user = req.body.user;
     const jobId = Date.now().toString();
+    start(jobId);
     res.json({
-      jobId,
-      status: "started"
+      jobId
     })
 
     const data = await getAllTracksData(
@@ -80,7 +81,7 @@ app.post("/update", async (req, res) => {
 
 app.get("/update-status/:jobId", async (req, res) => {
   try {
-    const result = await getUpdateStatus(req.params.jobId);
+    const result = get(req.params.jobId);
     console.log("Updating Job Id", result);
     res.json(result)
   } catch (err) {
@@ -93,6 +94,13 @@ app.post("/download-cache", async (req, res) => {
   try {
     const user = req.body.user;
     const data = await getStoredData(user);
+    if (data.length === 0) {
+      res.json(
+        {
+          status: false,
+        }
+      )
+    }
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const arrayChartJson = await prepareCached(organizedDataJson);
@@ -102,6 +110,7 @@ app.post("/download-cache", async (req, res) => {
 
     res.json(
       {
+        status: true,
         normalCache: arrayChartJson,
         weeklyCache: weeklyChartJson,
         statisticsCache: userStatistics

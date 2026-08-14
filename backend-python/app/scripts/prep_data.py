@@ -125,5 +125,4 @@ async def return_color_from_urls(payload):
             }
 
     tasks = [handle(r) for r in payload]
-    print("[color] batch complete")
     return await asyncio.gather(*tasks)

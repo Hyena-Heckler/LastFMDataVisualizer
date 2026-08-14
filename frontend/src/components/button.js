@@ -31,18 +31,4 @@ export function setupButtons() {
 
     console.log("Successful download for:", store.user);
   });
-
-  document.getElementById("update").addEventListener("click", async () => {
-    if (!store.user) {
-      alert("Please log in first");
-      return;
-    }
-
-    // Step 1: Start the updating process
-    document.getElementById("update").disabled = true;
-    await updateUser();
-    await fetchCache();
-    document.getElementById("update").disabled = false;
-    console.log("Successful update for:", store.user);
-  });
 }

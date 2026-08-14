@@ -5,6 +5,7 @@ import { getAlbumColor } from "../integrations/python/client.js";
 import { normalizeAlbum, normalizeSong } from "./tracks.transform.js";
 import pkg from "pg-copy-streams";
 import { PassThrough } from "stream";
+import { update, complete, get} from "./job_progress.js";
 
 const copyFrom = pkg.from;
 dotenv.config();
@@ -28,26 +29,7 @@ async function getUser(lastfmUsername) {
   return result.rows[0]?.user_id;
 }
 
-export async function updateJob(jobId, update) {
-  await db.query(`
-    INSERT INTO jobs (job_id, status, step, progress)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (job_id)
-    DO UPDATE SET
-      status = EXCLUDED.status,
-      step = EXCLUDED.step,
-      progress = EXCLUDED.progress
-  `, [
-    jobId,
-    update.status,
-    update.step,
-    update.progress
-  ]);
-}
-
-
-
-async function updateColorOfAlbums(){
+async function updateColorOfAlbums(jobId){
   const result = await db.query(`
     SELECT album_id, image_url
     FROM albums
@@ -56,7 +38,9 @@ async function updateColorOfAlbums(){
       OR color_b IS NULL
   `);
 
-  const rows = result.rows
+  const rows = result.rows;
+  let completedRows = 0;
+  const totalRows = rows.length;
 
   console.log("Row Length:", rows.length)
 
@@ -80,18 +64,21 @@ async function updateColorOfAlbums(){
         color_b = CASE album_id ${bCase} END
       WHERE album_id = ANY($1::int[])
     `, [ids]);
+
+    completedRows += ids.length;
+    update(jobId, "coloring", completedRows / totalRows);
   }
 
 
-  async function updateColorBatches(totalAlbums, batchSize = 3) {
-    const totalBatches = Math.ceil(totalAlbums / 500);
+  async function updateColorBatches(totalAlbums, batchSize = 10, limit = 200) {
+    const totalBatches = Math.ceil(totalAlbums / limit);
 
     for(let i = 0; i < totalBatches; i += batchSize) {
       const batch = [];
-      console.error("New Batch");
-      for(let j = i; j < i + batchSize && j <= totalBatches; j++) {
-        const limit = j < totalBatches ? 500 : totalAlbums % 500 || 500;
-        batch.push(updateColors(j * 500, limit));
+      
+      for(let j = i; j < i + batchSize && j < totalBatches; j++) {
+        const batchLimit = j < totalBatches - 1 ? limit : totalAlbums % limit || limit;
+        batch.push(updateColors(j * limit, batchLimit));
       }
 
       await Promise.all(batch);
@@ -441,12 +428,7 @@ async function loadUserData(lastfmUsername) {
 
 
 export async function getAllTracksData(username, apiKey, jobId) {
-  await updateJob(jobId, {
-    status: "processing",
-    step: "fetching",
-    progress: 5
-  });
-
+  update(jobId, "fetching", .05);
 
   async function getTotalTrackNumber() { 
     // gets the number of tracks
@@ -472,11 +454,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
     totalTracks = await getTotalTrackNumber();
   } catch (err) {
     console.log(err)
-    await updateJob(jobId, {
-      status: "failed",
-      step: "loading",
-      progress: 100
-    });
+    update(jobId, "failed", 1.0);
     return null;
   }
 
@@ -488,11 +466,7 @@ export async function getAllTracksData(username, apiKey, jobId) {
     userJSON = userData;
   }
 
-  await updateJob(jobId, {
-    status: "processing",
-    step: "db_write",
-    progress: 10
-  });
+  update(jobId, "fetching", 0.10);
 
   async function getMaxTracksFromPage(page, limit = 1000, filterCurrentlyPlaying = true) { 
     const url = `https://ws.audioscrobbler.com/2.0/?user=${username}&api_key=${apiKey}&format=json&method=user.getrecenttracks&limit=${limit}&page=${page}`
@@ -523,7 +497,6 @@ export async function getAllTracksData(username, apiKey, jobId) {
     let userPlaylistHistory = [];
     for(let i = 1; i <= totalPages; i += batchSize) {
       const batch = []; // allows pages to be done in batches so it is processed faster, but not overwhelm lastfm api
-      console.error("New Batch");
       for(let j = i; j < i + batchSize && j <= totalPages; j++) {
         const limit = j < totalPages ? 1000 : totalTrackNumber % 1000 || 1000;
         batch.push(getMaxTracksFromPage(j, limit));
@@ -546,46 +519,14 @@ export async function getAllTracksData(username, apiKey, jobId) {
   let newData = await getAllTracksBatch(totalTracks - loggedTracks);
   let data = newData.concat(userJSON);
   console.log("Saving tracks:", data.length);
-  await saveUserData(username, newData, (progress) => {
-    updateJob(jobId, {
-      status: "processing",
-      step: progress.stage,
-      progress: progress.percent
-    });
-  });
+  await saveUserData(username, newData);
   
   console.log("Processing Album Colors");
-  await updateColorOfAlbums();
+  await updateColorOfAlbums(jobId);
   console.log("Finished Processing Album Colors");
 
-  await updateJob(jobId, {
-    status: "completed",
-    step: "done",
-    progress: 100
-  });
+  complete(jobId);
   return data;
-}
-export async function getUpdateStatus(jobId) {
-  const result = await db.query(`
-    SELECT 
-      j.status AS status,
-      j.step AS step,
-      j.progress AS progress
-    FROM jobs j
-    WHERE j.job_id = $1
-  `, [jobId]);
-
-  const row = result.rows;
-
-  if (!row.length) {
-    return { ready: false, progress: 0 }
-  }
-
-  if (row[0].status === "completed" || row[0].step === "done" || row[0].progress === 100) {
-    return {ready: true, progress: 100, status: row[0].status}
-  } else {
-    return {ready: false, progress: row[0].progress, status: "processing"}
-  }
 }
 
 export async function getStoredData(username) {

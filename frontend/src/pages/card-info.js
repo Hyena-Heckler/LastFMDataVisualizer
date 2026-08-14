@@ -1,6 +1,6 @@
 export function setUpCardInfo() {
     // Get the modal
-    const modal = document.getElementById("modal");
+    const modal = document.getElementById("info__modal");
     const infoButton = document.getElementById("chart-help");
     const exitInfo = document.getElementById("modal-close");
 

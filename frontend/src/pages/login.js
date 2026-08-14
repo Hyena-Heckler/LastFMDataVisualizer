@@ -1,28 +1,33 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
 import {computeStatistics} from "../components/statistics-adder.js";
-//import data from "./Data.json";
 
 export function setupLogin() {
-  const loginForm = document.getElementById("panel__form")
+  const loginForm = document.getElementById("panel__form");
+  const submitButton = loginForm.querySelector("button");
+  const loginWaiting = document.getElementById("login-waiting-progress");
+  submitButton.disabled = false;
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     
-    const submitButton = loginForm.querySelector("button");
-    const loginDisclaimer = document.getElementById("login-disclaimer");
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 
     try {
       submitButton.disabled = true;
-      loginDisclaimer.hidden = false;
+      loginWaiting.hidden = false;
       const username = document.getElementById("username-login").value;
       if (username === "") {
         alert("No Username Inputted");
         return
       }
+      
 
       store.user = username;
-      let status = await updateUser();
+      const status = await updateUser((progress, status) => {
+        showLoginProgress(progress, status);
+      });
       if (status == "failed") {
         store.user = null;
         alert("Invalid Username");
@@ -30,7 +35,6 @@ export function setupLogin() {
       }
 
       await fetchCache();
-      // store.cache = data;
 
       addDateDropdown();
 
@@ -41,7 +45,7 @@ export function setupLogin() {
       alert("Failed to load user data");
     } finally {
       submitButton.disabled = false;
-      loginDisclaimer.hidden = true;
+      loginWaiting.hidden = true;
       document.getElementById("render-video").disabled = false;
       document.getElementById("render-video").hidden = false;
       document.getElementById("animated-video").hidden = true;
@@ -65,4 +69,14 @@ export function addDateDropdown() {
   dateDropdown.dispatchEvent(new Event("change"));
 
   dateDropdown.disabled = false;
+}
+
+function showLoginProgress(progress, status) {
+  const percentage = (progress * 100).toFixed(0)
+  document.getElementById("login-progress-bar")
+    .style.width = `${percentage}%`;
+  document.getElementById("login-status-percent")
+    .textContent = `${percentage}%`;
+  document.getElementById("login-status")
+    .textContent = status;
 }
