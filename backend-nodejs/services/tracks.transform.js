@@ -40,13 +40,13 @@ export function transformTracks(tracks) {
 export function weekFriendlyCache(cache) {
     const songs = {};
     const weeks = {};
-    const weekNames = cache.data[0].slice(1);
+    const weekNames = cache[0].slice(1);
 
     weekNames.forEach(week => {
         weeks[week] = new Array(30).fill(null);
     })
 
-    cache.data.slice(1).forEach((song, cacheSongId) => {
+    cache.slice(1).forEach((song, cacheSongId) => {
         songs[cacheSongId] = {
             ...song[0],
             weeks: 0,
