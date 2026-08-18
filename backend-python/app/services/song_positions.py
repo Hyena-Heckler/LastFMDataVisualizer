@@ -126,7 +126,10 @@ def get_album_position_data(playlist_history, max_position_range=30):
     total_playlists = len(playlist_history)
 
     for track in sheet.values():
-        arr = [None] * total_playlists
+        arr = [{
+            "position": None,
+            "points": None
+        }] * total_playlists
 
         for playlist_idx, value in track["values"]:
             arr[playlist_idx] = value
