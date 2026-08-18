@@ -1,5 +1,5 @@
 import sys
-from app.services.song_positions import get_song_position_data
+from app.services.song_positions import get_song_position_data, get_album_position_data
 from app.services.data_points import add_extra_info
 from app.services.accent_color_of_image import *
 import datetime
@@ -30,9 +30,10 @@ def sort_week(data): #sorts the week based on the time that the week starts (ear
 
 def points_each_week(data):
     previous_week = {}
+    
+    time_factor = (1/2) ** (1/4) # in one month, a track loses half its points
     for week in data:
         # takes previous week's points and multiplies by a time factor
-        time_factor = (1/2) ** (1/4) # in one month, a track loses half its points
         current_week = {
             name: {**track, "points": track["points"] * time_factor}
             for name, track in previous_week.items()
@@ -56,7 +57,7 @@ def filter_songs_in_week(data, filter_size = 30):
             week["tracks"] = week["tracks"][:filter_size]
     return data
 
-def format_node_to_python(data):
+def song_format_node_to_python(data):
     print(data[0]["tracks"][0])
     transformed = [
         {
@@ -79,26 +80,81 @@ def format_node_to_python(data):
     ]
     return transformed
 
+def album_filtered_points_each_week(data, filter_size = 30):
+    album_data = []
+    breadth_factor = .5
+
+    for week in data:
+        current_week = {}
+        for song in week["tracks"]:
+            album_index = (song["album"], song["image"])
+            if album_index in current_week:
+                current_week[album_index]["points"] += song["points"] ** breadth_factor
+            else:
+                current_week[album_index] = {
+                    "album": song["album"],
+                    "artists": [
+                        song["artist"]
+                    ],
+                    "image": song["image"],
+                    "points": song["points"] ** breadth_factor,
+                    "color_r": song["color_r"],
+                    "color_g": song["color_g"], 
+                    "color_b": song["color_b"]
+                }
+        ordered_albums = list(current_week.values())
+        ordered_albums.sort(key = lambda n:n["points"], reverse=True) # sorts albums with highest points first
+        album_data.append({
+            "date": week["date"],
+            "albums": ordered_albums[:filter_size]
+        })
+
+
+    return album_data
+
+def album_format_node_to_python(data):
+    print(data[0]["tracks"][0])
+    transformed = [
+        {
+            "date": unix_to_date(obj["weekStart"]),
+            "albums": [
+                {
+                    "name": album["album"],
+                    "artists": [
+                        album["artist"]
+                    ],
+                    "image": album["image"],
+                    "points": album["points"],
+                    "color": [album["color_r"], album["color_g"], album["color_b"]]
+                }
+                for album in obj["albums"]
+            ]
+        }
+        for obj in data
+    ]
+    return transformed
+
 def prepare_cached_data(history):
     try:
+        max_filter_size = 30
         ordered_history = sort_week(history.copy())
-        ranked_history = points_each_week(ordered_history)
-        filtered_history = filter_songs_in_week(ranked_history, filter_size = 30)
-        formatted_history = format_node_to_python(filtered_history)
-        song_position_data = get_song_position_data(formatted_history, True)
-        song_points_by_position_data = get_song_position_data(formatted_history, True, is_position=False)
-            
-        def combine_poi_and_pos(in1, in2):
-            return [
-                in1[0],
-                *[
-                    {"position": pos, "points": pts}
-                    for pos, pts in zip(in1[1:], in2[1:])
-                ]
-            ]
-        cached_song_data = [song_position_data[0]] + [combine_poi_and_pos(pos_data, poi_data) for pos_data, poi_data in zip(song_position_data[1:], song_points_by_position_data[1:]) ]
+        song_ranked_history = points_each_week(ordered_history)
 
-        return cached_song_data
+        album_filtered_ranked_history = album_filtered_points_each_week(song_ranked_history, filter_size = max_filter_size)
+        formatted_album_history = album_format_node_to_python(album_filtered_ranked_history)
+        cached_album_data = get_album_position_data(formatted_album_history, True)
+        
+        filtered_song_history = filter_songs_in_week(song_ranked_history, filter_size = max_filter_size)
+        formatted_song_history = song_format_node_to_python(filtered_song_history)
+        cached_song_data = get_song_position_data(formatted_song_history, True)
+
+        
+            
+
+        return {
+            "tracks": cached_song_data,
+            "albums": cached_album_data
+        }
 
     except Exception as e:
         traceback.print_exc(file=sys.stderr)
@@ -107,7 +163,7 @@ def prepare_cached_data(history):
 def get_statistics(cached_song_data):
     return add_extra_info(cached_song_data)
 
-def prep_data(command, payload, video_path = None, job_id = None):
+def prep_data(command, payload):
     if command == "prepare_cached_data":
         return prepare_cached_data(payload)
 

@@ -82,7 +82,7 @@ export function setUpVideo() {
         });
         
         let data;
-        data = store.cache.normalCache.data;
+        data = store.cache.normalCache.data.tracks;
         
         const positionsData = [
             data[0],
