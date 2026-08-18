@@ -56,3 +56,18 @@ export async function updateUser(onProgress) {
     }
   }
 }
+
+export async function fetchPrepythonCache() {
+  const res = await fetch(`${backend_server}/download-prepython-cache`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user: store.user
+    })
+  });
+
+  return await res.json();
+}
+

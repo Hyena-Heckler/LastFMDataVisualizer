@@ -121,6 +121,28 @@ app.post("/download-cache", async (req, res) => {
   }
 });
 
+app.post("/download-prepython-cache", async (req, res) => {
+  try {
+    const user = req.body.user;
+    const data = await getStoredData(user);
+    if (data.length === 0) {
+      res.json(
+        {
+          status: false,
+        }
+      )
+    }
+    const organizedData = transformTracks(data);
+    const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
+    console.log("Finished Preparing File for Cache");
+
+    res.json(organizedDataJson);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to cache tracks" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });

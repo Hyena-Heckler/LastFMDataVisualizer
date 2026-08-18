@@ -105,7 +105,7 @@ def album_filtered_points_each_week(data, filter_size = 30):
         ordered_albums = list(current_week.values())
         ordered_albums.sort(key = lambda n:n["points"], reverse=True) # sorts albums with highest points first
         album_data.append({
-            "date": week["date"],
+            "weekStart": week["weekStart"],
             "albums": ordered_albums[:filter_size]
         })
 
