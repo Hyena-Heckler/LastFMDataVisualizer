@@ -7,6 +7,7 @@ import traceback
 import os
 import asyncio
 
+
 semaphore = asyncio.Semaphore(30)
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
@@ -113,7 +114,7 @@ def album_filtered_points_each_week(data, filter_size = 30):
     return album_data
 
 def album_format_node_to_python(data):
-    print(data[0]["tracks"][0])
+    print(data[0]["albums"][0])
     transformed = [
         {
             "date": unix_to_date(obj["weekStart"]),
@@ -121,7 +122,7 @@ def album_format_node_to_python(data):
                 {
                     "name": album["album"],
                     "artists": [
-                        album["artist"]
+                        album["artists"][0]
                     ],
                     "image": album["image"],
                     "points": album["points"],
@@ -182,3 +183,18 @@ async def return_color_from_urls(payload):
 
     tasks = [handle(r) for r in payload]
     return await asyncio.gather(*tasks)
+
+import json
+from pathlib import Path
+if __name__ == "__main__":
+    json_path = Path(__file__).parent / "PartialData.json"
+
+    with json_path.open("r", encoding="utf-8") as f:
+        payload_data = json.load(f)
+
+    result = prep_data("prepare_cached_data", payload_data)
+
+    output_path = Path(__file__).parent / "output.json"
+
+    with output_path.open("w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
