@@ -36,7 +36,7 @@ def get_song_position_data(playlist_history, max_position_range=30):
     for index, playlist in enumerate(playlist_history, 1):
         for song_index, song in enumerate(playlist['songs']):
             key = (song["name"], tuple(song["artists"]), song["album"])
-            if key not in sheet:  # intializes song's history
+            if key not in sheet:  # intializes song's history=
                 sheet[key] = {
                     "name": song['name'],
                     "artists": song['artists'],
@@ -54,8 +54,6 @@ def get_song_position_data(playlist_history, max_position_range=30):
                 }
             ))
     
-    print("Midway Process 1")
-
     sheet = {
         key: track for key, track in sheet.items()
         if any(value["position"] <= max_position_range for _, value in track["values"])
@@ -64,7 +62,13 @@ def get_song_position_data(playlist_history, max_position_range=30):
     total_playlists = len(playlist_history)
 
     for track in sheet.values():
-        arr = [None] * total_playlists
+        arr = [
+            {
+                "position": None,
+                "points": None
+            }
+            for _ in range(total_playlists)
+        ]
 
         for playlist_idx, value in track["values"]:
             arr[playlist_idx] = value
@@ -125,16 +129,19 @@ def get_album_position_data(playlist_history, max_position_range=30):
 
     total_playlists = len(playlist_history)
 
-    for track in sheet.values():
-        arr = [{
-            "position": None,
-            "points": None
-        }] * total_playlists
+    for album in sheet.values():
+        arr = [
+            {
+                "position": None,
+                "points": None
+            }
+            for _ in range(total_playlists)
+        ]
 
-        for playlist_idx, value in track["values"]:
+        for playlist_idx, value in album["values"]:
             arr[playlist_idx] = value
 
-        track["values"] = arr
+        album["values"] = arr
 
     
     print("Midway Process 2")

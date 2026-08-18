@@ -140,14 +140,13 @@ def prepare_cached_data(history):
         max_filter_size = 30
         ordered_history = sort_week(history.copy())
         song_ranked_history = points_each_week(ordered_history)
-
         album_filtered_ranked_history = album_filtered_points_each_week(song_ranked_history, filter_size = max_filter_size)
         formatted_album_history = album_format_node_to_python(album_filtered_ranked_history)
-        cached_album_data = get_album_position_data(formatted_album_history, True)
+        cached_album_data = get_album_position_data(formatted_album_history)
         
         filtered_song_history = filter_songs_in_week(song_ranked_history, filter_size = max_filter_size)
         formatted_song_history = song_format_node_to_python(filtered_song_history)
-        cached_song_data = get_song_position_data(formatted_song_history, True)
+        cached_song_data = get_song_position_data(formatted_song_history)
 
         
             
