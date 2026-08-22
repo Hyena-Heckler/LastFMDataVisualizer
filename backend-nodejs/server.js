@@ -104,16 +104,26 @@ app.post("/download-cache", async (req, res) => {
     const organizedData = transformTracks(data);
     const organizedDataJson = [...organizedData.entries()].map(([, week]) => (week));
     const arrayChartJson = await prepareCached(organizedDataJson);
-    const weeklyChartJson = await weekFriendlyCache(arrayChartJson.data.tracks);
-    const userStatistics = await calculateStatistics(arrayChartJson.data.tracks);
+
+    const songWeeklyChartJson = await weekFriendlyCache(arrayChartJson.data.tracks);
+    const songUserStatistics = await calculateStatistics(arrayChartJson.data.tracks);
+
+    const albumWeeklyChartJson = await weekFriendlyCache(arrayChartJson.data.albums);
+    const albumUserStatistics = await calculateStatistics(arrayChartJson.data.albums);
     console.log("Finished Preparing File for Cache");
 
     res.json(
       {
-        status: true,
-        normalCache: arrayChartJson,
-        weeklyCache: weeklyChartJson,
-        statisticsCache: userStatistics
+        tracks: {
+          normalCache: arrayChartJson.data.tracks,
+          weeklyCache: songWeeklyChartJson,
+          statisticsCache: songUserStatistics
+        },
+        albums: {
+          normalCache: arrayChartJson.data.albums,
+          weeklyCache: albumWeeklyChartJson,
+          statisticsCache: albumUserStatistics
+        }
       });
   } catch (err) {
     console.error(err);

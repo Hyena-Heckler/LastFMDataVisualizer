@@ -1,7 +1,5 @@
 import {store} from "../store.js";
-import {updateUser, fetchCache, fetchPrepythonCache} from "../services/api.js";
-
-let backend_server =  import.meta.env.VITE_API_URL
+import {fetchCache, fetchPrepythonCache} from "../services/api.js";
 
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);

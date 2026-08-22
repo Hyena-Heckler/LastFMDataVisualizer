@@ -13,6 +13,10 @@
   font-family: "Consolas", monospace;
 }
 
+html {
+    scrollbar-gutter: stable;
+}
+
 :root {
   --black: #363537;
   --orange: #FFC145;
@@ -22,6 +26,45 @@
   --dark-pink: #de8e8e;
   --green: #8CD867;
 }
+
+/* #region Under Construction CSS Styles */
+
+.status {
+  background-color: var(--orange);
+  position:fixed;
+  top:0;
+  width:100%;
+  z-index: 100;
+  padding: 5px;
+  border-bottom: 5px solid var(--black);
+}
+
+
+.construction-tape {
+  width: 200%;
+  padding: 15px 0;
+  font-weight: bold;
+  color: #000;
+  z-index: -1;
+  height: 20px;
+
+  background: repeating-linear-gradient(
+    45deg,
+    var(--orange) 0px,
+    var(--orange) 19px,
+    var(--black) 20px,
+    var(--black) 39px,
+    var(--orange) 40px
+  );
+
+  border-top: 2px solid #111;
+  border-bottom: 2px solid #111;
+
+  transform: translateY(var(--position)) rotate(var(--rotation));
+}
+
+/* #endregion */
+
 
 /* #region Modal Overlay */
 
@@ -135,6 +178,29 @@
 
 /* #endregion */
 
+/* #region Navigation Styles */
+nav {
+  background-color: #F5DDDD;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 10px;
+  padding: 10px;
+
+  width: 100%;
+}
+
+nav a {
+    color: #363537;
+    font-size: 30px;
+    text-decoration: none;
+}
+
+nav a:visited {
+    color: #363537;
+}
+
+/* #endregion */
+
 /* #region Body CSS Styles */
 
 body {
@@ -146,19 +212,6 @@ body {
 
 /* #endregion */
 
-/* #region Status Banner CSS Styles */
-
-.status {
-  background-color: var(--orange);
-  position:fixed;
-  top:0;
-  width:100%;
-  z-index: 100;
-  padding: 5px;
-  border-bottom: 5px solid var(--black);
-}
-
-/* #endregion */
 
 /* #region Introduction CSS Styles */ 
 
@@ -608,7 +661,7 @@ body {
   background-color: var(--pink);
   color: var(--black);
   cursor: pointer;
-  padding: 20;
+  padding: 10px;
   width: 100%;
   text-align: left;
   border: none;
@@ -654,7 +707,8 @@ body {
   position: sticky;
   bottom: var(--about-bottom);
   
-  margin: 0px 0 0 0;
+  margin: auto 50px 0 50px;
+  padding: 50px;
   background-color: var(--light-pink);
   color: var(--black);
 }
@@ -667,9 +721,6 @@ body {
   width: 100%;
 }
 
-.about__content {
-  padding: 0 50px 50px 50px;
-}
 
 .about__title:hover {
   cursor: pointer;

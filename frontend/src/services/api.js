@@ -1,21 +1,27 @@
 // services/api.js
 
 import { store } from "../store.js";
+import { saveCache } from "./database.js";
 
 const backend_server = import.meta.env.VITE_API_URL;
 
 export async function fetchCache() {
-  const res = await fetch(`${backend_server}/download-cache`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      user: store.user
-    })
-  });
+  // const res = await fetch(`${backend_server}/download-cache`, {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json"
+  //   },
+  //   body: JSON.stringify({
+  //     user: store.user
+  //   })
+  // });
 
-  store.cache = await res.json();
+  // store.cache = await res.json();
+  const { default: data } = await import("./Data (1).json");
+
+  store.cache = data;
+
+  await saveCache(store);
 }
 
 export async function updateUser(onProgress) {
