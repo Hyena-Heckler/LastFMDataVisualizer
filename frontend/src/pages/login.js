@@ -21,14 +21,14 @@ export function setupLogin() {
       
 
       store.user = username;
-      // const status = await updateUser((progress, status) => {
-      //   showLoginProgress(progress, status);
-      // });
-      // if (status == "failed") {
-      //   store.user = null;
-      //   alert("Invalid Username");
-      //   return
-      // }
+      const status = await updateUser((progress, status) => {
+        showLoginProgress(progress, status);
+      });
+      if (status == "failed") {
+        store.user = null;
+        alert("Invalid Username");
+        return
+      }
 
       await fetchCache();
 
