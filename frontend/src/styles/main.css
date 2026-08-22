@@ -32,11 +32,11 @@ html {
 .status {
   background-color: var(--orange);
   position:fixed;
-  top:0;
+  bottom:0;
   width:100%;
   z-index: 100;
   padding: 5px;
-  border-bottom: 5px solid var(--black);
+  border-top: 5px solid var(--black);
 }
 
 

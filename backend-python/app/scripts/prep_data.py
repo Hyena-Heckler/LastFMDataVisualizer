@@ -83,7 +83,7 @@ def song_format_node_to_python(data):
 
 def album_filtered_points_each_week(data, filter_size = 30):
     album_data = []
-    breadth_factor = .5
+    breadth_factor = .75
 
     for week in data:
         current_week = {}
@@ -91,6 +91,7 @@ def album_filtered_points_each_week(data, filter_size = 30):
             album_index = (song["album"], song["image"])
             if album_index in current_week:
                 current_week[album_index]["points"] += song["points"] ** breadth_factor
+                current_week[album_index]["breakdown"].append((song["name"], song["points"] ** breadth_factor))
             else:
                 current_week[album_index] = {
                     "album": song["album"],
@@ -101,10 +102,12 @@ def album_filtered_points_each_week(data, filter_size = 30):
                     "points": song["points"] ** breadth_factor,
                     "color_r": song["color_r"],
                     "color_g": song["color_g"], 
-                    "color_b": song["color_b"]
+                    "color_b": song["color_b"],
+                    "breakdown": [(song["name"], song["points"] ** breadth_factor)]
                 }
         ordered_albums = list(current_week.values())
         ordered_albums.sort(key = lambda n:n["points"], reverse=True) # sorts albums with highest points first
+        print(ordered_albums[0]["album"])
         album_data.append({
             "weekStart": week["weekStart"],
             "albums": ordered_albums[:filter_size]
@@ -126,6 +129,7 @@ def album_format_node_to_python(data):
                     ],
                     "image": album["image"],
                     "points": album["points"],
+                    "breakdown": album["breakdown"],
                     "color": [album["color_r"], album["color_g"], album["color_b"]]
                 }
                 for album in obj["albums"]
@@ -140,6 +144,8 @@ def prepare_cached_data(history):
         max_filter_size = 30
         ordered_history = sort_week(history.copy())
         song_ranked_history = points_each_week(ordered_history)
+
+
         album_filtered_ranked_history = album_filtered_points_each_week(song_ranked_history, filter_size = max_filter_size)
         formatted_album_history = album_format_node_to_python(album_filtered_ranked_history)
         cached_album_data = get_album_position_data(formatted_album_history)

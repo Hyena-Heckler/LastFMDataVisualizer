@@ -116,7 +116,8 @@ def get_album_position_data(playlist_history, max_position_range=30):
                 index - 1,
                 {
                     "position": album_index + 1, # adds the position of playlist to the position key, shifted by 1 as 0th place is 1st
-                    "points": album['points']
+                    "points": album['points'],
+                    "breakdown": album['breakdown']
                 }
             ))
     
@@ -133,7 +134,8 @@ def get_album_position_data(playlist_history, max_position_range=30):
         arr = [
             {
                 "position": None,
-                "points": None
+                "points": None,
+                "breakdown": None
             }
             for _ in range(total_playlists)
         ]
