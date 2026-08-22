@@ -9,6 +9,7 @@ export default defineConfig({
                 albums: resolve(__dirname, "albums/index.html"),
                 artists: resolve(__dirname, "artists/index.html"),
                 songs: resolve(__dirname, "songs/index.html"),
+                about: resolve(__dirname, "about/index.html"),
             },
         },
     },
