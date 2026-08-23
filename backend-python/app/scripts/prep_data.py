@@ -59,7 +59,6 @@ def filter_songs_in_week(data, filter_size = 30):
     return data
 
 def song_format_node_to_python(data):
-    print(data[0]["tracks"][0])
     transformed = [
         {
             "date": unix_to_date(obj["weekStart"]),
@@ -93,6 +92,8 @@ def album_filtered_points_each_week(data, filter_size = 30):
                 current_week[album_index]["points"] += song["points"] ** breadth_factor
                 current_week[album_index]["breakdown"].append((song["name"], song["points"] ** breadth_factor))
             else:
+                if song["album"] == "":
+                    continue
                 current_week[album_index] = {
                     "album": song["album"],
                     "artists": [
@@ -107,7 +108,6 @@ def album_filtered_points_each_week(data, filter_size = 30):
                 }
         ordered_albums = list(current_week.values())
         ordered_albums.sort(key = lambda n:n["points"], reverse=True) # sorts albums with highest points first
-        print(ordered_albums[0]["album"])
         album_data.append({
             "weekStart": week["weekStart"],
             "albums": ordered_albums[:filter_size]
@@ -117,7 +117,6 @@ def album_filtered_points_each_week(data, filter_size = 30):
     return album_data
 
 def album_format_node_to_python(data):
-    print(data[0]["albums"][0])
     transformed = [
         {
             "date": unix_to_date(obj["weekStart"]),
@@ -192,7 +191,7 @@ async def return_color_from_urls(payload):
 import json
 from pathlib import Path
 if __name__ == "__main__":
-    json_path = Path(__file__).parent / "PartialData.json"
+    json_path = Path(__file__).parent / "PartialData (1).json"
 
     with json_path.open("r", encoding="utf-8") as f:
         payload_data = json.load(f)
