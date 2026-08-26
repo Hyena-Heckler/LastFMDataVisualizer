@@ -29,62 +29,51 @@ def format_date(curr_date):  # formats the date without parentheses
     current_date_temp = datetime.datetime.strptime(curr_date, "(%m/%d/%y)")
     return re.sub('-', "/", str(current_date_temp.strftime("%m/%d/%y")))
 
-
-# access a sheet that displays the song and artists in brackets
-def access_display_sheet(playlist_history):
-    sheet = []
-    for playlist in playlist_history:
-        column = [format_date(playlist['date'])]
-        for song in playlist['songs']:
-            column.append(full_title(song))
-        sheet.append(column)
-    return sheet
-
-
 # positions of all songs for all dates
-def get_song_position_data(playlist_history, include_none_dates, max_position_range=30, is_position=True):  # include_none_dates determines if None dates are included in position
-    attribute = 'positions' if is_position else 'points'
-
+def get_song_position_data(playlist_history, max_position_range=30):
     sheet = {}  # stores the data
     print("Started creating sheet")
     for index, playlist in enumerate(playlist_history, 1):
         for song_index, song in enumerate(playlist['songs']):
-            song_key = (song["name"], tuple(song["artists"]), tuple(song["album"]))
-            if song_key not in sheet:  # intializes song's history
-                sheet[song_key] = {
+            key = (song["name"], tuple(song["artists"]), song["album"])
+            if key not in sheet:  # intializes song's history=
+                sheet[key] = {
                     "name": song['name'],
                     "artists": song['artists'],
                     "image": song['image'],
                     "album": song['album'],
                     "color": song['color'],
-                    "positions": [],
-                    "points": []
+                    "values": []
                 }
 
-            if is_position:
-                sheet[song_key][attribute].append(
-                    (index - 1, song_index + 1))  # adds the position of playlist to the position key, shifted by 1 as 0th place is 1st
-            else:
-                sheet[song_key][attribute].append(
-                    (index - 1, song['points']))
+            sheet[key]["values"].append((
+                index - 1,
+                {
+                    "position": song_index + 1, # adds the position of playlist to the position key, shifted by 1 as 0th place is 1st
+                    "points": song['points']
+                }
+            ))
     
-    print("Midway Process 1")
-
-    if is_position:
-        sheet = {
-            key: track for key, track in sheet.items()
-            if any(value <= max_position_range for _, value in track[attribute])
-        }
+    sheet = {
+        key: track for key, track in sheet.items()
+        if any(value["position"] <= max_position_range for _, value in track["values"])
+    }
 
     total_playlists = len(playlist_history)
 
     for track in sheet.values():
-        arr = [None] * total_playlists
+        arr = [
+            {
+                "position": None,
+                "points": None
+            }
+            for _ in range(total_playlists)
+        ]
 
-        for playlist_idx, value in track[attribute]:
+        for playlist_idx, value in track["values"]:
             arr[playlist_idx] = value
 
-        track[attribute] = arr
+        track["values"] = arr
 
     
     print("Midway Process 2")
@@ -103,7 +92,76 @@ def get_song_position_data(playlist_history, include_none_dates, max_position_ra
             "image": track['image'],
             "color": track['color']
         }]
-        column.extend(track[attribute])
+        column.extend(track["values"])
+        final_sheet.append(column)
+    print("Finished creating sheet")
+    return final_sheet
+
+def get_album_position_data(playlist_history, max_position_range=30):
+    sheet = {}  # stores the data
+    print("Started creating sheet")
+    for index, playlist in enumerate(playlist_history, 1):
+        for album_index, album in enumerate(playlist['albums']):
+            key = (album["name"], tuple(album["artists"]), album["image"])
+            if key not in sheet:  # intializes song's history
+                sheet[key] = {
+                    "name": album['name'],
+                    "artists": album['artists'],
+                    "image": album['image'],
+                    "color": album['color'],
+                    "values": []
+                }
+
+            sheet[key]["values"].append((
+                index - 1,
+                {
+                    "position": album_index + 1, # adds the position of playlist to the position key, shifted by 1 as 0th place is 1st
+                    "points": album['points'],
+                    "breakdown": album['breakdown']
+                }
+            ))
+    
+    print("Midway Process 1")
+
+    sheet = {
+        key: album for key, album in sheet.items()
+        if any(value["position"] <= max_position_range for _, value in album["values"])
+    }
+
+    total_playlists = len(playlist_history)
+
+    for album in sheet.values():
+        arr = [
+            {
+                "position": None,
+                "points": None,
+                "breakdown": None
+            }
+            for _ in range(total_playlists)
+        ]
+
+        for playlist_idx, value in album["values"]:
+            arr[playlist_idx] = value
+
+        album["values"] = arr
+
+    
+    print("Midway Process 2")
+
+    sheet = list(sheet.values())
+
+    final_sheet = [[None]] #final sheet returned
+    for playlist in playlist_history: #adds the playlist date as a row in data
+        final_sheet[0].append(format_date(playlist['date']))
+    for index, album in enumerate(sheet): # formats the name of the title in the chart and adds the track image for future purposes
+        # print(track['name'])
+        column = [{
+            "name": album['name'],
+            "artists": album['artists'],
+            "image": album['image'],
+            "color": album['color']
+        }]
+        column.extend(album["values"])
         final_sheet.append(column)
     print("Finished creating sheet")
     return final_sheet

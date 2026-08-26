@@ -7,6 +7,14 @@ export function addCard(entry, currentWeek) {
   const card = document.createElement("div");
   const image = song.image || "/null-image.png";
 
+  const pageType = document.body.dataset.pageType;
+  let showAlbumMinor = false;
+  switch (pageType) {
+      case "tracks":
+          showAlbumMinor = true;
+          break;
+  }
+
   card.className = "chart__song"
   card.innerHTML = `
     <div class="chart__position">
@@ -41,8 +49,12 @@ export function addCard(entry, currentWeek) {
     <div class="chart__identifier">
       <h3>${song.name}</h3>
       <div class="chart__identifier-extra">
-        <h4>${song.album}</h4>
-        <h4>-</h4>
+        ${
+          showAlbumMinor ? `
+            <h4>${song.album}</h4>
+            <h4>-</h4>
+          ` : ""
+        }
         <h4>${song.artists.join(", ")}</h4>
       </div>
     </div>

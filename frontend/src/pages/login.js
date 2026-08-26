@@ -1,6 +1,5 @@
 import {store} from "../store.js";
 import {updateUser, fetchCache} from "../services/api.js";
-import {computeStatistics} from "../components/statistics-adder.js";
 
 export function setupLogin() {
   const loginForm = document.getElementById("panel__form");
@@ -11,9 +10,6 @@ export function setupLogin() {
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     
-    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-
     try {
       submitButton.disabled = true;
       loginWaiting.hidden = false;
@@ -36,9 +32,6 @@ export function setupLogin() {
 
       await fetchCache();
 
-      addDateDropdown();
-
-      computeStatistics();
       document.getElementById("login-disclaimer").hidden = true;
     } catch (err) {
       console.error(err);
@@ -46,29 +39,10 @@ export function setupLogin() {
     } finally {
       submitButton.disabled = false;
       loginWaiting.hidden = true;
-      document.getElementById("render-video").disabled = false;
-      document.getElementById("render-video").hidden = false;
-      document.getElementById("animated-video").hidden = true;
+      window.location.href = "/songs/";
+
     }
   });
-}
-
-export function addDateDropdown() {
-  const dateDropdown = document.getElementById("date");
-  dateDropdown.innerHTML = "";
-  if (!store.cache.weeklyCache?.weeks) {
-    console.error("Missing Cache");
-    return;
-  }
-  Object.keys(store.cache.weeklyCache.weeks).forEach(week => {
-    const option = document.createElement("option");
-    option.value = week;
-    option.textContent = week;
-    dateDropdown.appendChild(option);
-  });
-  dateDropdown.dispatchEvent(new Event("change"));
-
-  dateDropdown.disabled = false;
 }
 
 function showLoginProgress(progress, status) {

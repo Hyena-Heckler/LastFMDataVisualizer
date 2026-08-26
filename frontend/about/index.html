@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YourTop30 | Last.fm Data Visualizer</title>
+    <title>YourTop30 | Album</title>
 
     <meta
       name="description"
@@ -32,15 +32,15 @@
     <meta name="twitter:image:alt" content="YourTop30 Last.fm listening chart visualization">
 
     <link rel="icon" href="/icon.png" type="image/png">
-    <link href="src/styles/main.css" rel="stylesheet"/>
+    <link href="/src/styles/main.css" rel="stylesheet"/>
   </head>
-  <body>
+  <body data-page-type="albums">
     <nav>
       <a href="/songs/">Songs</a>
       <a href="/albums/">Albums</a>
       <a href="/artists/">Artists</a>
       <a href="/about/">About</a>
-    </nav>
+  </nav>
     <!-- Banner For When Site is Down -->
     <div class="status" hidden>
       <h2>CURRENTLY BEING WORKED ON</h1>
@@ -49,42 +49,13 @@
 
     <!-- Title and Introduction -->
     <header class="introduction">
-      <h1 class="introduction__title">YourTop30</h1>
-      <p class="text">
-        Input your <a href="https://www.last.fm/home" target="_blank"><span class="highlight">lastfm</span></a> username and see your own personal charts and additional metrics. 
-        Want to visually see it? Your history can be graphed!
-      </p>
+      <h1 class="introduction__title">YourTop30:About</h1>
     </header>
 
-    <!-- Control Panel For Website -->
-    <div class="panel">
-      <form id="panel__form" action="/submit-username" method="POST">
-        <label class="panel__form-label" for="username-login">Username:</label>
-        <input class="panel__input" type="text" id="username-login" name="username" placeholder="Enter username here">
-        <button class="panel__button" id="submit-login" type="submit" disabled>Submit</button>
-      </form>
-      <div class="login__waiting" id="login-waiting-progress" hidden>
-        <div class="progress" id="login_progress">
-            <div class="progress__bar">
-                <div class="progress__complete-bar" id="login-progress-bar"
-                    style="width: 0"
-                ></div>
-            </div>
-            <div class="progress__status">
-                <span id="login-status">LOADING</span>
-                <span id="login-status-percent">0</span>
-            </div>
-        </div>
-        <p class="text" id="login-disclaimer" style="font-size: x-small;">May Take Several Minutes If It Is Your First Time on this Site</p>
-      </div>
-    </div>
-
     <!-- About + Roadmap -->
-    <div class="about__buffer" hidden>
-    </div>
-    <section class="about" id="footer" hidden>
+    <section class="about">
       <div class="about__content">
-        <h2 class="about__title" id="footer-title">A Little Bit More About This Site</h2>
+        <h2 class="about__title">A Little Bit More About This Site</h2>
         <p class="about__description" id="footer-description"> 
           I was inspired to make this site after viewing videos online that showed different animated charts of artists or specific years over time. 
           I wanted something similar for myself, so I, originally, manually collected the data and graphed the data myself.
@@ -115,7 +86,5 @@
         </p>
       </div>
     </section>
-
-    <script type="module" src="src/initialize.js"></script>
   </body>
 </html>

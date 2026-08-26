@@ -17,18 +17,6 @@ export const db = new Pool({
   },
 });
 
-async function getUser(lastfmUsername) {
-  const result = await db.query(`
-    INSERT INTO users (username)
-    VALUES ($1)
-    ON CONFLICT (username)
-    DO UPDATE SET username = EXCLUDED.username
-    RETURNING user_id;
-  `, [lastfmUsername]);
-
-  return result.rows[0]?.user_id;
-}
-
 async function updateColorOfAlbums(jobId){
   const result = await db.query(`
     SELECT album_id, image_url

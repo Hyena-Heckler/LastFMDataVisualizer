@@ -1,7 +1,5 @@
 import {store} from "../store.js";
-import {updateUser, fetchCache} from "../services/api.js";
-
-let backend_server =  import.meta.env.VITE_API_URL
+import {fetchCache, fetchPrepythonCache} from "../services/api.js";
 
 function downloadJSON(data, filename) { // downloads a JSON file using a data
   const json = JSON.stringify(data, null, 2);
@@ -31,4 +29,17 @@ export function setupButtons() {
 
     console.log("Successful download for:", store.user);
   });
+
+  document.getElementById("download-partial-json").addEventListener("click", async () => {
+    
+    if (!store.user) {
+      alert("Please log in first");
+      return;
+    }
+    
+    const partialCache = await fetchPrepythonCache();
+    downloadJSON(partialCache, "PartialData");
+
+    console.log("Successful partial download for:", store.user);
+  });  
 }

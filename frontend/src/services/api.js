@@ -1,6 +1,7 @@
 // services/api.js
 
 import { store } from "../store.js";
+import { saveCache } from "./database.js";
 
 const backend_server = import.meta.env.VITE_API_URL;
 
@@ -16,6 +17,10 @@ export async function fetchCache() {
   });
 
   store.cache = await res.json();
+  // const { default: data } = await import("./Data (1).json");
+  // store.cache = data;
+
+  await saveCache(store);
 }
 
 export async function updateUser(onProgress) {
@@ -56,3 +61,18 @@ export async function updateUser(onProgress) {
     }
   }
 }
+
+export async function fetchPrepythonCache() {
+  const res = await fetch(`${backend_server}/download-prepython-cache`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user: store.user
+    })
+  });
+
+  return await res.json();
+}
+

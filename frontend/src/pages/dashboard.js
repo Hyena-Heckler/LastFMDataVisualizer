@@ -32,3 +32,21 @@ export function setupDateDropdown() {
         dateDropdown.dispatchEvent(new Event("change"));
     });
 }
+
+export function addDateDropdown() {
+  const dateDropdown = document.getElementById("date");
+  dateDropdown.innerHTML = "";
+  if (!store.cache.weeklyCache?.weeks) {
+    console.error("Missing Cache");
+    return;
+  }
+  Object.keys(store.cache.weeklyCache.weeks).forEach(week => {
+    const option = document.createElement("option");
+    option.value = week;
+    option.textContent = week;
+    dateDropdown.appendChild(option);
+  });
+  dateDropdown.dispatchEvent(new Event("change"));
+
+  dateDropdown.disabled = false;
+}
